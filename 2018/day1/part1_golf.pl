@@ -1,1 +1,1 @@
-@f=<>;$r=0;foreach(@f){$r+=$_}print$r
+@f=<>;$r=0;map{$r+=$_}@f;print$r
