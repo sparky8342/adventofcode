@@ -17,15 +17,20 @@ sub overlap {
 		}
 	}
 
-	foreach my $claim (@claims) {
-		# #1 @ 1,3: 4x4	
+	my %claims_found;
 
+	foreach my $claim (@claims) {
 		$claim =~ /^#(\d+) @ (\d+),(\d+): (\d+)x(\d+)$/;
 		my ($id,$x,$y,$w,$h) = ($1,$2,$3,$4,$5);
+
+		$claims_found{$id} = 0;
 
 		for (my $ypos = $y; $ypos < $y + $h; $ypos++) {
 			for (my $xpos = $x; $xpos < $x + $w; $xpos++) {	
 				if ($grid[$ypos][$xpos] ne '.') {
+					# mark overlapping claims	
+					$claims_found{$grid[$ypos][$xpos]} = 1;
+					$claims_found{$id} = 1;
 					$grid[$ypos][$xpos] = 'X';
 				}
 				else {
@@ -43,8 +48,15 @@ sub overlap {
 				$overlap++;
 			}
 		}
-		#print "\n";
 	}
 
-	return $overlap;
+	my $non_overlap_id;
+	foreach my $id (keys %claims_found) {
+		if ($claims_found{$id} == 0) {
+			$non_overlap_id = $id;
+			last;
+		}
+	}
+
+	return ($overlap,$non_overlap_id);
 }
