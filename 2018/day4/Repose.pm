@@ -14,6 +14,9 @@ sub most_asleep {
 	my $current_guard;
 	my $sleep_start;
 
+	my %longest = (guard => 0, sleep => 0, minute => 0, minute_frequency => 0);
+	my %frequent = (guard => 0, minute => 0, minute_frequency => 0);
+
 	foreach my $entry (@events) {
 		$entry =~ /^.*:(\d{2})\] (.*)/;
 		my $minute = $1;
@@ -27,15 +30,25 @@ sub most_asleep {
 		}
 		elsif ($action =~ /wakes up/) {
 			$guards{$current_guard}{sleep} += $minute - $sleep_start;
+			my $longest_so_far = 0;
+			if ($guards{$current_guard}{sleep} > $longest{sleep}) {
+				$longest{sleep} = $guards{$current_guard}{sleep};
+				$longest{guard} = $current_guard;
+			}
 			for (my $i = $sleep_start; $i < $minute; $i++) {
 				$guards{$current_guard}{minutes}{$i}++;
+				if ($guards{$current_guard}{minutes}{$i} > $longest{minute_frequency}) {
+					$longest{minute_frequency} = $guards{$current_guard}{minutes}{$i};
+					$longest{minute} = $i;
+				}
+				if ($guards{$current_guard}{minutes}{$i} > $frequent{minute_frequency}) {
+					$frequent{minute_frequency} = $guards{$current_guard}{minutes}{$i};
+					$frequent{minute} = $i;
+					$frequent{guard} = $current_guard;
+				}
 			}
 		}
 	}
 
-	my $longest_guard = (sort { $guards{$b}{sleep} <=> $guards{$a}{sleep} } keys %guards)[0];
-	my $minutes = $guards{$longest_guard}{minutes};
-	my $longest_minute = (sort { $minutes->{$b} <=> $minutes->{$a} } keys %$minutes)[0];
-
-	return $longest_guard * $longest_minute;	
+	return ($longest{guard} * $longest{minute}, $frequent{guard} * $frequent{minute});
 }	

@@ -8,4 +8,5 @@ my @records = <$fh>;
 close $fh;
 chomp($_) foreach @records;
 
-print most_asleep(@records) . "\n";
+my ($l,$h) = most_asleep(@records);
+print "$l\n$h\n";

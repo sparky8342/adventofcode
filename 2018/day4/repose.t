@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Repose qw(most_asleep);
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 my $data = <<'END_DATA';
 [1518-11-01 00:00] Guard #10 begins shift
@@ -26,4 +26,6 @@ END_DATA
 my @events = split("\n",$data);
 chomp($_) foreach @events;
 
-is(most_asleep(@events),240);
+my ($l,$h) = most_asleep(@events);
+is($l,240);
+is($h,4455);
