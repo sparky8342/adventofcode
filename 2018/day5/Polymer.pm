@@ -5,14 +5,8 @@ use warnings;
 use parent "Exporter";
 our @EXPORT_OK = qw(reduction find_best_after_removal);
 
-my @ab = split//,'abcdefghijklmnopqrstuvwxyz';
-
-my $search;
-foreach my $l (@ab) {
-	$search .= '|' if $search;
-	$search .= lc($l) . uc($l) . '|' . uc($l) . lc($l);
-}
-$search = "($search)";
+my @ab = ('a'..'z');
+my $search = '('.(join('|', map {lc($_).uc($_).'|'.uc($_).lc($_)} @ab)).')';
 
 sub reduction {
 	my ($polymer) = @_;
