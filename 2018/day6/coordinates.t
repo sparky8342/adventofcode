@@ -1,7 +1,7 @@
 use strict;
 use warnings;
-use Coordinates qw(largest_area);
-use Test::More tests => 1;
+use Coordinates qw(find_areas);
+use Test::More tests => 2;
 
 my @data = (
 	'1, 1',
@@ -12,4 +12,6 @@ my @data = (
 	'8, 9'
 );
 
-is(largest_area(@data),17);
+my ($area,$safe_area) = find_areas(32,@data);
+is($area,17);
+is($safe_area,16);
