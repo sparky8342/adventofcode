@@ -37,7 +37,6 @@ sub steps {
 	my $amount = scalar keys %$todo;
 	my $time = -1;
 	while (keys %$done < $amount) {
-                my $worker;
                 for (my $i = 0; $i < @workers; $i++) {
                         my $worker = $workers[$i];
                         if ($worker->{time} > 0) {
