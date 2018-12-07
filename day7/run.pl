@@ -8,4 +8,5 @@ my @ins = <$fh>;
 close $fh;
 chomp($_) foreach @ins;
 
-print steps(@ins) . "\n";
+my ($steps,$time) = steps(5,60,@ins);
+print "$steps\n$time\n";

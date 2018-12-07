@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Sleigh qw(steps);
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 my $data = <<'END_DATA';
 Step C must be finished before step A can begin.
@@ -16,4 +16,6 @@ END_DATA
 my @ins = split("\n",$data);
 chomp($_) foreach @ins;
 
-is(steps(@ins),'CABDFE');
+my ($steps,$time) = steps(2,0,@ins);
+is($steps,'CABDFE');
+is($time,15);
