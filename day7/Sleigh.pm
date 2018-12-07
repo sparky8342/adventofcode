@@ -23,10 +23,6 @@ sub steps {
 	while (keys %todo) {
 		my %available;
 		foreach my $node (keys %todo) {
-			if (!exists($tree{$node})) {
-				$available{$node} = 1;
-				next;
-			}
 
 			my $ok = 1;
 			foreach my $parent (keys %{$tree{$node}}) {
