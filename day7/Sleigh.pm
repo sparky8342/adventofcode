@@ -25,6 +25,7 @@ sub steps {
 		foreach my $node (keys %todo) {
 			if (!exists($tree{$node})) {
 				$available{$node} = 1;
+				next;
 			}
 
 			my $ok = 1;
