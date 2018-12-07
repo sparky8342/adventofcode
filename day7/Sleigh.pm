@@ -19,7 +19,6 @@ sub steps {
 	}
 
 	my $step_order = '';
-	my %done;
 
 	while (keys %todo) {
 		my %available;
@@ -30,7 +29,7 @@ sub steps {
 
 			my $ok = 1;
 			foreach my $parent (keys %{$tree{$node}}) {
-				if (!exists($done{$parent})) {
+				if (exists($todo{$parent})) {
 					$ok = 0;
 					last;
 				}
@@ -43,7 +42,6 @@ sub steps {
 
 		my $step = (sort keys %available)[0];
 		delete($todo{$step});
-		$done{$step} = 1;
 		$step_order .= $step;
 	}
 
