@@ -7,4 +7,5 @@ open my $fh, '<', 'input.txt';
 chomp(my $data = <$fh>);
 close $fh;
 
-print sum_metadata($data) . "\n";
+my ($sum,$value) = sum_metadata($data);
+print "$sum\n$value\n";
