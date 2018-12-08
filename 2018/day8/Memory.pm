@@ -19,8 +19,9 @@ sub sum_metadata {
 	print Dumper $tree;
 
 	my $sum = find_sum($tree);
+	my $value = find_value($tree);
 
-	return $sum;
+	return ($sum,$value);
 	#return $tree->{sum};
 }
 
@@ -54,13 +55,38 @@ sub build_tree {
 }
 
 sub find_sum {
-	my ($tree) = @_;
-	my $metadata = $tree->{metadata};
+	my ($node) = @_;
+	my $metadata = $node->{metadata};
 	my $sum = 0;
-	$sum += $_ foreach @{$tree->{metadata}};
-	$sum += find_sum($_) foreach @{$tree->{children}};
+	$sum += $_ foreach @{$node->{metadata}};
+	$sum += find_sum($_) foreach @{$node->{children}};
 	return $sum;
 }
+
+sub find_value {
+	my ($node) = @_;
+
+	use Data::Dumper;
+	print Dumper $node;
+
+	my $metadata = $node->{metadata};
+	my $children = $node->{children};
+	my $sum = 0;
+	if (@$children == 0) {
+		$sum += $_ foreach @{$node->{metadata}};
+	}
+	else {
+		foreach my $entry (@{$node->{metadata}}) {
+			if (defined($children->[$entry - 1])) {
+				$sum += find_value($children->[$entry - 1]);
+			}
+		}
+	}
+	return $sum;
+}
+
+
+
 
 
 __END__
