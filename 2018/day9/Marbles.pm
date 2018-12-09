@@ -26,7 +26,7 @@ sub play {
 		else {
 			$current++;
 			$current = 0 if $current == scalar(@marbles);
-			@marbles = (@marbles[0..$current],$marble,@marbles[$current+1..@marbles-1]);
+			splice(@marbles,$current+1,0,$marble);
 			$current++;
 		}
 		$player++;
