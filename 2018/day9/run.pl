@@ -11,3 +11,6 @@ $data =~ /^(\d+).*?(\d+)/;
 my ($players,$no_marbles) = ($1,$2);
 print "$players,$no_marbles\n";
 print play($players,$no_marbles) . "\n";
+$no_marbles *= 100;
+print "$players,$no_marbles\n";
+print play($players,$no_marbles) . "\n";
