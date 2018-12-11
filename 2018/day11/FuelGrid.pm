@@ -29,21 +29,28 @@ sub find_best_square {
 		}
 	}
 
-	for my $x (1..298) {
-		for my $y (1..298) {
-			print "$x $y\n";
-			#my $size_limit = 300 - ($x > $y ? $x : $y);
-			#foreach my $size (1..$size_limit) {
-			foreach my $size (2..2) {
+	for my $size (1..300) {
+		print "$size\n";
+		for my $x (1..300) {
+			for my $y (1..300) {
+				#print "$x $y\n";
 				my $power = 0;
-				for my $dx (0..$size) {
-					for my $dy (0..$size) {
+				my $xlimit = $size;
+				if (300 - $x < $xlimit) {
+					$xlimit = 300 - $x;
+				}
+				for my $dx (0..$xlimit) {
+					my $ylimit = $size;
+					if (300 - $y < $ylimit) {
+						$ylimit = 300 - $y;
+					}
+					for my $dy (0..$ylimit) {
 						$power += $grid[$x+$dx][$y+$dy];
 					}
 				}
 
 				if ($power > $max_power) {
-					print "$max_power\n";
+					print "$power : $x,$y,$size\n";
 					$max_power = $power;
 					$max_x = $x;
 					$max_y = $y;
