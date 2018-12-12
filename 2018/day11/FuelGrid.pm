@@ -7,13 +7,15 @@ our @EXPORT_OK = qw(find_best_square);
 
 $| = 1;
 
+my $best_power;
+my $best_x;
+my $best_y;
+my $best_size;
+
 sub find_best_square {
-	my ($serial) = @_;
- 
-	my $max_power = 0;
-	my $max_x;
-	my $max_y;
-	my $max_size;
+	my ($serial,$min_size,$max_size) = @_;
+
+	$best_power = 0;
 
 	my @grid;
 	for my $x (1..300) {
@@ -29,37 +31,82 @@ sub find_best_square {
 		}
 	}
 
-	for my $size (1..300) {
-		print "$size\n";
-		for my $x (1..300) {
-			for my $y (1..300) {
-				#print "$x $y\n";
-				my $power = 0;
-				my $xlimit = $size;
-				if (300 - $x < $xlimit) {
-					$xlimit = 300 - $x;
-				}
-				for my $dx (0..$xlimit) {
-					my $ylimit = $size;
-					if (300 - $y < $ylimit) {
-						$ylimit = 300 - $y;
-					}
-					for my $dy (0..$ylimit) {
-						$power += $grid[$x+$dx][$y+$dy];
-					}
-				}
+	for my $size ($min_size..$max_size) {
+		my $x = 1;
+		my $y = 1;
+		my $power = 0;
 
-				if ($power > $max_power) {
-					print "$power : $x,$y,$size\n";
-					$max_power = $power;
-					$max_x = $x;
-					$max_y = $y;
-					$max_size = $size;
-				}
+		for my $dx ($x..$x + $size - 1) {
+			for my $dy ($y..$y + $size - 1) {
+				$power += $grid[$dx][$dy];
 			}
 		}
-	}
+		max_check($power,$x,$y,$size);
 
-	return "$max_x,$max_y";
+		while ($y < 300 - $size) {
+			# go right
+			while ($x <= 300 - $size) {
+				for (my $dy = $y; $dy < $y + $size; $dy++) {
+					$power -= $grid[$x][$dy];
+				}
+				$x++;
+				for (my $dy = $y; $dy < $y + $size; $dy++) {
+					$power += $grid[$x+$size-1][$dy];
+				}
+				max_check($power,$x,$y,$size);
+			}
+
+			# down 1
+			for (my $dx = $x; $dx < $x + $size; $dx++) {
+				$power -= $grid[$dx][$y]
+			}
+			$y++;
+			for (my $dx = $x; $dx < $x + $size; $dx++) {
+				$power += $grid[$dx][$y+$size-1]
+			}
+
+			max_check($power,$x,$y,$size);
+
+			# go left
+			while ($x > 1) {
+				for (my $dy = $y; $dy < $y + $size; $dy++) {
+					$power -= $grid[$x+$size-1][$dy];
+				}
+				$x--;
+				for (my $dy = $y; $dy < $y + $size; $dy++) {
+					$power += $grid[$x][$dy];
+				}
+				max_check($power,$x,$y,$size);
+			}
+
+			# down 1
+			for (my $dx = $x; $dx < $x + $size; $dx++) {
+				$power -= $grid[$dx][$y]
+			}
+			$y++;
+			for (my $dx = $x; $dx < $x + $size; $dx++) {
+				$power += $grid[$dx][$y+$size-1]
+			}
+			max_check($power,$x,$y,$size);
+		}
+	}
+	if ($min_size == $max_size) {
+		return "$best_x,$best_y";
+	}
+	else {
+		return "$best_x,$best_y,$best_size";
+	}
 }
 
+
+sub max_check {
+	my ($power,$x,$y,$size) = @_;
+	if ($power > $best_power) {
+		$best_power = $power;
+		$best_x = $x;
+		$best_y = $y;
+		$best_size = $size;
+	}
+}
+
+1;
