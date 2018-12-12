@@ -7,4 +7,5 @@ open my $fh, '<', 'input.txt';
 chomp(my $serial = <$fh>);
 close $fh;
 
+print find_best_square($serial,3,3) . "\n";
 print find_best_square($serial,1,300) . "\n";
