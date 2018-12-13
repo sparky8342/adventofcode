@@ -7,7 +7,7 @@ my @data = <DATA>;
 my $initial = shift(@data);
 ($initial) = $initial =~ /: (.*)/;
 shift(@data);
-is(iterate($initial,@data),325);
+is(iterate($initial,20,@data),325);
 
 __DATA__
 initial state: #..#.#..##......###...###

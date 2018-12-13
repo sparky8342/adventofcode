@@ -1,85 +1,69 @@
 package Plants;
 use strict;
 use warnings;
-no warnings 'portable';
-use Math::BigInt;
 
 use parent "Exporter";
 our @EXPORT_OK = qw(iterate);
 
 sub iterate {
-	my ($initial,@data) = @_;
+	my ($initial,$generations,@data) = @_;
 
-	$initial =~ s/#/1/g;
-	$initial =~ s/\./0/g;
-	$initial = Math::BigInt->from_bin($initial); 
+	my @state = split//,$initial;
 
 	my @commands;
 	my @change;
 	foreach my $row (@data) {
 		$row =~ /(.*) => (.)/;
 		my ($pattern,$set) = ($1,$2);
-
-		$pattern =~ s/#/1/g;
-		$pattern =~ s/\./0/g;
-		$pattern = oct("0b" . $pattern);
-
-		$set = $set eq '#' ? 1 : 0;
-
+		next if $set eq '.';
 		push @commands, $pattern;
-		push @change, $set;
 	}
 
-	my $state = $initial;
+	my $left_add = 0;
 
-	my $shift = 0;
+	for (1..$generations) {
+		my @previous_state = @state;
+		my $previous_left_add = $left_add;
+		@state = ('.','.','.','.',@state,'.','.','.','.');
 
-	for (1..20) {
-		my $next = Math::BigInt->new(0);
-		my $next_shift = 0;
+		$left_add += 2;
 
-		$state->blsft(4);
-
-		my $leading_zeroes = 0;
-		while ($state > 0) {
+		my @new_state;
+		for (my $i = 0; $i < @state - 5; $i++) {
+			my $chunk = join('',@state[$i..$i+4]);
 			my $match = 0;
-			my $chunk = $state & 31;
-			for (my $i = 0; $i < @commands; $i++) {
-				my $command = $commands[$i];
-				if ($chunk == $command) {
-					if ($change[$i] == 0) {
-						$leading_zeroes++;
-					}
-					else {
-						$next += Math::BigInt->new(1)->blsft($next_shift);
-						$leading_zeroes = 0;
-					}
+			foreach my $command (@commands) {
+				if ($chunk eq $command) {
+					push @new_state, '#';
 					$match = 1;
 					last;
 				}
 			}
-			if ($match == 0) {
-				$leading_zeroes++;
-			}
-			$next_shift++;
-
-			$state->brsft(1);
+			push @new_state, '.' if $match == 0;
 		}
 
-		$shift -= 2 - $leading_zeroes;
+		while ($new_state[0] eq '.') {
+			shift(@new_state);
+			$left_add--;
+		}
 
-		$state = $next;
-		while (($state & 1) == 0) {
-			$state->brsft(1)
+		while ($new_state[-1] eq '.') {
+			pop(@new_state);
+		}
+
+		@state = @new_state;
+		if (join('',@state) eq join('',@previous_state)) {
+			my $change = $left_add - $previous_left_add;
+			$left_add += $change * ($generations - $_);
+			last;
 		}
 	}
 
 	my $sum = 0;
-	my $bin = $state->as_bin;
-	$bin =~ s/0b//;
-	foreach my $digit (split//,$bin) {
-		$sum += $shift if $digit == 1;
-		$shift++;
+	my $value = -$left_add;
+	foreach my $plant (@state) {
+		$sum += $value if $plant eq '#';
+		$value++;
 	}
 
 	return $sum;
