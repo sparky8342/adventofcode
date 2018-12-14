@@ -36,7 +36,7 @@ use constant DIR_CHANGE => {
 };
 
 sub move {
-	my (@data) = @_;
+	my ($first,@data) = @_;
 
 	my @grid;
 	foreach my $row (@data) {
@@ -53,16 +53,23 @@ sub move {
 					dir => $square,
 					row => $row,
 					col => $col,
-					turn => 0
+					turn => 0,
+					alive => 1
 				};
 			}
 		}
 	}
 
 	while (1) {
+		@carts = grep { $_->{alive} == 1 } @carts;
+		if (@carts == 1) {
+			return $carts[0]->{col} . ',' . $carts[0]->{row};
+		}
+
 		@carts = sort { $a->{row} <=> $b->{row} || $a->{col} <=> $b->{col} } @carts;
 
 		foreach my $cart (@carts) {
+			next if $cart->{alive} == 0;
 			$cart->{row} += &CARTS->{$cart->{dir}}->{drow};
 			$cart->{col} += &CARTS->{$cart->{dir}}->{dcol};
 			my $square = $grid[$cart->{row}][$cart->{col}];
@@ -76,7 +83,9 @@ sub move {
 			}
 
 			my $collision = collision_check(@carts);
-			return $collision if $collision;
+			if ($collision && $first) {
+				return $collision;
+			}
 		}
 
 	}
@@ -87,9 +96,14 @@ sub collision_check {
 	my @carts = @_;
 	@carts = sort { $a->{row} <=> $b->{row} || $a->{col} <=> $b->{col} } @carts;
 
+	my $crash;
 	for (my $i = 0; $i < @carts - 1; $i++) {
-		if ($carts[$i]->{row} == $carts[$i+1]->{row} && $carts[$i]->{col} == $carts[$i+1]->{col}) {
-			return $carts[$i]->{col} . ',' . $carts[$i]->{row};
+		if ($carts[$i]->{alive} == 1 && $carts[$i+1]->{alive} == 1) {
+			if ($carts[$i]->{row} == $carts[$i+1]->{row} && $carts[$i]->{col} == $carts[$i+1]->{col}) {
+				$carts[$i]->{alive} = 0;
+				$carts[$i+1]->{alive} = 0;
+				return $carts[$i]->{col} . ',' . $carts[$i]->{row};
+			}
 		}
 	}
 
