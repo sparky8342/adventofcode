@@ -4,7 +4,7 @@ use MineCarts qw(move);
 use Test::More tests => 1;
 
 my @data = <DATA>;
-is(move(@data),'7,3');
+is(move(1,@data),'7,3');
 
 __DATA__
 /->-\        

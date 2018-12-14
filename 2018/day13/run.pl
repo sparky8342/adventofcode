@@ -8,4 +8,5 @@ my @data = <$fh>;
 close $fh;
 chomp($_) foreach @data;
 
-print move(@data) . "\n";
+print move(1,@data) . "\n";
+print move(0,@data) . "\n";
