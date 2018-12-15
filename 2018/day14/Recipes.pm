@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use parent "Exporter";
-our @EXPORT_OK = qw(make);
+our @EXPORT_OK = qw(make find);
 
 sub make {
 	my ($n) = @_;
@@ -16,8 +16,28 @@ sub make {
 		push @r, split//,$r[$e1] + $r[$e2];
 		$e1 = ($e1 + $r[$e1] + 1) % @r;
 		$e2 = ($e2 + $r[$e2] + 1) % @r;
-		#print "$e1 $e2: " . join(' ',@r) . "\n";
 	}
 
 	return join('',@r[$n..$n+9]);
+}
+
+sub find {
+	my ($n) = @_;
+	my $len = length($n);
+
+	my @r = (3,7);
+	my $e1 = 0;
+	my $e2 = 1;
+
+	while (1) {
+		push @r, split//,$r[$e1] + $r[$e2];
+		$e1 = ($e1 + $r[$e1] + 1) % @r;
+		$e2 = ($e2 + $r[$e2] + 1) % @r;
+		if (join('',@r[@r-$len..@r-1]) eq $n) {
+			return @r-$len;
+		}
+		if (join('',@r[@r-$len-1..@r-2]) eq $n) {
+			return @r-$len-1;
+		}
+	}
 }
