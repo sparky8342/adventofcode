@@ -1,12 +1,12 @@
 use strict;
 use warnings;
-use Bandits qw(combat);
+use Bandits qw(find_winning_attack_power);
 use Test::More tests => 1;
 
 my @data = <DATA>;
 chomp($_) foreach @data;
 
-is(combat(3,0,@data),27730);
+is(find_winning_attack_power(@data),4988);
 
 __DATA__
 #######
