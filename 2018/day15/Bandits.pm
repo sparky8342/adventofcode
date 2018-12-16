@@ -3,10 +3,22 @@ use strict;
 use warnings;
 
 use parent "Exporter";
-our @EXPORT_OK = qw(combat);
+our @EXPORT_OK = qw(combat find_winning_attack_power);
+
+sub find_winning_attack_power {
+	my (@data) = @_;
+	my $power = 3;
+	my $result = -1;
+	while ($result == -1) {
+		print "$power\n";
+		$result = combat($power,1,@data);
+		$power++;
+	}
+	return $result;
+}
 
 sub combat {
-	my @data = @_;
+	my ($elves_attack_power,$elves_must_survive,@data) = @_;
 
 	my @grid;
 	foreach my $row (@data) {
@@ -58,7 +70,8 @@ sub combat {
 					$unit->{last_col} = $col;
 					$unit->{moved} = 1;
 					$grid[$new_row][$new_col] = $unit;
-					attack(\@grid,$new_row,$new_col);
+					my $end = attack($elves_attack_power,$elves_must_survive,\@grid,$new_row,$new_col);
+					return -1 if $end;
 				}
 			}
 		}
@@ -154,10 +167,11 @@ sub bfs {
 }
 
 sub attack {
-	my ($grid,$row,$col) = @_;
+	my ($elves_attack_power,$elves_must_survive,$grid,$row,$col) = @_;
 
 	my $unit = $grid->[$row][$col];
 	my $enemy = $unit->{type} eq 'E' ? 'G' : 'E';
+	my $power = $unit->{type} eq 'E' ? $elves_attack_power : 3;
 
 	my $hitpoints = 300;
 	my $attack_row;
@@ -182,11 +196,14 @@ sub attack {
 	}
 
 	if ($attack_row) {
-		$grid->[$attack_row][$attack_col]->{hitpoints} -= 3;
+		$grid->[$attack_row][$attack_col]->{hitpoints} -= $power;
 	
 		if ($grid->[$attack_row][$attack_col]->{hitpoints} <= 0) {
+			if ($unit->{type} eq 'G' && $elves_must_survive) {
+				return 1;
+			}
 			$grid->[$attack_row][$attack_col] = '.';
-			return 1;
+			return 0;
 		}
 	}
 
