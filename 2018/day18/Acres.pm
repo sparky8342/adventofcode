@@ -18,7 +18,9 @@ sub iterate {
 	my $x_size = @{$grid[0]};
 	my $y_size = @grid;
 
-	for (1..$amount) {
+	my %cache = (join('', map { join('',@$_) } @grid) => 0);
+
+	for my $iter (1..$amount) {
 		my @newgrid;
 
 		for (my $y = 0; $y < $y_size; $y++) {
@@ -65,6 +67,15 @@ sub iterate {
 		}
 		@grid = @newgrid;
 
+		my $squash = join('', map { join('',@$_) } @grid);
+		if (exists($cache{$squash})) {
+			my $cycle = $iter - $cache{$squash};
+			if (($amount - $iter) % $cycle == 0) {
+				last;
+			}
+		}
+
+		$cache{$squash} = $iter;
 		pp(\@grid);
 	}
 

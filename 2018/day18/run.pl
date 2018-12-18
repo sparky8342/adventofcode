@@ -9,3 +9,4 @@ close $fh;
 chomp($_) foreach @data;
 
 print iterate(10,@data) . "\n";
+print iterate(1000000000,@data) . "\n";
