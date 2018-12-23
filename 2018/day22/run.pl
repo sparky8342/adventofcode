@@ -8,4 +8,5 @@ my @data = <$fh>;
 close $fh;
 chomp($_) foreach @data;
 
-print risk_level(@data) . "\n";
+my ($rl) = risk_level(@data);
+print "$rl\n";
