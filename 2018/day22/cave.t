@@ -7,7 +7,8 @@ use Test::More tests => 1;
 my @data = <DATA>;
 chomp($_) foreach @data;
 
-is(risk_level(@data),114);
+my ($rl) = risk_level(@data);
+is($rl,114);
 
 __DATA__
 depth: 510
