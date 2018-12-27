@@ -26,7 +26,9 @@ my %opcodes = (
 );
 
 sub run_program {
-	my @data = @_;
+	my ($rs,@data) = @_;
+
+	@r = @$rs;
 
 	my $bind = shift(@data);
 	my ($bind_reg) = $bind =~ /(\d)/;
@@ -36,8 +38,6 @@ sub run_program {
 	foreach my $line (@data) {
 		push @program, [split/ /,$line];
 	}
-
-	@r = (0,0,0,0,0,0);
 
 	while (1) {
 		$r[$bind_reg] = $ip;
