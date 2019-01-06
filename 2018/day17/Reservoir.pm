@@ -45,56 +45,68 @@ sub run_water {
 	pp($min_x,$max_x,$min_y,$max_y,\@grid);
 
 	$grid[1][500] = '|';
-	my %running_water = (1 => {500 => 1});
+	my @running_water = ([1,500]);
 
-	while (1) {
+	while (@running_water) {
 		my $change = 0;
 
 		# analyze each space of running water to see
 		# if more should be added, or it should change
 		# to standing water
 
-		# can be improved, all running water is being checked
-		# every time when some would have no more changes
+		my $space = pop(@running_water);
+		my ($y,$x) = @$space;
+		next if $y == $max_y;
+		next if $grid[$y][$x] eq '~';
 
-		foreach my $y (keys %running_water) {
-			next if $y == $max_y;
-			foreach my $x (keys %{$running_water{$y}}) {
-				if ($grid[$y+1][$x] eq '.') {
-					$grid[$y+1][$x] = '|';
-					$running_water{$y+1}{$x} = 1;
-					$change = 1;
+		if ($grid[$y+1][$x] eq '.') {
+			$grid[$y+1][$x] = '|';
+			push @running_water,[$y+1,$x];
+		}
+
+		if ($grid[$y+1][$x] =~ /^[#~]$/) {
+			if ($grid[$y][$x-1] eq '.') {
+				$grid[$y][$x-1] = '|';
+				push @running_water,[$y,$x-1];
+			}
+			if ($grid[$y][$x+1] eq '.') {
+				$grid[$y][$x+1] = '|';
+				push @running_water,[$y,$x+1];
+			}
+
+			# check for standing water
+			my $dir = 0;
+			if ($grid[$y][$x-1] eq '#') {
+				$dir = 1;
+			}			
+			elsif ($grid[$y][$x+1] eq '#') {
+				$dir = -1;
+			}
+
+			if ($dir != 0) {
+				my $dx = $x;
+				while ($grid[$y][$dx+$dir] eq '|' && $grid[$y+1][$dx+$dir] =~ /^[#~]$/) {
+					$dx += $dir;
 				}
-				if ($grid[$y+1][$x] =~ /^[#~]$/) {
-					if ($grid[$y][$x-1] eq '.') {
-						$grid[$y][$x-1] = '|';	
-						$running_water{$y}{$x-1} = 1;
-						$change = 1;
+				if ($grid[$y][$dx+$dir] eq '#') {
+					my ($s,$e);
+					if ($dir == 1) {
+						$s = $x;
+						$e = $dx;
 					}
-					if ($grid[$y][$x+1] eq '.') {
-						$grid[$y][$x+1] = '|';
-						$running_water{$y}{$x+1} = 1;
-						$change = 1;
+					elsif ($dir == -1) {
+						$s = $dx;
+						$e = $x;
 					}
-
-					# check for standing water
-					if ($grid[$y][$x-1] eq '#') {
-						my $dx = $x;
-						while ($grid[$y][$dx+1] eq '|' && $grid[$y+1][$dx+1] =~ /^[#~]$/) {
-							$dx++;
-						}
-						if ($grid[$y][$dx+1] eq '#') {
-							for (my $cx = $x; $cx <= $dx; $cx++) {
-								$grid[$y][$cx] = '~';
-								delete($running_water{$y}{$x});
-								$change = 1;
-							}
+					for (my $cx = $s; $cx <= $e; $cx++) {
+						$grid[$y][$cx] = '~';
+						if ($grid[$y-1][$cx] eq '|') {
+							push @running_water,[$y-1,$cx];
 						}
 					}
 				}
 			}
 		}
-		last if $change == 0;
 	}
 
 	pp($min_x-1,$max_x+1,$min_y,$max_y,\@grid);
