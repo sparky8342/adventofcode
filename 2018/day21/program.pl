@@ -6,67 +6,53 @@ my $in = 12980435;
 
 my ($a,$b,$c,$d);
 
-$a = 123;
-$a = $a & 456;
+$a = 0;
 
-if ($a == 72) {
+L1:
+while (1) {
 
-	$a = 0;
+	$b = $a | 65536;
+	$a = 16123384;
 
-	L1:
+	L2:
 	while (1) {
 
-		$b = $a | 65536;
-		$a = 16123384;
-
-		L2:
-		while (1) {
-
-			$c = $b & 255;
-			$a = $a + $c;
-			$a = $a & 16777215;
-			$a = $a * 65899;
-			$a = $a & 16777215;
+		$c = $b & 255;
+		$a = $a + $c;
+		$a = $a & 16777215;
+		$a = $a * 65899;
+		$a = $a & 16777215;
 
 
-			if ($b < 256) {
-				# line 16
-				if ($in == $a) {
-					# end
-					print "$a $b $c $d\n";
-					exit;
-				}
-				else {
-					next L1;
-				}	
+		if ($b < 256) {
+			# line 16
+			if ($in == $a) {
+				# end
+				print "$a $b $c $d\n";
+				exit;
 			}
 			else {
-				$c = 0;
+				next L1;
+			}	
+		}
+		else {
+			$c = 0;
 
-				while (1) {
-					$d = $c + 1;
-					$d *= 256;
+			while (1) {
+				$d = $c + 1;
+				$d *= 256;
 
-					print "$a $b $c $d\n";
+				print "$a $b $c $d\n";
 
-					if ($d > $b) {
-						$b = $c;
-						next L2;
-					}
-
-					$c++;
-
+				if ($d > $b) {
+					$b = $c;
+					next L2;
 				}
+
+				$c++;
+
 			}
-		}	
-	}
-
-
+		}
+	}	
 }
-else {
-	# line 4
-}
-
-
-
 
