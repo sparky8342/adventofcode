@@ -36,13 +36,14 @@ $program[2] = 2;
 print run_program(\@program) . "\n";
 
 # part 2
+my $target_result = 19690720;
 for my $noun (0..99) {
 	for my $verb (0..99) {
 		my @program = @source_program;
 		$program[1] = $noun;
 		$program[2] = $verb;
 		my $result = run_program(\@program);
-		if ($result == 19690720) {
+		if ($result == $target_result) {
 			print 100 * $noun + $verb . "\n";
 			exit;
 		}
