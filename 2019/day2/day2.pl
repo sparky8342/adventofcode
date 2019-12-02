@@ -27,9 +27,24 @@ sub run_program {
 open my $fh, '<', 'input.txt';
 chomp(my $line = <$fh>);
 close $fh;
-my @program = split(/,/,$line);
+my @source_program = split(/,/,$line);
 
+# part 1
+my @program = @source_program;
 $program[1] = 12;
 $program[2] = 2;
-
 print run_program(\@program) . "\n";
+
+# part 2
+for my $noun (0..99) {
+	for my $verb (0..99) {
+		my @program = @source_program;
+		$program[1] = $noun;
+		$program[2] = $verb;
+		my $result = run_program(\@program);
+		if ($result == 19690720) {
+			print 100 * $noun + $verb . "\n";
+			exit;
+		}
+	}
+}
