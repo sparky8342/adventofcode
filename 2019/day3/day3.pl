@@ -83,12 +83,10 @@ foreach my $test (@tests) {
 	is(closest_crossover($test->{wires}), ($test->{distance}, $test->{steps}));
 }
 
-my @wires;
 open my $fh, '<', 'input.txt';
-chomp(my $line = <$fh>);
-push @wires, [split/,/,$line];
-chomp($line = <$fh>);
-push @wires, [split/,/,$line];
+chomp(my @wires = <$fh>);
 close $fh;
+
+@wires = map { [split(/,/,$_)] } @wires;
 
 print join("\n",closest_crossover(\@wires)) . "\n";
