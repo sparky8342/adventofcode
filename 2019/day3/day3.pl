@@ -29,22 +29,24 @@ sub closest_crossover {
 				$x = $x + $dx;
 				$y = $y + $dy;
 				$steps++;
-				if (!exists($grid{$wire_no}{$x}{$y})) {
-					$grid{$wire_no}{$x}{$y} = $steps;
-				}
-
-				if ($wire_no == 1 && exists($grid{0}{$x}{$y})) {
-					my $dist = abs($x) + abs($y);
-					if ($dist < $best_dist) {
-						$best_dist = $dist;
-					}
-
-					my $total_steps = $grid{0}{$x}{$y} + $grid{1}{$x}{$y};
-					if ($total_steps < $best_steps) {
-						$best_steps = $total_steps;
+				if ($wire_no == 0) {
+					if (!exists($grid{$x}{$y})) {
+						$grid{$x}{$y} = $steps;
 					}
 				}
+				elsif ($wire_no == 1) {
+					if (exists($grid{$x}{$y})) {
+						my $dist = abs($x) + abs($y);
+						if ($dist < $best_dist) {
+							$best_dist = $dist;
+						}
 
+						my $total_steps = $grid{$x}{$y} + $steps;
+						if ($total_steps < $best_steps) {
+							$best_steps = $total_steps;
+						}
+					}
+				}
 			}
 		}
 	}
