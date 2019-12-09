@@ -12,15 +12,13 @@ sub run_program {
 	while (1) {
 		my $ins = $program->[$pos];
 
-                my $opcode = substr($ins, length($ins) - 2, 2);
-                $opcode = sprintf("%d", $opcode);
-                my $modes = substr($ins, 0, length($ins) - 2) || "000";
-                $modes = sprintf("%03d", $modes);
-		my ($mode3, $mode2, $mode1) = split(//, $modes);
+                my $opcode = sprintf("%d", substr($ins, length($ins) - 2, 2));
 
 		if ($opcode == 99) {
 			last;
 		}
+
+		my ($mode3, $mode2, $mode1) = split(//, sprintf("%03d", substr($ins, 0, length($ins) - 2) || "000"));
 
 		my ($a1, $a2, $a3) = @$program[$pos+1..$pos+3];
 		if ($opcode != 3) {
@@ -37,7 +35,6 @@ sub run_program {
 		elsif ($mode2 == 2) {
 			$a2 = $program->[$a2 + $rb];
 		}
-
 		if ($mode3 == 2) {
 			$a3 += $rb;
 		}
@@ -51,12 +48,8 @@ sub run_program {
 			$pos += 4;
 		}
 		elsif ($opcode == 3) {
-			if ($mode1 == 2) {
-				$program->[$a1 + $rb] = $input;
-			}
-			else {
-				$program->[$a1] = $input;
-			}
+			$a1 += $rb if $mode1 == 2;
+			$program->[$a1] = $input;
 			$pos += 2;
 		}
 		elsif ($opcode == 4) {
@@ -64,37 +57,17 @@ sub run_program {
 			$pos += 2;
 		}
 		elsif ($opcode == 5) {
-			if ($a1 != 0) {
-				$pos = $a2;
-			}
-			else {
-				$pos += 3;
-			}
+			$pos = $a1 != 0 ? $a2 : $pos + 3;
 		}
 		elsif ($opcode == 6) {
-			if ($a1 == 0) {
-				$pos = $a2;
-			}
-			else {
-				$pos += 3;
-			}
+			$pos = $a1 == 0 ? $a2 : $pos + 3;
 		}
 		elsif ($opcode == 7) {
-			if ($a1 < $a2) {
-				$program->[$a3] = 1;
-			}
-			else {
-				$program->[$a3] = 0;
-			}
+			$program->[$a3] = $a1 < $a2 ? 1 : 0;
 			$pos += 4;
 		}
 		elsif ($opcode == 8) {
-			if ($a1 == $a2) {
-				$program->[$a3] = 1;
-			}
-			else {
-				$program->[$a3] = 0;
-			}
+			$program->[$a3] = $a1 == $a2 ? 1 : 0;
 			$pos += 4;
 		}
 		elsif ($opcode == 9) {
