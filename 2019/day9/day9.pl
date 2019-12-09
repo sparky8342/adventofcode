@@ -102,7 +102,6 @@ sub run_program {
 			$pos += 2;
 		}
 	}
-	return $program->[0];
 }
 
 open my $fh, '<', 'input.txt';
