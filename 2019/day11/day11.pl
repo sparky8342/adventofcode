@@ -95,35 +95,70 @@ chomp(my $line = <$fh>);
 close $fh;
 my @source_program = split(/,/,$line);
 
-my @program = map { Math::BigInt->new($_) } @source_program;
+my $limits = { lx => 0, hx => 0, ly => 0, hy => 0 };
 
-my %grid = (0 => { 0 => 0 });
+for my $part (1..2) {
+	my @program = map { Math::BigInt->new($_) } @source_program;
+	$pos = 0;
+	$rb = 0;
 
-my $robot = { x => 0, y => 0, dir => '^' };
-my $input = 0;
+	my %grid = (0 => { 0 => 0 });
+	if ($part == 2) {
+		$grid{0}{0} = 1;
+	}
 
-while (1) {
-	my $output = run_program(\@program, $grid{$robot->{x}}{$robot->{y}});
-	last if $output->[0] == -1;
+	my $robot = { x => 0, y => 0, dir => '^' };
 
-	$grid{$robot->{x}}{$robot->{y}} = $output->[0];
-	my $turn = $output->[1];
-	for (my $i = 0; $i <= 5; $i++) { 
-		if (TURNS->{$turn}->[$i] eq $robot->{dir}) {
-			$robot->{dir} = TURNS->{$turn}->[$i + 1];
-			last;
+	while (1) {
+		my $output = run_program(\@program, $grid{$robot->{x}}{$robot->{y}});
+		last if $output->[0] == -1;
+
+		$grid{$robot->{x}}{$robot->{y}} = $output->[0];
+		my $turn = $output->[1];
+		for (my $i = 0; $i <= 5; $i++) {
+			if (TURNS->{$turn}->[$i] eq $robot->{dir}) {
+				$robot->{dir} = TURNS->{$turn}->[$i + 1];
+				last;
+			}
+		}
+		if    ($robot->{dir} eq '^') { $robot->{y}-- }
+		elsif ($robot->{dir} eq '>') { $robot->{x}++ }
+		elsif ($robot->{dir} eq 'v') { $robot->{y}++ }
+		elsif ($robot->{dir} eq '<') { $robot->{x}-- }
+
+		if ($part == 2) {
+			if ($robot->{x} < $limits->{lx}) { $limits->{lx} = $robot->{x} }
+			if ($robot->{x} > $limits->{hx}) { $limits->{hx} = $robot->{x} }
+			if ($robot->{y} < $limits->{ly}) { $limits->{ly} = $robot->{y} }
+			if ($robot->{y} > $limits->{hy}) { $limits->{hy} = $robot->{y} }
 		}
 	}
-	if    ($robot->{dir} eq '^') { $robot->{y}-- }
-	elsif ($robot->{dir} eq '>') { $robot->{x}++ }
-	elsif ($robot->{dir} eq 'v') { $robot->{y}++ }
-	elsif ($robot->{dir} eq '<') { $robot->{x}-- }
-}
 
-my $painted = 0;
-foreach my $x (keys %grid) {
-	foreach my $y ( keys %{$grid{$x}} ) {
-		$painted++;
+	if ($part == 1) {
+		my $painted = 0;
+		foreach my $x (keys %grid) {
+			foreach my $y ( keys %{$grid{$x}} ) {
+				$painted++;
+			}
+		}
+		print "$painted\n";
+	}
+	elsif ($part == 2) {
+		for my $y ($limits->{ly}..$limits->{hy}) {
+			for my $x ($limits->{lx}..$limits->{hx}) {
+				if (exists($grid{$x}{$y})) {
+					if ($grid{$x}{$y} == 1) {
+						print '#';
+					}
+					else {
+						print ' ';
+					}
+				}
+				else {
+					print ' ';
+				}
+			}
+			print "\n";
+		}
 	}
 }
-print "$painted\n";
