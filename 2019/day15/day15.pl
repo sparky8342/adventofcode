@@ -130,13 +130,12 @@ while (1) {
 	$hy = $dy if $dy > $hy;	
 }
 my $steps = bfs(0,0,2,$ox,$oy);
-print "$steps\n";
 
 # part 2
 my $longest = bfs($ox, $oy, 3);
-print "$longest\n";
 
-# 311 too high
+print "$steps\n";
+print "$longest\n";
 
 sub print_grid {
 	locate(1,1);
@@ -187,6 +186,8 @@ sub bfs {
 		if ($mode == 3) {
 			# find longest path
 			$max_dist = $space->{dist} if $space->{dist} > $max_dist;
+			$grid{$space->{x}}{$space->{y}} = 'o';
+			print_grid($x,$y);
 		}
 
 		push @queue, (
