@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use Test::More tests => 5;
+use Math::BigInt;
 use Data::Dumper;
 
 my @tests = (
@@ -84,6 +85,7 @@ my @tests = (
 	}
 );
 
+# part 1
 foreach my $test (@tests) {
 	is(ore_needed($test->{data}), $test->{ore});
 }
@@ -97,6 +99,7 @@ sub ore_needed {
 	my ($data) = @_;
 	my $tree = setup_tree($data);
 	my $chemicals = { map { $_ => 0 } keys %$tree };
+	$chemicals->{ORE} = Math::BigInt->new(1000000000000);
 	my $total_ore = [0];
 	make_chemical($tree, $chemicals, $total_ore, 'FUEL');
 	return $total_ore->[0];
@@ -119,16 +122,15 @@ sub make_chemical {
 	my ($tree, $chemicals, $total_ore, $name) = @_;
 
 	while (my($chemical, $needed) = each %{$tree->{$name}{requires}}) {
-		if ($chemical eq 'ORE') {
-			$chemicals->{ORE} += $needed;
-			$total_ore->[0] += $needed;
-		}
 
 		while ($chemicals->{$chemical} < $needed) {
 			make_chemical($tree, $chemicals, $total_ore, $chemical);
 		}
 
 		$chemicals->{$chemical} -= $needed;
+		if ($chemical eq 'ORE') {
+			$total_ore->[0] += $needed;
+		}
 	}
 
 	$chemicals->{$name} += $tree->{$name}{amount};
