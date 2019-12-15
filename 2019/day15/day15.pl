@@ -97,7 +97,7 @@ my ($ox, $oy);
 cls();
 while (1) {
 	my ($dx, $dy) = (0, 0);
-	my $input = bfs($x,$y);
+	my $input = bfs($x,$y,1);
 
 	if    ($input == 1) { $dy = -1 }
 	elsif ($input == 2) { $dy =  1 }
@@ -129,8 +129,14 @@ while (1) {
 	$ly = $dy if $dy < $ly;
 	$hy = $dy if $dy > $hy;	
 }
-my $steps = bfs(0,0,$ox,$oy);
+my $steps = bfs(0,0,2,$ox,$oy);
 print "$steps\n";
+
+# part 2
+my $longest = bfs($ox, $oy, 3);
+print "$longest\n";
+
+# 311 too high
 
 sub print_grid {
 	locate(1,1);
@@ -149,21 +155,24 @@ sub print_grid {
 }
 
 sub bfs {
-	my ($x, $y, $x2, $y2) = @_;
+	my ($x, $y, $mode, $x2, $y2) = @_;
 
 	my @queue = { x => $x, y => $y, dist => 0 };
 	my %visited;
+	my $max_dist = 0;
 
 	while (@queue) {
 		my $space = shift(@queue);
-		if ($x2) {
-			if ($space->{x} == $x2 && $space->{y} == $y2) {
-				return $space->{dist};
-			}
-		}
-		else {
+		if ($mode == 1) {
+			# nearest unknown space
 			if (!exists($grid{$space->{x}}{$space->{y}})) {
 				return $space->{dir};
+			}
+		}
+		elsif ($mode == 2) {
+			# find path to x2, y2
+			if ($space->{x} == $x2 && $space->{y} == $y2) {
+				return $space->{dist};
 			}
 		}
 
@@ -174,6 +183,12 @@ sub bfs {
 		if ($grid{$space->{x}}{$space->{y}} eq '#') {
 			next;
 		}
+
+		if ($mode == 3) {
+			# find longest path
+			$max_dist = $space->{dist} if $space->{dist} > $max_dist;
+		}
+
 		push @queue, (
 			{ x => $space->{x} + 1, y => $space->{y},     dist => $space->{dist} + 1, dir => $space->{dir} || 4 },
 			{ x => $space->{x} - 1, y => $space->{y},     dist => $space->{dist} + 1, dir => $space->{dir} || 3 },
@@ -181,4 +196,5 @@ sub bfs {
 			{ x => $space->{x}    , y => $space->{y} - 1, dist => $space->{dist} + 1, dir => $space->{dir} || 1 }
 		);
 	}
+	return $max_dist if $mode == 3;
 }	
