@@ -52,7 +52,7 @@ sub run_program {
 		}
 		elsif ($opcode == 3) {
 			$a1 += $rb if $mode1 == 2;
-			$program->[$a1] = $input;
+			$program->[$a1] = shift(@$input);
 			$pos += 2;
 		}
 		elsif ($opcode == 4) {
@@ -114,6 +114,7 @@ while (1) {
 print_grid();
 
 my $sum = 0;
+my $robot;
 for my $y (0..$hy) {
 	for my $x (0..$hx) {
 		if ($grid{$x}{$y} eq '#') {
@@ -124,9 +125,107 @@ for my $y (0..$hy) {
 				$sum += $x * $y;
 			}
 		}
+		elsif ($grid{$x}{$y} =~ /^([<>^v])$/) {
+			$robot = { dir => $1, x => $x, y => $y };
+		}
 	}
 }
 print "$sum\n";
+
+# part 2
+my @dirs = (
+	{
+		x => -1,
+		y => 0,
+		dir => {
+			'^' => { new_dir => '<', turn => 'L' },
+			'v' => { new_dir => '<', turn => 'R' }
+		}
+	},
+	{
+		x => 1,
+		y => 0,
+		dir => {
+			'^' => { new_dir => '>', turn => 'R' },
+			'v' => { new_dir => '>', turn => 'L' }
+		}
+	},
+	{
+		x => 0,
+		y => -1,
+		dir => {
+			'<' => { new_dir => '^', turn => 'R' },
+			'>' => { new_dir => '^', turn => 'L' }
+		}
+	},
+	{
+		x => 0,
+		y => 1,
+		dir => {
+			'<' => { new_dir => 'v', turn => 'L' },
+			'>' => { new_dir => 'v', turn => 'R' }
+		}
+	}
+);
+
+my @commands;
+while (1) {
+	my $move;
+	my $found = 0;
+	foreach my $dir (@dirs) {
+		if (($grid{$robot->{x} + $dir->{x}}{$robot->{y} + $dir->{y}} || '') eq '#'
+		&& exists($dir->{dir}->{$robot->{dir}})) {
+			$move = { x => $dir->{x}, y => $dir->{y}, turn => $dir->{dir}->{$robot->{dir}}->{turn}, steps => 0 };
+			$robot->{dir} = $dir->{dir}->{$robot->{dir}}->{new_dir};
+			$found = 1;
+			last;
+		}
+	}
+	last if !$found;
+
+	while (($grid{$robot->{x} + $move->{x}}{$robot->{y} + $move->{y}} || '') eq '#') {
+		$robot->{x} += $move->{x};
+		$robot->{y} += $move->{y};
+		$move->{steps}++;
+	}
+
+	push @commands, $move->{turn} . $move->{steps};
+}
+
+my $str = join(',',@commands);
+$str =~ s/,//g;
+
+my %groups;
+foreach my $group ('A', 'B', 'C') {
+	if ($str =~ /([^A-C]+).*?\1/) {
+		$groups{$group} = $1;
+		$str =~ s/$groups{$group}/$group/g;
+		$groups{$group} =~ s/(\d)(\D)/$1,$2/g;
+		$groups{$group} =~ s/(\D)(\d)/$1,$2/g;
+	}
+}
+$str = join(',',split(//,$str));
+
+my @input;
+foreach my $line ($str, $groups{A}, $groups{B}, $groups{C}) {
+	push @input, map { ord($_) } split(//,$line);
+	push @input, 10;
+}
+push @input, ord('n');
+push @input, 10;
+
+@program = map { Math::BigInt->new($_) } @source_program;
+$program[0] = Math::BigInt->new(2);
+$pos = 0;
+$rb = 0;
+
+my $last_out;
+while (1) {
+	my $output = run_program(\@program, \@input);
+	last if $output == -9;
+	$last_out = $output;
+}
+print "$last_out\n";
 
 sub print_grid {
 	#locate(1,1);
