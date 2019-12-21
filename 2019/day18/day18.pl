@@ -41,44 +41,78 @@ for (my $y = 0; $y < $height; $y++) {
 	}
 }
 
+# part 1
 print_grid($grid);
 
-my $steps = search($grid, $me->{x}, $me->{y}, 0);
+my $steps = search($grid, [[$me->{x}, $me->{y}]]);
+print "$steps\n";
+
+$grid->[$me->{y} - 1][$me->{x} - 1] = '1';
+$grid->[$me->{y} - 1][$me->{x}] = '#';
+$grid->[$me->{y} - 1][$me->{x} + 1] = '2';
+$grid->[$me->{y}][$me->{x} - 1] = '#';
+$grid->[$me->{y}][$me->{x}] = '#';
+$grid->[$me->{y}][$me->{x} + 1] = '#';
+$grid->[$me->{y} + 1][$me->{x} - 1] = '3';
+$grid->[$me->{y} + 1][$me->{x}] = '#';
+$grid->[$me->{y} + 1][$me->{x} + 1] = '4';
+
+# part 2
+print_grid($grid);
+
+$steps = search($grid, [
+	[$me->{x} - 1, $me->{y} - 1],
+	[$me->{x} + 1, $me->{y} - 1],
+	[$me->{x} - 1, $me->{y} + 1],
+	[$me->{x} + 1, $me->{y} + 1]
+]);
 print "$steps\n";
 
 sub search {
-	my ($grid, $x, $y) = @_;
-	my $keys = bfs($grid, $x, $y);
-
-	if (@$keys == 0) {
-		return 0;
-	}
+	my ($grid, $robots) = @_;
 
 	my @step_count;
-	foreach my $key (@$keys) {
-		# move player to key
-		$grid->[$y][$x] = '.';
-		$grid->[$key->{y}][$key->{x}] = '@';
+	foreach my $robot (@$robots) {
+		my $x = $robot->[0];
+		my $y = $robot->[1];	
 
-		# delete corresponding door from map
-		my $door = uc($key->{key});
-		my $d;
-		if (exists($doors{$door})) {
-			$d = $doors{$door};
-			$grid->[$d->[1]][$d->[0]] = '.';
+		my $keys = bfs($grid, $x, $y);
+
+		if (@$keys == 0) {
+			next;
 		}
 
-		my $s = search($grid, $key->{x}, $key->{y}) + $key->{dist};
-		push @step_count, $s;
+		foreach my $key (@$keys) {
+			# move robot to key
+			my $r = $grid->[$y][$x];
+			$grid->[$y][$x] = '.';
+			$grid->[$key->{y}][$key->{x}] = $r;
+			$robot->[0] = $key->{x};
+			$robot->[1] = $key->{y};
 
-		# put key, door and player back
-		$grid->[$key->{y}][$key->{x}] = $key->{key};
-		if ($d) {
-			$grid->[$d->[1]][$d->[0]] = $door;
+			# delete corresponding door from map
+			my $door = uc($key->{key});
+			my $d;
+			if (exists($doors{$door})) {
+				$d = $doors{$door};
+				$grid->[$d->[1]][$d->[0]] = '.';
+			}
+
+			my $s = search($grid, $robots) + $key->{dist};
+			push @step_count, $s;
+
+			# put key, door and robot back
+			$grid->[$key->{y}][$key->{x}] = $key->{key};
+			if ($d) {
+				$grid->[$d->[1]][$d->[0]] = $door;
+			}
+			$grid->[$y][$x] = $r;
+			$robot->[0] = $x;
+			$robot->[1] = $y;
 		}
-		$grid->[$y][$x] = '@';
 	}
 
+	return 0 unless @step_count;
 	@step_count = sort { $a <=> $b } @step_count;
 	return $step_count[0];
 }
