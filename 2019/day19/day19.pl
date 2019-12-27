@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 use Math::BigInt;
-use Term::ANSIScreen qw(cls locate);
 
 my $pos = 0;
 my $rb = 0;
@@ -84,7 +83,7 @@ sub run_program {
 open my $fh, '<', 'input.txt';
 chomp(my $line = <$fh>);
 close $fh;
-my @source_program = split(/,/,$line);
+my @source_program = map { Math::BigInt->new($_) } split(/,/,$line);
 
 # part 1
 my @program;
@@ -92,12 +91,42 @@ my @program;
 my $in_beam = 0;
 for (my $x = 0; $x < 50; $x++) {
 	for (my $y = 0; $y < 50; $y++) {
-		$pos = 0; $rb = 0;
-		@program = map { Math::BigInt->new($_) } @source_program;
-		my $output = run_program(\@program, [$x, $y]);
-		if ($output == 1) {
-			$in_beam++;
-		}
+		$in_beam++ if inside($x, $y);
 	}
 }
 print "$in_beam\n";
+
+# part 2
+my $size = 99;
+
+# skip over section with empty spaces
+my $x = 10;
+my $y = 0;
+while (!inside($x,$y)) {
+	$y++;
+}
+
+# walk down top of beam, check bottom left
+# corner of possible square
+while (1) {
+	while (inside($x, $y)) {
+		$x++;
+	}
+	$x--;
+
+	my $lx = $x - $size;
+
+	if ($lx > 0 && inside($lx, $y + $size)) {
+		my $ans = $lx * 10000 + $y;
+		print "$ans\n";
+		last;
+	}
+	$y++;
+}
+
+sub inside {
+	my ($x, $y) = @_;
+	$pos = 0; $rb = 0;
+	@program = @source_program;
+	return run_program(\@program, [$x, $y]);
+}
