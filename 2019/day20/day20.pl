@@ -11,7 +11,6 @@ while (my $row = <$fh>) {
 close($fh);
 
 my %portals;
-
 my %portal_info;
 
 my $height = @$grid;
@@ -42,10 +41,10 @@ for (my $y = 0; $y < $height; $y++) {
 					($pathx, $pathy) = neighbour_path($x2, $y2);
 				}
 				if ($portal eq 'AA') {
-					$start = { x => $pathx, y => $pathy, dist => 0 };
+					$start = { x => $pathx, y => $pathy, dist => 0, level => 0 };
 				}
 				elsif ($portal eq 'ZZ') {
-					$end = { x => $pathx, y => $pathy };
+					$end = { x => $pathx, y => $pathy, level => 0 };
 				}
 				$grid->[$y][$x] = '#';
 				$grid->[$y2][$x2] = '#';
@@ -112,28 +111,41 @@ sub bfs {
 	while (@queue) {
 		my $space = shift(@queue);
 
-		if (exists($visited{$space->{x}}{$space->{y}})) {
+		if (exists($visited{$space->{x}}{$space->{y}}{$space->{level}})) {
 			next;
 		}
-		$visited{$space->{x}}{$space->{y}} = 1;
+		$visited{$space->{x}}{$space->{y}}{$space->{level}} = 1;
 
 		if ($grid->[$space->{y}][$space->{x}] eq '#') {
 			next;
 		}
 		elsif ($grid->[$space->{y}][$space->{x}] =~ /^[A-Z]{2}$/) {
 			my $tele = $portal_info{$grid->[$space->{y}][$space->{x}]}{$space->{x} . ' ' . $space->{y}};
-			unshift @queue, { x => $tele->[0], y => $tele->[1], dist => $space->{dist} };
+			my $new_space = { x => $tele->[0], y => $tele->[1], dist => $space->{dist}, level => $space->{level} };
+
+			if ($space->{x} == 1 || $space->{x} == $width - 2 || $space->{y} == 1 || $space->{y} == $height - 2) {
+				if ($new_space->{level} > 0) {
+					$new_space->{level}--;
+					unshift @queue, $new_space;
+				}
+			}
+			else {
+				$new_space->{level}++;
+				push @queue, $new_space;
+			}
 			next;
 		}
-		elsif ($space->{x} == $end->{x} && $space->{y} == $end->{y}) {
+		elsif ($space->{x} == $end->{x} && $space->{y} == $end->{y} && $space->{level} == $end->{level}) {
 			return $space->{dist};
 		}
 
 		push @queue, (
-			{ x => $space->{x} + 1, y => $space->{y},     dist => $space->{dist} + 1, dir => $space->{dir} || 4 },
-			{ x => $space->{x} - 1, y => $space->{y},     dist => $space->{dist} + 1, dir => $space->{dir} || 3 },
-			{ x => $space->{x}    , y => $space->{y} + 1, dist => $space->{dist} + 1, dir => $space->{dir} || 2 },
-			{ x => $space->{x}    , y => $space->{y} - 1, dist => $space->{dist} + 1, dir => $space->{dir} || 1 }
+			{ x => $space->{x} + 1, y => $space->{y},     dist => $space->{dist} + 1, level => $space->{level} },
+			{ x => $space->{x} - 1, y => $space->{y},     dist => $space->{dist} + 1, level => $space->{level} },
+			{ x => $space->{x}    , y => $space->{y} + 1, dist => $space->{dist} + 1, level => $space->{level} },
+			{ x => $space->{x}    , y => $space->{y} - 1, dist => $space->{dist} + 1, level => $space->{level} }
 		);
+		# consider higher level spaces first, to not fall into infinity
+		@queue = sort { $a->{level} <=> $b->{level} } @queue;
 	}
 }
