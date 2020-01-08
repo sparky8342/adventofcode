@@ -9,6 +9,7 @@ use Data::Dumper;
 
 sub db_connect {
 	my $dbh = DBI->connect("dbi:SQLite:dbname=day23.db","","");
+	$dbh->do("PRAGMA journal_mode=WAL");
 	return $dbh;
 }
 
@@ -78,6 +79,7 @@ sub run_program {
 		}
 		else {
 			$program->[$a1] = -1;
+			sleep 1;
 		}
 		$pos += 2;
 	}
@@ -85,9 +87,6 @@ sub run_program {
 		$pos += 2;
 		push @output, $a1;
 		if (scalar(@output) == 3) {
-			if ($output[0] == 255) {
-				return $output[2];
-			}
 			my $qh = $dbh->prepare("INSERT INTO stream (program_id, value) values (?, ?)");
 			$qh->execute($output[0], $output[1]);
 			$qh->execute($output[0], $output[2]);
@@ -150,6 +149,35 @@ for (my $i = 0; $i < 50; $i++) {
 	}
 
 	$pm->finish();
+}
+
+$dbh = db_connect();
+my $first = 1;
+my $last_y = 0;
+while (1) {
+	my $qh = $dbh->prepare("SELECT count(*) C FROM stream WHERE program_id != 255");
+	$qh->execute();
+	my $row = $qh->fetchrow_hashref();
+	if ($row->{C} == 0) {
+		my $qh = $dbh->prepare("SELECT value FROM stream WHERE program_id = 255 ORDER BY id desc LIMIT 2");
+		$qh->execute();
+		my @vals;
+		while (my $row = $qh->fetchrow_hashref()) {
+			unshift @vals, $row->{value};
+		}
+		$qh = $dbh->prepare("INSERT INTO stream (program_id, value) values (?, ?)");
+		$qh->execute(0, $vals[0]);
+		$qh->execute(0, $vals[1]);
+		if ($first == 1) {
+			print $vals[1] . "\n";
+			$first = 0;
+		}
+		if ($last_y == $vals[1]) {
+			print $last_y . "\n";
+		}
+		$last_y = $vals[1];
+	}
+	sleep 10;
 }
 
 $pm->wait_all_children();
