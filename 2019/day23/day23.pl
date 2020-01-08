@@ -75,6 +75,10 @@ sub run_program {
 		my $row = $qh->fetchrow_hashref();
 		if ($row->{id}) {
 			$dbh->do("DELETE FROM stream where id = " . $row->{id});
+			# message to end program
+			if ($row->{value} == -1) {
+				return -9;
+			}
 			$program->[$a1] = $row->{value};
 		}
 		else {
@@ -120,20 +124,7 @@ chomp(my $line = <$fh>);
 close $fh;
 my @program = map { Math::BigInt->new($_) } split(/,/,$line);
 
-# part 1
-
 my $pm = Parallel::ForkManager->new(50);
-
-$pm->run_on_finish(
-	sub {
-		my ($pid, $exit_code, $ident, $exit_signal, $core_dump, $data_structure_reference) = @_;
-
-		if (defined($data_structure_reference)) {
-			my $string = ${$data_structure_reference};
-			print "$string\n";
-		}
-	}
-);
 
 for (my $i = 0; $i < 50; $i++) {
 	$pm->start and next;
@@ -143,9 +134,7 @@ for (my $i = 0; $i < 50; $i++) {
 	$id = $i;
 	while (1) {
 		my $result = run_program(\@program);
-		if ($result) {
-			$pm->finish(0, \$result);
-		}
+		last if $result && $result == -9;
 	}
 
 	$pm->finish();
@@ -169,15 +158,24 @@ while (1) {
 		$qh->execute(0, $vals[0]);
 		$qh->execute(0, $vals[1]);
 		if ($first == 1) {
+			# part 1
 			print $vals[1] . "\n";
 			$first = 0;
 		}
 		if ($last_y == $vals[1]) {
+			# part 2
 			print $last_y . "\n";
+			last;
 		}
 		$last_y = $vals[1];
 	}
-	sleep 10;
+	sleep 1;
+}
+
+# send message to end
+$qh = $dbh->prepare("INSERT INTO stream (program_id, value) values (?, ?)");
+for my $id (0..49) {
+	$qh->execute($id, -1);
 }
 
 $pm->wait_all_children();
