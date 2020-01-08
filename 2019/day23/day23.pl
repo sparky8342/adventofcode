@@ -7,8 +7,11 @@ use DBI;
 use DBD::SQLite;
 use Data::Dumper;
 
+use constant DBFILE => 'day23.db';
+use constant EXTRA_DBFILES => ['day23.db-wal', 'day23.db-shm'];
+
 sub db_connect {
-	my $dbh = DBI->connect("dbi:SQLite:dbname=day23.db","","");
+	my $dbh = DBI->connect("dbi:SQLite:dbname=" . DBFILE,"","");
 	$dbh->do("PRAGMA journal_mode=WAL");
 	return $dbh;
 }
@@ -179,3 +182,4 @@ for my $id (0..49) {
 }
 
 $pm->wait_all_children();
+unlink($_) foreach (DBFILE, @{&EXTRA_DBFILES});
