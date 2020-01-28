@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Memoize qw(memoize unmemoize flush_cache);
+use Memoize qw(memoize);
 
 open my $fh, '<', 'input.txt';
 my @data = <$fh>;
