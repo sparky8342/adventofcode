@@ -2,36 +2,36 @@
 use strict;
 use warnings;
 
-my @replacements;
+my %replacements;
 
 open my $fh, '<', 'input.txt';
 while (my $line = <$fh>) {
 	chomp($line);
 	last if $line eq '';
 	my ($val, $repl) = split(' => ', $line);
-	push @replacements, [ $val, $repl ];
+	push @{$replacements{$val}}, $repl;
 }
 my $molecule = <$fh>;
 close $fh;
 
 my %mo;
 
-LOOP:
-foreach my $r (@replacements) {
-	my ($val, $repl) = @$r;
+foreach my $val (keys %replacements) {
+	LOOP:
+	foreach my $repl ( @{$replacements{$val}} ) {
+		my $n = 0;
 
-	my $n = 0;
-
-	while (1) {
-		my $m = $molecule;
-		for (1..$n) {
-			$m =~ s/$val/-/;
+		while (1) {
+			my $m = $molecule;
+			for (1..$n) {
+				$m =~ s/$val/-/;
+			}
+			my $found = $m =~ s/$val/$repl/;
+			next LOOP unless $found;
+			$m =~ s/-/$val/g;
+			$mo{$m} = 1;
+			$n++;
 		}
-		my $found = $m =~ s/$val/$repl/;
-		next LOOP unless $found;
-		$m =~ s/-/$val/g;
-		$mo{$m} = 1;
-		$n++;
 	}
 }
 
