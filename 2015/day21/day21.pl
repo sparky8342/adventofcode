@@ -45,42 +45,54 @@ for (0..5) {
 }
 
 my $cheapest = 9999999;
+my $losing_gold = 0;
 
 foreach my $weapon (@{&WEAPONS}) {
-	my $cost = $weapon->{cost};
+	my $wcost = $weapon->{cost};
 	my $damage = $weapon->{damage};
 
 	foreach my $clothes (@{&GARMENTS}) {
-		$cost += $clothes->{cost}; 
+		my $cost = $wcost + $clothes->{cost}; 
 		my $armour = $clothes->{armour};
 
 		for (my $no_rings = 0; $no_rings <= 2; $no_rings++) {
 			if ($no_rings == 0) {
-				if (simulate($damage, $armour, $cost) && $cost < $cheapest) {
-					$cheapest = $cost;
+				if (simulate($damage, $armour)) {
+					if ($cost < $cheapest) {
+						$cheapest = $cost;
+					}
+				}
+				elsif ($cost > $losing_gold) {
+					$losing_gold = $cost;
 				}
 			}
 			else {
 				my $iter = variations(\@ring_ids, $no_rings);
 				while (my $v = $iter->next) {
-					my ($rdamage, $rarmour, $rcost) = (0, 0, 0);
+
+					my ($rdamage, $rarmour, $rcost) = ($damage, $armour, $cost);
 					foreach my $id (@$v) {
 						$rdamage += RINGS->[$id]->{damage};
 						$rarmour += RINGS->[$id]->{armour};
 						$rcost += RINGS->[$id]->{cost};
 					}
-					if (simulate($damage + $rdamage, $armour + $rarmour, $cost + $rcost) && $cost + $rcost < $cheapest) {
-						$cheapest = $cost + $rcost;
+					if (simulate($rdamage, $rarmour)) {
+						if ($rcost < $cheapest) {
+							$cheapest = $rcost;
+						}
+					}
+					elsif ($rcost > $losing_gold) {
+						$losing_gold = $rcost;
 					}
 				}
 			}
 		}
 	}
 }
-print "$cheapest\n";
+print "$cheapest\n$losing_gold\n";
 
 sub simulate {
-	my ($damage, $armour, $cost) = @_;
+	my ($damage, $armour) = @_;
 
 	my $me = { hit_points => 100, damage => $damage, armour => $armour };
 	my $opponent = { hit_points => $enemy->{hit_points}, damage => $enemy->{damage}, armour => $enemy->{armour} };
