@@ -37,27 +37,16 @@ foreach my $r (@replacements) {
 print scalar keys %mo;
 print "\n";
 
-my %seen;
-my $smallest_steps = 999999;
 no warnings 'recursion';
-search($molecule, 0);
-print "$smallest_steps\n";
+my $steps = search($molecule, 0);
+print "$steps\n";
 
 sub search {
 	my ($m, $steps) = @_;
 
 	if ($m eq 'e') {
-		if ($steps < $smallest_steps) {
-			print "$steps\n";
-			$smallest_steps = $steps;
-		}
-		return;
+		return $steps;
 	}
-
-	if (exists($seen{$m})) {
-		return;
-	}
-	$seen{$m} = 1;
 
 	SEARCH:
 	foreach my $r (@replacements) {
@@ -73,7 +62,9 @@ sub search {
 				my $found = $mo =~ s/$repl/$val/;
 				next SEARCH unless $found;
 				$mo =~ s/-/$repl/g;
-				search($mo, $steps + 1);
+				if (my $steps = search($mo, $steps + 1)) {
+					return $steps;
+				}
 				$n++;
 			}
 		}
