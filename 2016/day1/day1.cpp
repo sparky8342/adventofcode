@@ -26,13 +26,13 @@ vector<string> split(string& s, const string& delimiter) {
 }
 
 int main() {
-        string input;
-        ifstream in("input.txt");
-        getline(in, input);
-        in.close();
+	string input;
+	ifstream in("input.txt");
+	getline(in, input);
+	in.close();
 
-        std::vector<std::string> directions;
-        directions = split(input, ", ");
+	std::vector<std::string> directions;
+	directions = split(input, ", ");
 
 	map<char, map<char, char>> turns;
 	turns['^']['L'] = '<';
@@ -74,5 +74,5 @@ int main() {
 
 	cout << abs(x) + abs(y) << endl;
 	cout << hq_distance << endl;
-        return 0;
+	return 0;
 }
