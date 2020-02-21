@@ -4,11 +4,13 @@
 #include <vector>
 using namespace std;
 
+#define SIZE 3
+
 int main() {
-	int grid[3][3];	
+	int grid[SIZE][SIZE];
 	int n = 1;
-	for (int y = 0; y < 3; y++) {
-		for (int x = 0; x < 3; x++) {
+	for (int y = 0; y < SIZE; y++) {
+		for (int x = 0; x < SIZE; x++) {
 			grid[x][y] = n;
 			n++;
 		}
@@ -30,13 +32,13 @@ int main() {
 			if (direction == 'U' && y > 0) {
 				y--;
 			}
-			else if (direction == 'D' && y < 2) {
+			else if (direction == 'D' && y < SIZE - 1) {
 				y++;
 			}
 			else if (direction == 'L' && x > 0) {
 				x--;
 			}
-			else if (direction == 'R' && x < 2) {
+			else if (direction == 'R' && x < SIZE - 1) {
 				x++;
 			}
 		}
