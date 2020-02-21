@@ -62,7 +62,6 @@ int main() {
 			}
 			cout << grid[y][x];
 		}
-
 		cout << endl;
 	}
 	return 0;
