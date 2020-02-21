@@ -5,7 +5,8 @@
 #include <algorithm>
 using namespace std;
 
-vector<string> split(string& s, const string& delimiter) {
+vector<string> split(string& str, const string& delimiter) {
+	string s = str;
 	vector<string> tokens;
 	size_t pos = 0;
 	string token;
@@ -31,8 +32,8 @@ int main() {
         }
         in.close();
 
+	// part1
 	int num = 0;
-
 	for (string& coords : data) {
 		vector<string> lengths_str;
 		lengths_str = split(coords, "  ");
@@ -43,6 +44,35 @@ int main() {
 		sort(lengths.begin(), lengths.end());
 		if (lengths[0] + lengths[1] > lengths[2]) {
 			num++;
+		}
+	}
+	cout << num << endl;
+
+	// part2
+	num = 0;
+	vector<vector<int>> lengths;
+	for (string& coords : data) {
+		vector<string> lengths_str;
+		lengths_str = split(coords, "  ");
+		vector<int> row;
+		for (int i = 0; i < 3; i++) {
+			int n = stoi(lengths_str[i]);
+			row.push_back(stoi(lengths_str[i]));
+		}
+		lengths.push_back(row);
+
+		if (lengths.size() == 3) {
+			for (int i = 0; i < 3; i++) {
+				vector<int> col;
+				for (int j = 0; j < 3; j++) {
+					col.push_back(lengths[j][i]);
+				}
+				sort(col.begin(), col.end());
+				if (col[0] + col[1] > col[2]) {
+					num++;
+				}
+			}
+			lengths.clear();
 		}
 	}
 	cout << num << endl;
