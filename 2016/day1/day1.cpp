@@ -60,7 +60,8 @@ int main() {
 
         for (string& element : directions) {
 		direction = turns[direction][element[0]];
-		for (int i = 0; i < stoi(element.substr(1, string::npos)); i++) {
+		int steps = stoi(element.substr(1, string::npos));
+		for (int i = 0; i < steps; i++) {
 			x = x + movement[direction].dx;
 			y = y + movement[direction].dy;
 			if (hq_distance == 0) {
