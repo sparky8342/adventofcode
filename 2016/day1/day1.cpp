@@ -11,10 +11,10 @@ struct Move {
 };
 
 vector<string> split(string& s, const string& delimiter) {
-	std::vector<std::string> tokens;
+	vector<string> tokens;
 	size_t pos = 0;
-	std::string token;
-	while ((pos = s.find(delimiter)) != std::string::npos) {
+	string token;
+	while ((pos = s.find(delimiter)) != string::npos) {
 		token = s.substr(0, pos);
 		tokens.push_back(token);
 		s.erase(0, pos + delimiter.length());
@@ -31,7 +31,7 @@ int main() {
 	getline(in, input);
 	in.close();
 
-	std::vector<std::string> directions;
+	vector<string> directions;
 	directions = split(input, ", ");
 
 	map<char, map<char, char>> turns;
