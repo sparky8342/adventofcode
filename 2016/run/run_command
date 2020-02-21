@@ -1,0 +1,1 @@
+g++ -std=c++17 -O2 day1.cpp -o day1 && ./day1
