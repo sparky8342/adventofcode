@@ -24,9 +24,10 @@ bool customsort(const pair<char,int> &a, const pair<char,int> &b) {
 int main() {
 	int total = 0;
 	const regex name_regex("([a-z\\-]+)([0-9]+)\\[(.*)\\]");
-        string line;
-        ifstream in("input.txt");
-        while (getline(in, line)) {
+	string line;
+	int northpole;
+	ifstream in("input.txt");
+	while (getline(in, line)) {
 		smatch base_match;
 		regex_match(line, base_match, name_regex);
 
@@ -61,10 +62,29 @@ int main() {
 		}
 		if (ok == true) {
 			total += sector_id;
+			int shift_id = sector_id % 26;
+			string room_name;
+			for (int i = 0; i < code.size(); i++) {
+				char ch = code[i];
+				if (ch != '-') {
+					int n = int(ch);
+					n += shift_id;
+					if (n > 122) {
+						n -= 26;
+					}
+					room_name += char(n);
+				}
+				else {
+					room_name += '-';
+				}
+			}
+			if (room_name == "northpole-object-storage-") {
+				northpole = sector_id;
+			}
 		}	
 
         }
         in.close();
-	cout << total << endl;
+	cout << total << endl << northpole << endl;
 	return 0;
 }
