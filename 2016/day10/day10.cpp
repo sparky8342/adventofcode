@@ -7,10 +7,10 @@
 using namespace std;
 
 struct Bot {
-	int low;
 	string low_dest;
-	int high;
+	int low;
 	string high_dest;
+	int high;
 	vector<int> vals;
 };
 
