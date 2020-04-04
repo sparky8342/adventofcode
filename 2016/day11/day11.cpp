@@ -34,31 +34,14 @@ Building copybuilding(Building building) {
 }
 
 bool endcondition(Building building) {
-	if (building.floors[3].generators.size() == 5 && building.floors[3].microchips.size() == 5) {
-		return true;
+	for (int i = 0; i < 3; i++) {
+		if (building.floors[i].generators.size() > 0 || building.floors[i].microchips.size() > 0) {
+			return false;
+		}
 	}
-	return false;
+	return true;
 }
 
-void printbuilding(Building building) {
-	cout << "elevator: " << to_string(building.elevator) << endl;
-	for ( auto floor : building.floors ) {
-		set<string>::iterator it;
-		cout << "generators: ";
-		for ( it = floor.generators.begin(); it != floor.generators.end(); ++it ) {
-			cout << *it << ",";
-		}
-		cout << endl;
-
-		cout << "microchips: ";
-		for ( it = floor.microchips.begin(); it != floor.microchips.end(); ++it ) {
-			cout << *it << ",";
-		}
-		cout << endl << "--------------------" << endl;
-	}
-	cout << endl;
-}
-	
 bool validbuilding(Building building) {
 	for ( auto floor : building.floors ) {
 		if ( floor.generators.size() == 0 ) {
@@ -68,13 +51,10 @@ bool validbuilding(Building building) {
 		set<string>::iterator it;
 		for ( it = floor.microchips.begin(); it != floor.microchips.end(); ++it ) {
 			if ( floor.generators.count( *it ) == 0 ) {
-				//cout << "not valid" << endl;
 				return false;
 			}
 		}
 	}
-	//printbuilding(building);
-	//cout << "valid" << endl;
 	return true;
 }
 
@@ -113,10 +93,6 @@ void bfs(Building building) {
 		}
 		visited.insert(serial);
 
-		if (!validbuilding(bl)) {
-			continue;
-		}
-
 		if (endcondition(bl)) {
 			cout << to_string(bl.steps) << endl;
 			break;
@@ -138,7 +114,11 @@ void bfs(Building building) {
 			set<string>::iterator it;
 			set<string>::iterator it2;
 			for ( it = floor.generators.begin(); it != floor.generators.end(); ++it ) {
-				for ( it2 = floor.generators.begin(); it2 != floor.generators.end(); ++it2 ) {
+				it2 = floor.generators.begin();
+				while (*it != *it2) {
+					it2++;
+				}
+				for ( ; it2 != floor.generators.end(); ++it2 ) {
 					Building buildingcopy = copybuilding(bl);
 					buildingcopy.floors[elevator].generators.erase(*it);
 					buildingcopy.floors[destination_floor].generators.insert(*it);
@@ -146,15 +126,21 @@ void bfs(Building building) {
 						buildingcopy.floors[elevator].generators.erase(*it2);
 						buildingcopy.floors[destination_floor].generators.insert(*it2);
 					}
-					buildingcopy.elevator = destination_floor;
-					buildingcopy.steps++;
-					moves.push(buildingcopy);
+					if (validbuilding(buildingcopy)) {
+						buildingcopy.elevator = destination_floor;
+						buildingcopy.steps++;
+						moves.push(buildingcopy);
+					}
 				}
 			}
 				
 			// 1 or 2 things from microchip set
 			for ( it = floor.microchips.begin(); it != floor.microchips.end(); ++it ) {
-				for ( it2 = floor.microchips.begin(); it2 != floor.microchips.end(); ++it2 ) {
+				it2 = floor.microchips.begin();
+				while (*it != *it2) {
+					it2++;
+				}
+				for ( ; it2 != floor.microchips.end(); ++it2 ) {
 					Building buildingcopy = copybuilding(bl);
 					buildingcopy.floors[elevator].microchips.erase(*it);
 					buildingcopy.floors[destination_floor].microchips.insert(*it);
@@ -162,24 +148,29 @@ void bfs(Building building) {
 						buildingcopy.floors[elevator].microchips.erase(*it2);
 						buildingcopy.floors[destination_floor].microchips.insert(*it2);
 					}
-					buildingcopy.elevator = destination_floor;
-					buildingcopy.steps++;
-					moves.push(buildingcopy);
+					if (validbuilding(buildingcopy)) {
+						buildingcopy.elevator = destination_floor;
+						buildingcopy.steps++;
+						moves.push(buildingcopy);
+					}
 				}
 			}
 			
 			// 1 from each set
-			for ( it = floor.microchips.begin(); it != floor.microchips.end(); ++it ) {
-				for ( it2 = floor.generators.begin(); it2 != floor.generators.end(); ++it2 ) {
-					Building buildingcopy = copybuilding(bl);
-					buildingcopy.floors[elevator].microchips.erase(*it);
-					buildingcopy.floors[destination_floor].microchips.insert(*it);
-					buildingcopy.floors[elevator].generators.erase(*it2);
-					buildingcopy.floors[destination_floor].generators.insert(*it2);
-					buildingcopy.elevator = destination_floor;
-					buildingcopy.steps++;
-					moves.push(buildingcopy);
-
+			if (floor.microchips.size() > 0 && floor.generators.size() > 0) {
+				for ( it = floor.microchips.begin(); it != floor.microchips.end(); ++it ) {
+					for ( it2 = floor.generators.begin(); it2 != floor.generators.end(); ++it2 ) {
+						Building buildingcopy = copybuilding(bl);
+						buildingcopy.floors[elevator].microchips.erase(*it);
+						buildingcopy.floors[destination_floor].microchips.insert(*it);
+						buildingcopy.floors[elevator].generators.erase(*it2);
+						buildingcopy.floors[destination_floor].generators.insert(*it2);
+						if (validbuilding(buildingcopy)) {
+							buildingcopy.elevator = destination_floor;
+							buildingcopy.steps++;
+							moves.push(buildingcopy);
+						}
+					}
 				}
 			}
 		}
@@ -194,27 +185,15 @@ int main() {
 		.generators = { "polonium", "thulium", "promethium", "ruthenium", "cobalt" },
 		.microchips = { "thulium", "ruthenium", "cobalt" }
 	};
-	//Floor fl1 = Floor{
-	//	.generators = {},
-	//	.microchips = { "hydrogen", "lithium" }
-	//};
 	floors.push_back(fl1);
 
 	Floor fl2 = Floor{
 		.generators = {},
 		.microchips = { "polonium", "promethium" }
 	};
-	//Floor fl2 = Floor{
-	//	.generators = { "hydrogen" },
-	//	.microchips = {}
-	//};
 	floors.push_back(fl2);
 
 	Floor fl3 = Floor{ .generators = {}, .microchips = {} };
-	//Floor fl3 = Floor{
-	//	.generators = { "lithium" },
-	//	.microchips = {}
-	//};
 	floors.push_back(fl3);
 
 	Floor fl4 = Floor{ .generators = {}, .microchips = {} };
@@ -226,23 +205,31 @@ int main() {
 		.steps = 0
 	};
 
+	// part 1
+	bfs(bl);
+
+	// part 2
+	bl.floors[0].generators.insert("elerium");
+	bl.floors[0].generators.insert("dilithium");
+	bl.floors[0].microchips.insert("elerium");
+	bl.floors[0].microchips.insert("dilithium");
 	bfs(bl);
 
 	return 0;
 }
 
 /* 
-example:
-
-The first floor contains a hydrogen-compatible microchip and a lithium-compatible microchip.
-The second floor contains a hydrogen generator.
-The third floor contains a lithium generator.
-The fourth floor contains nothing relevant.
-
-my input:
+input:
 
 The first floor contains a polonium generator, a thulium generator, a thulium-compatible microchip, a promethium generator, a ruthenium generator, a ruthenium-compatible microchip, a cobalt generator, and a cobalt-compatible microchip.
 The second floor contains a polonium-compatible microchip and a promethium-compatible microchip.
 The third floor contains nothing relevant.
 The fourth floor contains nothing relevant.
+
+part 2 additions (to first floor):
+
+An elerium generator.
+An elerium-compatible microchip.
+A dilithium generator.
+A dilithium-compatible microchip.
 */
