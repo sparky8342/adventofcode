@@ -6,8 +6,10 @@
 #include <map>
 using namespace std;
 
+enum Ops { cpy, inc, decr, jnz };
+
 struct Ins {
-	string op;
+	Ops op;
 	string arg1;
 	string arg2;
 };
@@ -23,8 +25,8 @@ int run_program(vector<Ins> &program, int a, int b, int c, int d) {
 		}
 
 		Ins ins = program[pos];
-		if (ins.op == "cpy") {
-			if (ins.arg1 == "a" || ins.arg1 == "b" || ins.arg1 == "c" || ins.arg1 == "d") {
+		if (ins.op == cpy) {
+			if (registers.count(ins.arg1) == 1) {
 				registers[ins.arg2] = registers[ins.arg1];
 			}
 			else {
@@ -32,17 +34,17 @@ int run_program(vector<Ins> &program, int a, int b, int c, int d) {
 			}
 			pos++;
 		}
-		else if (ins.op == "inc") {
+		else if (ins.op == inc) {
 			registers[ins.arg1]++;
 			pos++;
 		}
-		else if (ins.op == "dec") {
+		else if (ins.op == decr) {
 			registers[ins.arg1]--;
 			pos++;
 		}
-		else if (ins.op == "jnz") {
+		else if (ins.op == jnz) {
 			bool jump = false;
-			if (ins.arg1 == "a" || ins.arg1 == "b" || ins.arg1 == "c" || ins.arg1 == "d") {
+			if (registers.count(ins.arg1) == 1) {
 				if (registers[ins.arg1] != 0) {
 					jump = true;
 				}
@@ -72,7 +74,12 @@ int main() {
 		Ins ins = Ins{};
 		
 		stringstream ss(line);
-		getline(ss, ins.op, ' ');
+		string cmd;
+		getline(ss, cmd, ' ');
+		if (cmd == "cpy") { ins.op = cpy; }
+		else if (cmd == "inc") { ins.op = inc; }
+		else if (cmd == "dec") { ins.op = decr; }
+		else if (cmd == "jnz") { ins.op = jnz; }
 		getline(ss, ins.arg1, ' ');
 		getline(ss, ins.arg2, ' ');
 
