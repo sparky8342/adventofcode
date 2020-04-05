@@ -13,6 +13,9 @@ struct Space {
 	int x;
 	int y;
 	int depth;
+	string serial() {
+		return to_string(x) + "_" + to_string(y);
+	}
 };
 
 struct Move {
@@ -69,7 +72,7 @@ int main() {
 			break;
 		}
 
-		string serial = to_string(space.x) + "_" + to_string(space.y);
+		string serial = space.serial();
 		if (visited.count(serial) == 1) {
 			continue;
 		}
@@ -81,7 +84,9 @@ int main() {
 
 		vector<Space> neighbours = get_neighbours(space);
 		for (auto neighbour : neighbours) {
-			spaces.push(neighbour);
+			if (visited.count(neighbour.serial()) == 0) {
+				spaces.push(neighbour);
+			}
 		}
 	}
 
