@@ -57,13 +57,15 @@ int main() {
 	spaces.push(Space{ .x = 1, .y = 1, .depth = 0 });
 
 	set <string> visited;
+
+	int within_fifty = 0;
 	
 	while (spaces.size() > 0) {
 		Space space = spaces.front();
 		spaces.pop();
 
 		if (space.x == TARGET_X && space.y == TARGET_Y) {
-			cout << space.depth << endl;
+			cout << space.depth << endl << within_fifty << endl;
 			break;
 		}
 
@@ -72,6 +74,10 @@ int main() {
 			continue;
 		}
 		visited.insert(serial);
+
+		if (space.depth <= 50) {
+			within_fifty++;
+		}
 
 		vector<Space> neighbours = get_neighbours(space);
 		for (auto neighbour : neighbours) {
