@@ -60,9 +60,11 @@ bool five_in_a_row(string str, char &ch) {
 	return in_a_row(str, ch, 5);
 }
 
-Hash generate_hash_struct(int n) {
-	string str = INPUT_SALT + to_string(n);
-	string hash_str = get_hash(str);
+Hash generate_hash_struct(int n, int rounds) {
+	string hash_str = INPUT_SALT + to_string(n);
+	for (int i = 1; i <= rounds; i++) {
+		hash_str = get_hash(hash_str);
+	}
 
 	Hash hash = Hash{ .hash_str = hash_str, .seen = n };
 	char ch;
@@ -77,14 +79,13 @@ Hash generate_hash_struct(int n) {
 	return hash;
 }
 
-
-int main() {
+int find_certain_hash(int find, int rounds) {
 	vector <Hash> valid_hashes;
 	vector <Hash> hash_window;
 
 	// set up window of 1001 hashes
 	for (int i = 0; i <= 1000; i++) {
-		hash_window.push_back(generate_hash_struct(i));
+		hash_window.push_back(generate_hash_struct(i, rounds));
 	}
 
 	int n = 1001;
@@ -92,7 +93,7 @@ int main() {
 		// find first three in a row, keep 1001 in the window
 		while (hash_window[0].three = false) {
 			hash_window.erase(hash_window.begin());
-			hash_window.push_back(generate_hash_struct(n));
+			hash_window.push_back(generate_hash_struct(n, rounds));
 			n++;
 		}
 			
@@ -108,16 +109,21 @@ int main() {
 		if (ok) {
 			valid_hashes.push_back(candidate);
 			cout << candidate.hash_str << " " << candidate.seen << endl;
-			if (valid_hashes.size() == 64) {
-				cout << valid_hashes[63].seen << endl;
-				break;
+			if (valid_hashes.size() == find) {
+				return valid_hashes[find - 1].seen;
 			}
 		}
 	
 		hash_window.erase(hash_window.begin());
-		hash_window.push_back(generate_hash_struct(n));
+		hash_window.push_back(generate_hash_struct(n, rounds));
 		n++;
 	}
+}
 
+int main() {
+	int hash_no = find_certain_hash(64, 1);
+	cout << hash_no << endl;
+	hash_no = find_certain_hash(64, 2017);
+	cout << hash_no << endl;
 	return 0;
 }
