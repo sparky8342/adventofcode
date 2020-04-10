@@ -1,0 +1,1 @@
+g++ -O2 day17.cpp -lssl -lcrypto -o day17 && ./day17
