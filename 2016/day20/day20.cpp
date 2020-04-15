@@ -16,7 +16,6 @@ int main() {
 	while (getline(in, line)) {
 		smatch match;
 		if (regex_match(line, match, range_regex)) {
-			//cout << match[1] << " " << match[2] << endl;
 			ranges.push_back(make_pair(stol(match[1]), stol(match[2])));
 		}
 	}
