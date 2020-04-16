@@ -93,8 +93,34 @@ int main() {
 	}
 	in.close();
 
+	// part 1
 	vector<char> code = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 	code = scramble(code, operations);
+
+	for (int i = 0; i < code.size(); i++) {
+		cout << code[i];
+	}
+	cout << endl;
+
+	// part 2
+	// just try all codes
+	vector<char> target = {'f', 'b', 'g', 'd', 'c', 'e', 'a', 'h'};
+	code = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+	do {
+		vector<char>scrambled = scramble(code, operations);
+
+		bool ok = true;
+		for (int i = 0; i < scrambled.size(); i++) {
+			if (scrambled[i] != target[i]) {
+				ok = false;
+				break;
+			}
+		}
+		if (ok) {
+			break;
+		}
+
+	} while (std::next_permutation(code.begin(), code.end()));
 
 	for (int i = 0; i < code.size(); i++) {
 		cout << code[i];
