@@ -6,8 +6,8 @@ using namespace std;
 int main() {
 	const regex swap_pos("^swap position ([0-9]+) with position ([0-9]+)$");
 	const regex swap_letter("^swap letter ([a-z]) with letter ([a-z])$");
-	const regex rotate_left("^rotate left ([0-9]+) step(s)?");
-	const regex rotate_right("^rotate right ([0-9]+) step(s)?");
+	const regex rotate_left("^rotate left ([0-9]+) step(s)?$");
+	const regex rotate_right("^rotate right ([0-9]+) step(s)?$");
 	const regex rotate_pos("^rotate based on position of letter ([a-z])$");
 	const regex reverse_pos("^reverse positions ([0-9]+) through ([0-9]+)$");
 	const regex move("^move position ([0-9]+) to position ([0-9]+)$");
@@ -81,9 +81,6 @@ int main() {
 			int val = code[x];
 			code.erase(code.begin() + x);
 			code.insert(code.begin() + y, val);
-		}
-		else {
-			cout << line << endl;
 		}
 	
 	}
