@@ -126,6 +126,7 @@ int main() {
 
 	vector<int> sequence = { 0, 1, 2, 3, 4, 5, 6, 7 };
 	int best_distance = 99999;
+	int best_distance_with_return = 99999;
 
         do {
 		if (sequence[0] != 0) {
@@ -138,9 +139,15 @@ int main() {
 		if (distance < best_distance) {
 			best_distance = distance;
 		}
+
+		distance += numbers[sequence[sequence.size()-1]].distances[0];
+		if (distance < best_distance_with_return) {
+			best_distance_with_return = distance;
+		}
+
         } while (std::next_permutation(sequence.begin(), sequence.end()));
 
-	cout << best_distance << endl;
+	cout << best_distance << endl << best_distance_with_return << endl;
 
 	return 0;
 }
