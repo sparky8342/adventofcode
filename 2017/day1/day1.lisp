@@ -1,14 +1,27 @@
+#!/usr/bin/sbcl --script
+
 (require "asdf")
 
 (let* ((in (uiop:read-file-string "input.txt"))
-	(digits (coerce in 'list))
-	(sum 0))
-	
-  	; copy the first digit to the end
-	(setf digits (cons (car digits) digits))
+	; coerce input into a list, removing final carriage return
+	(digits (butlast (coerce in 'list)))
+	(len (length digits))
+	(half_len (/ len 2))
+	(sum_part1 0)
+	(sum_part2 0))
 
-	(loop for i from 0 to (- (length digits) 2)
-        	do (if (eq (nth i digits) (nth (+ i 1) digits))
-		     (setq sum (+ sum (digit-char-p (nth i digits))))))
+	; repeat the list
+	(setf digits (append digits digits))
 
-	(princ sum))
+	(loop for i from 0 to (- len 1) do
+		; part 1
+		(if (eq (nth i digits) (nth (+ i 1) digits))
+			(setq sum_part1 (+ sum_part1 (digit-char-p (nth i digits)))))
+		; part 2
+		(if (eq (nth i digits) (nth (+ i half_len) digits))
+			(setq sum_part2 (+ sum_part2 (digit-char-p (nth i digits))))))
+
+	(princ sum_part1)
+	(terpri)
+	(princ sum_part2)
+	(terpri))
