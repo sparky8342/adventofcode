@@ -22,7 +22,7 @@
 				(let ((key (get-grid-key (+ x dx) (+ y dy))))
 					(if (gethash key grid)
 						(setq sum (+ sum (gethash key grid)))))))
-		(+ 0 sum)))
+		sum))
 
 (defun spiral (n)
 	(let ((grid (make-hash-table :test #'equal))
