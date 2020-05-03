@@ -54,14 +54,16 @@
 			(terpri))
 	; part2
 	(let ((lengths (split-chars-ascii data))
-		(nums (create-nums)))
+		(nums (create-nums))
+		(str ""))
 		(setq nums (knot nums lengths 64))
 		(loop for i from 0 to 15 do
 			(let ((x 0))
 				(loop for j from 0 to 15 do
 					(setq x (logxor x (nth (+ (* i 16) j) nums))))
-				(let ((str (string-downcase (write-to-string x :base 16))))
-					(if (= 1 (length str))
-						(princ 0))
-					(princ str))))
+				(let ((hex (string-downcase (write-to-string x :base 16))))
+					(if (= 1 (length hex))
+						(setq str (concatenate 'string str "0")))
+					(setq str (concatenate 'string str hex)))))
+		(princ str)
 		(terpri)))
