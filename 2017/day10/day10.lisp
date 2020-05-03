@@ -30,7 +30,7 @@
 						(loop for i from pos to (+ pos (- len 1)) do
 							(setf (nth i lst) (car part))
 							(setq part (cdr part)))))
-				(setq pos (+ pos len skip))
+				(setq pos (mod (+ pos len skip) 256))
 				(setq skip (+ skip 1)))
 			lst))
 
