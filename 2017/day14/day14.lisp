@@ -78,10 +78,54 @@
 				(setq amount (+ amount 1))))
 		amount))
 
+(defun count-groups (grid)
+	(let ((groups 0))
+		(dotimes (y 128)
+			(dotimes (x 128)
+				(when (= (aref grid x y) 1)
+					(remove-group grid x y)
+					(setq groups (+ groups 1)))))
+		groups))
+
+(defun remove-group (grid x y)
+	(let ((queue ()))
+		(push (list x y) queue)
+		(loop while (> (list-length queue) 0) do
+			(let ((square (car queue)))
+				(setq queue (cdr queue))
+				(let ((sqx (car square))
+					(sqy (car (cdr square))))
+						(when (= (aref grid sqx sqy) 1)
+							(setf (aref grid sqx sqy) 0)
+							(if (> sqx 0)
+								(push (list (- sqx 1) sqy) queue))
+							(if (< sqx 127)
+								(push (list (+ sqx 1) sqy) queue))
+							(if (> sqy 0)
+								(push (list sqx (- sqy 1)) queue))
+							(if (< sqy 127)
+								(push (list sqx (+ sqy 1)) queue))
+							(setq queue (nreverse queue))))))))
+
+(defun print-grid (grid)
+	(dotimes (i 128)
+		(dotimes (j 128)
+			(princ (aref grid i j)))
+				(terpri)))
+
 (let ((input "amgozmfv"))
-	(let ((squares 0))
-		(loop for i from 0 to 127 do
-			(let ((key (concatenate 'string input "-" (write-to-string i))))
-				(setq squares (+ squares (count-ones (to-bits (knot-hash key)))))))
-		(princ squares)
-		(terpri)))
+	(let ((squares 0)
+		(grid (make-array '(128 128))))
+			(loop for i from 0 to 127 do
+				(let ((key (concatenate 'string input "-" (write-to-string i))))
+					(let ((bit-str (to-bits (knot-hash key))))
+						(setq squares (+ squares (count-ones bit-str)))
+						(loop for j from 0 to 127 do
+							(setf (aref grid i j) (digit-char-p (char bit-str j)))))))
+
+			; part 1
+			(princ squares)
+			(terpri)
+			; part 2
+			(princ (count-groups grid))
+			(terpri)))
