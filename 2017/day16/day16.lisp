@@ -43,4 +43,13 @@
 	(*print-case* :downcase))
 		(setf p (play-moves p moves))
 		(princ (format nil "~{~a~}" p))
+		(terpri)
+		(let ((i 1))
+			(loop while (not (equal p '(a b c d e f g h i j k l m n o p))) do
+				(setf p (play-moves p moves))
+				(setq i (+ i 1)))
+			(let ((n (mod 1000000000 i)))
+				(loop repeat n do
+					(setf p (play-moves p moves)))))
+		(princ (format nil "~{~a~}" p))
 		(terpri))
