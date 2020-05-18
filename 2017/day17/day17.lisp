@@ -18,8 +18,7 @@
 		; part 2 (don't insert, just save the value when at position 1)
 		(setq pos 0)
 		(loop for x from 1 to 50000000 do
-			(setq pos (mod (+ pos steps) x))
-			(setq pos (+ pos 1))
+			(setq pos (+ (mod (+ pos steps) x) 1))
 			(if (= pos 1)
 				(setq pos1 x)))
 		(princ pos1)
