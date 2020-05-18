@@ -1,0 +1,58 @@
+#!/usr/bin/sbcl --script
+
+(require "asdf")
+
+(defun get-input ()
+	(let ((commands ()))
+		(with-open-file (stream "input.txt")
+			(loop for line = (read-line stream nil)
+				while line do
+					(let ((parts (map 'list (lambda (x) (read-from-string x)) (uiop:split-string line :separator " "))))
+						(push parts commands))))
+		(reverse commands)))
+
+(defun get-reg (reg registers)
+	(let ((val (gethash reg registers)))
+		(when (not val)
+			(setf (gethash reg registers) 0)
+			(setq val 0))
+	val))
+
+(defun run-instructions (registers instructions)
+	(let ((pos 0)
+		(done 0))
+		(loop while (and (>= pos 0) (< pos (list-length instructions)) (= done 0)) do
+			(let ((instruction (nth pos instructions)))
+				(let ((op (first instruction))
+					(arg1 (second instruction))
+					(arg2 (third instruction)))
+						; look up arg2 if it's a register
+						(if (not (numberp arg2))
+							(setq arg2 (get-reg arg2 registers)))
+						;(princ pos)(princ " ")(princ op)(princ " ")(princ arg1)(princ " ")(princ arg2)(princ " ")(princ (gethash 'sound registers))(terpri)
+						; execute op
+						(if (eq op 'snd)
+							(setf (gethash 'sound registers) (get-reg arg1 registers)))
+						(if (eq op 'set)
+							(setf (gethash arg1 registers) arg2))
+						(if (eq op 'add)
+							(setf (gethash arg1 registers) (+ (get-reg arg1 registers) arg2)))
+						(if (eq op 'mul)
+							(setf (gethash arg1 registers) (* (get-reg arg1 registers) arg2)))
+						(if (eq op 'mod)
+							(setf (gethash arg1 registers) (mod (get-reg arg1 registers) arg2)))
+						(if (eq op 'rcv)
+							(when (/= (get-reg arg1 registers) 0)
+								(princ (get-reg 'sound registers))
+								(terpri)
+								(setq done 1)))
+						(if (eq op 'jgz)
+							(if (> (get-reg arg1 registers) 0)
+								(setq pos (+ pos arg2))
+								(setq pos (+ pos 1))))
+						(if (not (eq op 'jgz))
+							(setq pos (+ pos 1))))))))
+
+(let ((registers (make-hash-table :test #'equal))
+	(instructions (get-input)))
+		(run-instructions registers instructions))
