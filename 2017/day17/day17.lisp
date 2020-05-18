@@ -16,6 +16,7 @@
 		(terpri)
 
 		; part 2 (don't insert, just save the value when at position 1)
+		(setq pos 0)
 		(loop for x from 1 to 50000000 do
 			(setq pos (mod (+ pos steps) x))
 			(setq pos (+ pos 1))
