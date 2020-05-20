@@ -13,6 +13,7 @@
 	ax
 	ay
 	az
+	collided
 )
 
 (defun get-input ()
@@ -33,7 +34,8 @@
 								:vz (sixth parts)
 								:ax (seventh parts)
 								:ay (eighth parts)
-								:az (ninth parts))))
+								:az (ninth parts)
+								:collided 0)))
 									(push pt particles)))
 						(setq id (+ id 1))))
 		particles))
@@ -63,8 +65,41 @@
 					(setq bestid (particle-id pt)))))
 	bestid))
 
-(let ((particles (get-input)))
-	(loop repeat 10000 do
-		(move-particles particles))
-	(princ (find-closest-id particles))
-	(terpri))
+(defun copy-particles (particles)
+	(let ((newpt ()))
+		(loop for pt in particles do
+			(push (copy-particle pt) newpt))
+	newpt))
+
+(defun find-collissions (particles)
+	(let ((coord (make-hash-table :test #'equal)))
+		(loop for pt in particles do
+			(if (= (particle-collided pt) 0)
+				(let ((key (concatenate 'string (write-to-string (particle-x pt)) "." (write-to-string (particle-y pt)) "." (write-to-string (particle-z pt)))))
+					(if (gethash key coord)
+						(progn
+							(setf (particle-collided pt) 1)
+							(setf (particle-collided (gethash key coord)) 1))
+						(setf (gethash key coord) pt)))))))
+
+(defun count-not-collided (particles)
+	(let ((amount 0))
+		(loop for pt in particles do
+			(if (= (particle-collided pt) 0)
+				(setq amount (+ amount 1))))
+		amount))
+
+(let ((initialparticles (get-input)))
+	; part 1
+	(let ((particles (copy-particles initialparticles)))
+		(loop repeat 10000 do
+			(move-particles particles))
+		(princ (find-closest-id particles))
+		(terpri))
+	; part 2
+	(let ((particles (copy-particles initialparticles)))
+		(loop repeat 10000 do
+			(move-particles particles)
+			(find-collissions particles))
+		(princ (count-not-collided particles))
+		(terpri)))
