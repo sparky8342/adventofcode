@@ -6,9 +6,9 @@ def sum2(numbers, target):
 	k = numbers[i] + numbers[j]
 
 	while k != target:
-		if numbers[i] + numbers[j] > target:
+		if k > target:
 			j -= 1
-		elif numbers[i] + numbers[j] < target:
+		else:
 			i += 1
 		k = numbers[i] + numbers[j]
 
