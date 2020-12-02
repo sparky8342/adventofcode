@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import re
 
 with open('input.txt') as f:
         lines = f.read().splitlines()
@@ -6,13 +7,14 @@ with open('input.txt') as f:
 part1 = 0
 part2 = 0
 for line in lines:
-	parts = line.split(" ")
-	mn, mx = parts[0].split("-")
-	mn = int(mn)
-	mx = int(mx)
-	letter = parts[1][0]
+	match = re.search("^(\d+)-(\d+) (\w): (\w+)$", line)
+	mn = int(match.group(1))
+	mx = int(match.group(2))
+	letter = match.group(3)
+	password = match.group(4)
+
 	count = 0
-	for char in parts[2]:
+	for char in password:
 		if char == letter:
 			count += 1
 
@@ -21,11 +23,11 @@ for line in lines:
 
 	count = 0
 	for pos in (mn - 1, mx - 1):
-		if parts[2][pos] == letter:
+		if password[pos] == letter:
 			count += 1
 
 	if count == 1:
 		part2 += 1
-	
+
 print(part1)
 print(part2)
