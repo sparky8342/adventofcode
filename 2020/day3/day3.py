@@ -6,16 +6,13 @@ def ski(grid, dx, dy):
 	y = 0
 	trees = 0
 	while y < len(grid):
-		if grid[y][x] == '#':
+		if grid[y][x % width] == '#':
 			trees += 1
 		y += dy
 		x += dx
-		if x >= width:
-			x = x - width
 	return trees
 
-with open('input.txt') as f:
-        grid = [list(line) for line in f.read().splitlines()]
+grid = [list(line) for line in (open('input.txt').read().splitlines())]
 
 print(ski(grid, 3, 1))
 
