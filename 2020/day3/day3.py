@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-def ski(dx, dy):
+def ski(grid, dx, dy):
+	width = len(grid[0])
 	x = 0
 	y = 0
 	trees = 0
@@ -14,18 +15,12 @@ def ski(dx, dy):
 	return trees
 
 with open('input.txt') as f:
-        lines = f.read().splitlines()
+        grid = [list(line) for line in f.read().splitlines()]
 
-grid = []
-for line in lines:
-	grid.append(list(line))
-
-width = len(lines[0])
-print(ski(3,1))
+print(ski(grid, 3, 1))
 
 answer = 1
 slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
 for dx, dy in slopes:
-	answer *= ski(dx, dy)
-
+	answer *= ski(grid, dx, dy)
 print(answer)
