@@ -1,37 +1,38 @@
 #!/usr/bin/python3
 import re
 
+required_keys = {'byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'}
+min_max = {
+	'byr' : (1920, 2002),
+	'iyr' : (2010, 2020),
+	'eyr' : (2020, 2030)
+}
+height_limits = {
+	'in' : (59, 76),
+	'cm' : (150, 193)
+}
 eye_colours = {'amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth'}
+
 def check_record(record):
-	for key in ('byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'):
+	for key in required_keys:
 		if not key in record:
 			return False, False
 
-	if int(record['byr']) < 1920 or int(record['byr']) > 2002:
-		return True, False
-
-	if int(record['iyr']) < 2010 or int(record['iyr']) > 2020:
-		return True, False
-
-	if int(record['eyr']) < 2020 or int(record['eyr']) > 2030:
-		return True, False
+	for key in min_max:
+		mn, mx = min_max[key]
+		val = int(record[key])
+		if val < mn or val > mx:
+			return True, False
 
 	height_type = record['hgt'][-2:]
-	if height_type == 'in':
-		height = int(record['hgt'][:-2])
-		if height < 59 or height > 76:
-			return True, False
-	elif height_type == 'cm':
-		height = int(record['hgt'][:-2])
-		if height < 150 or height > 193:
-			return True, False
-	else:
+	if height_type not in height_limits:
+		return True, False
+	height = int(record['hgt'][:-2])
+	mn, mx = height_limits[height_type]
+	if height < mn or height > mx:
 		return True, False
 
-	if record['hcl'][0] == '#':
-		if not re.search("^[0-9a-f]{6}$", record['hcl'][1:]):
-			return True, False
-	else:
+	if not re.search("^#[0-9a-f]{6}$", record['hcl']):
 		return True, False
 
 	if record['ecl'] not in eye_colours:
