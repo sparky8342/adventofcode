@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import re
 
 passes = open('input.txt').read().splitlines()
 
@@ -6,28 +7,9 @@ highest = 0
 seats = {i for i in range(1024)}
 
 for ps in passes:
-	row_part = ps[:7]
-	col_part = ps[7:]	
-
-	mn = 0
-	mx = 127
-	for letter in row_part:
-		if letter == 'F':
-			mx = mn + int((mx - mn) / 2)
-		elif letter == 'B':
-			mn = mn + int((mx - mn) / 2) + 1
-	row = mn
-
-	mn = 0
-	mx = 7
-	for letter in col_part:
-		if letter == 'L':
-			mx = mn + int((mx - mn) / 2)
-		elif letter == 'R':
-			mn = mn + int((mx - mn) / 2) + 1
-
-	col = mn
-	id = row * 8 + col
+	ps = re.sub('[FL]', '0', ps)	
+	ps = re.sub('[BR]', '1', ps)
+	id = int(ps, 2)
 	highest = max(highest, id)
 	seats.remove(id)
 
