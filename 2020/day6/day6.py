@@ -10,22 +10,13 @@ groups = data.split("\n\n")
 for group in groups:
 	people = group.split("\n")
 
-	questions = set()
-	for person in people:
-		for q in person:
-			questions.add(q)
-
-	part1 += len(questions)
-
 	question_sets = []
 	for person in people:
-		question_set = set()
-		for q in person:
-			question_set.add(q)
+		question_set = {q for q in person}
 		question_sets.append(question_set)
 
-	reduced = functools.reduce(lambda a,b : a.intersection(b), question_sets)
-	part2 += len(reduced)
+	part1 += len(functools.reduce(lambda a,b : a.union(b), question_sets))
+	part2 += len(functools.reduce(lambda a,b : a.intersection(b), question_sets))
 
 print(part1)
 print(part2)
