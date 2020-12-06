@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import functools
-import sys
 
 part1 = 0
 part2 = 0
