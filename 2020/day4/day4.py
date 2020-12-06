@@ -45,23 +45,19 @@ def check_record(record):
 
 present_count = 0
 valid_count = 0
-with open('input.txt') as f:
+
+data = open('input.txt').read().strip()
+groups = data.split("\n\n")
+
+for group in groups:
 	record = {}
-	for line in f:
-		line = line.strip()
+	lines = group.split("\n")
+	for line in lines:
+		parts = line.split()
+		for part in parts:
+			key, value = part.split(":")
+			record[key] = value
 
-		if line:
-			parts = line.split()
-			for part in parts:
-				key, value = part.split(":")
-				record[key] = value
-		else:
-			present, valid = check_record(record)
-			present_count += present
-			valid_count += valid
-			record = {}
-
-	# check last one
 	present, valid = check_record(record)
 	present_count += present
 	valid_count += valid
