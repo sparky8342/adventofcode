@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 import re
+import functools
 
 # walk up tree to find all parents
+@functools.lru_cache(maxsize=None) # memoize this function
 def find_parents(node):
 	parents = set()
 	for parent in nodes[node]['parents']:
@@ -10,6 +12,7 @@ def find_parents(node):
 	return parents
 
 # walk down to find all children and calculate amount
+@functools.lru_cache(maxsize=None)
 def count_bags(node):
 	total = 1
 	for child in nodes[node]['children']:
