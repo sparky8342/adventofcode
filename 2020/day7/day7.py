@@ -19,6 +19,11 @@ def count_bags(node):
 		total += child['amount'] * count_bags(child['name'])
 	return total	
 
+def get_node(node):
+	if node not in nodes:
+		nodes[node] = { 'parents' : [], 'children' : [] }
+	return nodes[node]
+
 nodes = {}
 data = open('input.txt').read().splitlines()
 
@@ -29,7 +34,7 @@ for line in data:
 	children = re.sub(" bag(s)?", "", children)
 	children = re.sub(", ", ",", children)
 
-	node = { 'parents' : [], 'children' : [] }	
+	node = get_node(name)
 
 	if children != 'no other':
 		children = children.split(",")
@@ -37,14 +42,9 @@ for line in data:
 			amount = int(child[0])
 			child_name = child[2:]
 			node['children'].append({ 'name' : child_name, 'amount' : amount })
+			get_node(child_name)['parents'].append(name)
 	
 	nodes[name] = node
-
-# set parents
-for parent, node in nodes.items():
-	for child in node['children']:
-		name = child['name']
-		nodes[name]['parents'].append(parent)
 
 print(len(find_parents('shiny gold')))
 print(count_bags('shiny gold') - 1)
