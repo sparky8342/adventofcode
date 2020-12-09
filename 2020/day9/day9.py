@@ -8,12 +8,6 @@ def valid(numbers, target):
 			return True
 	return False
 
-def sum_range(numbers, start, end):
-	total = 0
-	for i in range(start, end + 1):
-		total += numbers[i]
-	return total
-
 data = [int(i) for i in open('input.txt').read().splitlines()]
 preamble_size = 25
 
@@ -36,9 +30,10 @@ total = data[0]
 while total != part1:
 	if total < part1:
 		end += 1
+		total += data[end]
 	elif total > part1:
+		total -= data[start]
 		start += 1
-	total = sum_range(data, start, end)
 
 numbers = [data[i] for i in range(start, end + 1)]
 print(min(numbers) + max(numbers))
