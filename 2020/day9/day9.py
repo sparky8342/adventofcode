@@ -23,8 +23,8 @@ print(part1)
 
 # part 2
 start = 0
-end = 0
-total = data[0]
+end = 1
+total = data[0] + data[1]
 while total != part1:
 	if total < part1:
 		end += 1
