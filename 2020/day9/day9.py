@@ -9,18 +9,16 @@ def valid(numbers, target):
 	return False
 
 data = [int(i) for i in open('input.txt').read().splitlines()]
-preamble_size = 25
+PRE_SIZE = 25
 
 # part 1
-numbers = data[0:preamble_size]
-testdata = data[preamble_size:]
-
-while valid(numbers, testdata[0]):
-	numbers = numbers[1:]
-	numbers.append(testdata[0])
-	testdata = testdata[1:]
-
-part1 = testdata[0]
+part1 = 0
+for i in range (0, len(data)):
+	num = i + PRE_SIZE
+	numbers = data[i:num]
+	if not valid(numbers, data[num]):
+		part1 = data[num]
+		break
 print(part1)
 
 # part 2
