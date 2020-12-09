@@ -8,16 +8,37 @@ def valid(numbers, target):
 			return True
 	return False
 
+def sum_range(numbers, start, end):
+	total = 0
+	for i in range(start, end + 1):
+		total += numbers[i]
+	return total
+
 data = [int(i) for i in open('input.txt').read().splitlines()]
+preamble_size = 25
 
-numbers = data[0:25]
-data = data[25:]
+# part 1
+numbers = data[0:preamble_size]
+testdata = data[preamble_size:]
 
-while(1):
-	if not valid(numbers, data[0]):
-		print(data[0])
-		break
-
+while valid(numbers, testdata[0]):
 	numbers = numbers[1:]
-	numbers.append(data[0])
-	data = data[1:]
+	numbers.append(testdata[0])
+	testdata = testdata[1:]
+
+part1 = testdata[0]
+print(part1)
+
+# part 2
+start = 0
+end = 0
+total = data[0]
+while total != part1:
+	if total < part1:
+		end += 1
+	elif total > part1:
+		start += 1
+	total = sum_range(data, start, end)
+
+numbers = [data[i] for i in range(start, end + 1)]
+print(min(numbers) + max(numbers))
