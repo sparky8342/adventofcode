@@ -1,22 +1,17 @@
 #!/usr/bin/python3
 
-numbers = set([int(i) for i in open('input.txt').read().splitlines()])
-numbers.add(0)
-numbers.add(max(numbers) + 3)
+numbers = sorted([int(i) for i in open('input.txt').read().splitlines()])
+numbers.insert(0, 0)
+numbers.append(numbers[len(numbers) - 1] + 3)
 
 # part1
 diff_one = 0
 diff_three = 0
-n = 0
-while(1):
-	if n + 1 in numbers:
+for i in range(0, len(numbers) - 1):
+	if numbers[i + 1] - numbers[i] == 1:
 		diff_one += 1
-		n += 1
-	elif n + 3 in numbers:
+	elif numbers[i + 1] - numbers[i] == 3:
 		diff_three += 1
-		n += 3
-	else:
-		break
 
 print(diff_one * diff_three)
 
