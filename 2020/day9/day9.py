@@ -3,9 +3,9 @@
 def valid(numbers, target):
 	nset = set()
 	for number in numbers:
-		nset.add(number)
 		if target - number in numbers:
 			return True
+		nset.add(number)
 	return False
 
 data = [int(i) for i in open('input.txt').read().splitlines()]
