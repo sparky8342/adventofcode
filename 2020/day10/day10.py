@@ -1,19 +1,4 @@
 #!/usr/bin/python3
-import functools
-
-@functools.lru_cache(maxsize=None)
-def search(num):
-	total = 0
-	end = True
-	for i in (num + 1, num + 2, num + 3):
-		if i in numbers:
-			end = False
-			total += search(i)
-
-	if end:
-		total += 1
-
-	return total
 
 numbers = set([int(i) for i in open('input.txt').read().splitlines()])
 numbers.add(0)
@@ -36,4 +21,11 @@ while(1):
 print(diff_one * diff_three)
 
 # part 2
-print(search(0))
+dp = [0] * (max(numbers) + 1)
+dp[0] = 1
+for n in numbers:
+	for i in (n-1, n-2, n-3):
+		if i >= 0:
+			dp[n] += dp[i]
+
+print(dp[max(numbers)])
