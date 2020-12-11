@@ -2,14 +2,21 @@
 import copy
 
 class Grid:
-	def __init__(self, squares):
+	def __init__(self, squares, rule_type):
 		self.squares = squares
+		self.rule_type = rule_type
+		if rule_type == 1:
+			self.max_neighbours = 4
+			self.count_neighbours = self.count_immediate_neighbours
+		elif rule_type == 2:
+			self.max_neighbours = 5
+			self.count_neighbours = self.count_seen_neighbours
 		self.height = len(squares)
 		self.width = len(squares[0])
 		self.stable = False
-		self.update_occupied()
+		self.occupied = 0
 
-	def count_neighbours(self, x, y):
+	def count_immediate_neighbours(self, x, y):
 		neighbours = 0
 		for dy in range(-1,2):
 			for dx in range(-1,2):
@@ -23,24 +30,6 @@ class Grid:
 					neighbours += 1
 		return neighbours
 				
-	def generation(self):
-		new_squares = copy.deepcopy(self.squares)
-		self.stable = True
-		for y in range(self.height):
-			for x in range(self.width):
-				if self.squares[y][x] == '.':
-					continue
-				neighbours = self.count_neighbours(x, y)
-				if self.squares[y][x] == 'L' and neighbours == 0:
-					new_squares[y][x] = '#'
-					self.stable = False
-				elif self.squares[y][x] == '#' and neighbours >= 4:
-					new_squares[y][x] = 'L'
-					self.stable = False
-
-		self.squares = new_squares
-		self.update_occupied()
-
 	def count_seen_neighbours(self, x, y):
 		neighbours = 0
 		for dy in range(-1,2):
@@ -61,23 +50,28 @@ class Grid:
 					newy += dy
 		return neighbours
 
-	def generation2(self):
+	def generation(self):
 		new_squares = copy.deepcopy(self.squares)
 		self.stable = True
 		for y in range(self.height):
 			for x in range(self.width):
 				if self.squares[y][x] == '.':
 					continue
-				neighbours = self.count_seen_neighbours(x, y)
+				neighbours = self.count_neighbours(x, y)
 				if self.squares[y][x] == 'L' and neighbours == 0:
 					new_squares[y][x] = '#'
 					self.stable = False
-				elif self.squares[y][x] == '#' and neighbours >= 5:
+				elif self.squares[y][x] == '#' and neighbours >= self.max_neighbours:
 					new_squares[y][x] = 'L'
 					self.stable = False
 
 		self.squares = new_squares
-		self.update_occupied()
+		if self.stable:
+			self.update_occupied()
+
+	def run(self):
+		while self.stable == False:
+			self.generation()
 
 	def update_occupied(self):
 		self.occupied = 0
@@ -94,13 +88,10 @@ class Grid:
 		print()
 
 squares = [list(line) for line in (open('input.txt').read().splitlines())]
-g = Grid(copy.deepcopy(squares))
-
-while g.stable == False:
-	g.generation()
+g = Grid(copy.deepcopy(squares), 1)
+g.run()
 print(g.occupied)
 
-g = Grid(squares)
-while g.stable == False:
-	g.generation2()
+g = Grid(squares, 2)
+g.run()
 print(g.occupied)
