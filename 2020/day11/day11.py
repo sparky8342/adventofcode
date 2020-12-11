@@ -80,7 +80,7 @@ class Grid:
 		print()
 
 squares = [list(line) for line in (open('input.txt').read().splitlines())]
-g = Grid(copy.deepcopy(squares), 1)
+g = Grid(squares, 1)
 g.run()
 print(g.occupied)
 
