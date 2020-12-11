@@ -7,16 +7,21 @@ class Grid:
 		self.rule_type = rule_type
 		if rule_type == 1:
 			self.max_neighbours = 4
-			self.count_neighbours = self.count_immediate_neighbours
+			self.count_seen = False
 		elif rule_type == 2:
 			self.max_neighbours = 5
-			self.count_neighbours = self.count_seen_neighbours
+			self.count_seen = True
 		self.height = len(squares)
 		self.width = len(squares[0])
 		self.stable = False
 		self.occupied = 0
 
-	def count_immediate_neighbours(self, x, y):
+	def in_bounds(self, x, y):
+		if x < 0 or x >= self.width or y < 0 or y >= self.height:
+			return False
+		return True
+
+	def count_neighbours(self, x, y):
 		neighbours = 0
 		for dy in range(-1,2):
 			for dx in range(-1,2):
@@ -24,30 +29,17 @@ class Grid:
 					continue
 				newx = x + dx
 				newy = y + dy
-				if newx < 0 or newx == self.width or newy < 0 or newy == self.height:
-					continue
-				if self.squares[newy][newx] == '#':
-					neighbours += 1
-		return neighbours
-				
-	def count_seen_neighbours(self, x, y):
-		neighbours = 0
-		for dy in range(-1,2):
-			for dx in range(-1,2):
-				if dx == 0 and dy == 0:
-					continue
-				newx = x + dx
-				newy = y + dy
-				while 1:
-					if newx < 0 or newx == self.width or newy < 0 or newy == self.height:
-						break
+				while self.in_bounds(newx, newy):
 					if self.squares[newy][newx] == '#':
 						neighbours += 1
 						break
 					elif self.squares[newy][newx] == 'L':
 						break
-					newx += dx
-					newy += dy
+					if self.count_seen:
+						newx += dx
+						newy += dy
+					else:
+						break
 		return neighbours
 
 	def generation(self):
