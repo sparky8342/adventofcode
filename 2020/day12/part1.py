@@ -8,12 +8,12 @@ directions = {
 	'N' : ( 0,  1),
 	'S' : ( 0, -1)
 }
-
-dir_sequence = ['N', 'E', 'S', 'W', 'N', 'E', 'S']
+dir_sequence = ['N', 'E', 'S', 'W']
 
 x = 0
 y = 0
 direction = 'E'
+
 for action in actions:
 	cmd = action[0]
 	num = int(action[1:])
@@ -30,17 +30,12 @@ for action in actions:
 		dx, dy = directions[direction]
 		x += dx * num
 		y += dy * num
-	elif cmd == 'R':
+	elif cmd == 'L' or cmd == 'R':
 		steps = int(num / 90)
+		if cmd == 'L':
+			steps *= -1
 		for i in range(len(dir_sequence)):
 			if dir_sequence[i] == direction:
-				direction = dir_sequence[i + steps]
+				direction = dir_sequence[(i + steps) % 4]
 				break
-	elif cmd == 'L':
-		steps = int(num / 90)
-		for i in range(len(dir_sequence) - 1, 0, -1):
-			if dir_sequence[i] == direction:
-				direction = dir_sequence[i - steps]
-				break
-
 print(abs(x) + abs(y))
