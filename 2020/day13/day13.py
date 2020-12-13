@@ -23,15 +23,12 @@ for i, bus in enumerate(buses):
 		continue
 	targets.append((int(bus), i))
 
-num = targets.pop(0)
-inc = num[0]
-position = num[1] * -1
-
+position = 0
+inc = 1
 for target in targets:
 	time, offset = target
 	while (position + offset) % time != 0:
 		position += inc
-
 	inc *= time
 
 print(position)
