@@ -12,20 +12,16 @@ for bus in buses:
 	bus = int(bus)
 	times.append((bus - leave_time % bus, bus))
 
-times = sorted(times)
+times.sort()
 time = times[0]
 print(time[0] * time[1])
 
 # part 2
 targets = []
-positions = []
-nums = []
 for i, bus in enumerate(buses):
 	if bus == 'x':
 		continue
 	targets.append((int(bus), i))
-	positions.append([-i, int(bus)])
-	nums.append(int(bus))
 
 num = targets.pop(0)
 inc = num[0]
