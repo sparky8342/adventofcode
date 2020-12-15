@@ -1,26 +1,20 @@
 #!/usr/bin/python3
 
 def get(sequence, target):
-	seen1 = {}
-	seen2 = {}
-
-	for i, n in enumerate(sequence):
-		seen2[n] = i
-
+	seen = {}
+	for i, n in enumerate(sequence[:-1]):
+		seen[n] = i
 	last = sequence[-1]
-	pos = len(sequence)
+	pos = len(sequence) - 1
 
-	while pos < target:
+	while pos < target - 1:
 		nxt = 0
-		if last in seen1:
-			nxt = seen2[last] - seen1[last]
+		if last in seen:
+			nxt = pos - seen[last]
 
-		if nxt in seen2:
-			seen1[nxt] = seen2[nxt]
-		seen2[nxt] = pos
-
-		pos += 1
+		seen[last] = pos
 		last = nxt
+		pos += 1
 
 	return last
 
