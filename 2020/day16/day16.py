@@ -3,10 +3,23 @@ import re
 
 rules = {}
 tickets = []
-all_ranges = []
 valid_tickets = []
 rule_set = set()
 my_ticket = []
+no_fields = 0
+
+def in_any_rule(rules, value):
+	for r in rules.values():
+		for ra in r:
+			if ra[0] <= value <= ra[1]:
+				return True
+	return False
+
+def valid_for_rule(rules, rule, value):
+	for r in rules[rule]:
+		if r[0] <= value <= r[1]:
+			return True
+	return False
 
 with open('input.txt') as f:
 	line = f.readline().strip()
@@ -18,8 +31,6 @@ with open('input.txt') as f:
 		range1 = (int(match.group(2)), int(match.group(3)))
 		range2 = (int(match.group(4)), int(match.group(5)))
 		rules[name] = [ range1, range2 ]
-		all_ranges.append(range1)
-		all_ranges.append(range2)
 		rule_set.add(name)
 		line = f.readline().strip()
 
@@ -34,67 +45,54 @@ with open('input.txt') as f:
 		tickets.append([int(x) for x in line.strip().split(",")])
 		line = f.readline()
 
+no_fields = len(rule_set)
+
 # part 1
 error = 0
 for ticket in tickets:
 	ticket_ok = True
 	for value in ticket:
-		ok = False
-		for rnge in all_ranges:
-			if rnge[0] <= value <= rnge[1]:
-				ok = True
-				break
-		if ok == False:
-			ticket_ok = False
+		if not in_any_rule(rules, value):
 			error += value
+			ticket_ok = False
 
 	if ticket_ok == True:
 		valid_tickets.append(ticket)
 
 print(error)
 
+# part 2
 # set up sets of possible fields for each place
 possible_fields = []
-for _ in range(len(rules)):
+for _ in range(no_fields):
 	possible_fields.append(rule_set.copy())
 
 # remove possiblities based on tickets
 for i, fields in enumerate(possible_fields):
 	bad_fields = set()
 	for field in fields:
-		field_done = False
 		for ticket in valid_tickets:
-			if field_done == True:
-				break
-			range_ok = False
-			for rnge in rules[field]:
-				if rnge[0] <= ticket[i] <= rnge[1]:
-					range_ok = True
-			if range_ok == False:	
+			if not valid_for_rule(rules, field, ticket[i]):
 				bad_fields.add(field)
-				field_done = True
+				break
 
 	possible_fields[i] -= bad_fields
 
 # remove possibilities where one field is left
-while True:
-	# if there's 1 left in each set, we are done
-	left = 0
-	for fields in possible_fields:
-		left += len(fields)
-	if left == len(possible_fields):
-		break
-
+done = False
+while not done:
+	done = True
 	for i, fields in enumerate(possible_fields):
 		if len(fields) == 1:
 			(field,) = fields
-			for j in range(len(possible_fields)):
+			for j in range(no_fields):
 				if i != j and field in possible_fields[j]:
 					possible_fields[j].remove(field)
+					done = False
 
 answer = 1
 for i, fields in enumerate(possible_fields):
-	(field, ) = fields
+	(field,) = fields
 	if re.match("^departure", field):
 		answer *= my_ticket[i]
 
