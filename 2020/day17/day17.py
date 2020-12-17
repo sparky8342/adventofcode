@@ -1,47 +1,35 @@
 #!/usr/bin/python3
 
-def get_neighbours_3d(cubes, cube):
-	neighbours = 0
+def get_neighbours(cubes, cube):
+	neighbours = set()
+	neighbours.add(())
+
+	dimension = len(cube)
+
+	for i in range(0, dimension):
+		new_neighbours = set()
+		for space in neighbours:
+			new_neighbours.add(space + (cube[i],))
+			new_neighbours.add(space + (cube[i] + 1,))
+			new_neighbours.add(space + (cube[i] - 1,))
+		neighbours = new_neighbours
+
+	neighbours.remove(cube)
+
+	neighbour_count = 0
 	spaces = set()
-	for dx in (-1, 0, 1):
-		for dy in (-1, 0, 1):
-			for dz in (-1, 0, 1):
-				if dx == 0 and dy == 0 and dz == 0:
-					continue
-				position = (cube[0] + dx, cube[1] + dy, cube[2] + dz)
-				if position in cubes:
-					neighbours += 1
-				else:
-					spaces.add(position)
+	for neighbour in neighbours:
+		if neighbour in cubes:
+			neighbour_count += 1
+		else:
+			spaces.add(neighbour)
 
-	return neighbours, spaces
+	return neighbour_count, spaces
 
-def get_neighbours_4d(cubes, cube):
-	neighbours = 0
-	spaces = set()
-	for dx in (-1, 0, 1):
-		for dy in (-1, 0, 1):
-			for dz in (-1, 0, 1):
-				for dw in (-1, 0, 1):
-					if dx == 0 and dy == 0 and dz == 0 and dw == 0:
-						continue
-					position = (cube[0] + dx, cube[1] + dy, cube[2] + dz, cube[3] + dw)
-					if position in cubes:
-						neighbours += 1
-					else:
-						spaces.add(position)
-
-	return neighbours, spaces
-
-def generation(cubes, dimension):
+def generation(cubes):
 	new_cubes = set()
 	all_spaces = set()
-	get_neighbours = None
-	if dimension == 3:
-		get_neighbours = get_neighbours_3d
-	elif dimension == 4:
-		get_neighbours = get_neighbours_4d
-	
+
 	for cube in cubes:
 		neighbours, spaces = get_neighbours(cubes, cube)
 		if neighbours == 2 or neighbours == 3:
@@ -66,10 +54,9 @@ for y in range(len(grid)):
 			cubes3d.add((x, y, 0))
 			cubes4d.add((x, y, 0, 0))
 
-
 for _ in range(6):
-	cubes3d = generation(cubes3d, 3)
-	cubes4d = generation(cubes4d, 4)
+	cubes3d = generation(cubes3d)
+	cubes4d = generation(cubes4d)
 
 print(len(cubes3d))
 print(len(cubes4d))
