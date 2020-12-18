@@ -31,7 +31,7 @@ def evaluate(expr):
 
 	return str(value)
 
-lines = [line for line in (open('input.txt').read().splitlines())]
+lines = open('input.txt').read().splitlines()
 
 total = 0
 for line in lines:
