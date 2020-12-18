@@ -22,12 +22,8 @@ def evaluate(expr):
 		value2 = int(parts[i + 1])
 		if parts[i] == '+':
 			value += value2
-		elif parts[i] == '-':
-			value -= value2
 		elif parts[i] == '*':
 			value *= value2
-		elif parts[i] == '/':
-			value /= value2
 
 	return str(value)
 
