@@ -46,7 +46,6 @@ with open('input.txt') as f:
 # part 1
 regex = eval_rules('0')
 regex = '^' + regex + '$'
-
 valid = 0
 for message in messages:
 	if re.match(regex, message):
