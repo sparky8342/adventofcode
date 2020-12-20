@@ -89,26 +89,22 @@ def calc_answer(tiles, square):
 	end = len(square) - 1
 	return tiles[square[0][0][0]]['id'] * tiles[square[0][end][0]]['id'] * tiles[square[end][0][0]]['id'] * tiles[square[end][end][0]]['id']
 
-
-def search(tiles, square, combos, x, y):
+def search(tiles, square, combos, x, y, answer_squares):
 	if not is_valid(tiles, square):
-		return -1
+		return
 
 	if x == len(square):
 		x = 0
 		y += 1
 
 	if y == len(square):
-		return calc_answer(tiles, square)
+		answer_squares.append(deepcopy(square))
+		return
 
 	for c in combos:
 		square[y][x] = c
-		ans = search(tiles, square, combos, x + 1, y)
-		if ans != -1:
-			return ans
+		search(tiles, square, combos, x + 1, y, answer_squares)
 		square[y][x] = (-1, -1)
-
-	return -1
 
 def backtrack(tiles):
 	square_size = int(math.sqrt(len(tiles)))
@@ -121,7 +117,64 @@ def backtrack(tiles):
 		for j in range(8):
 			combos.append((i, j))
 
-	return search(tiles, square, combos, 0, 0)
+	answer_squares = []
+	search(tiles, square, combos, 0, 0, answer_squares)
+	return answer_squares
+
+def get_sea_monster():
+	return ['                  # ','#    ##    ##    ###',' #  #  #  #  #  #   ']
+
+def remove_sea_monster_at(grid, x, y):
+	grid_size = len(grid)
+	sea_monster = get_sea_monster()
+	sea_monster_h = len(sea_monster)
+	sea_monster_w = len(sea_monster[0])
+
+	for sy in range(sea_monster_h):
+		if y + sy == grid_size:
+			return
+		for sx in range(sea_monster_w):
+			if x + sx == grid_size:
+				return
+			if sea_monster[sy][sx] == '#':
+				if grid[y + sy][x + sx] != '#':
+					return
+
+	for sy in range(sea_monster_h):
+		for sx in range(sea_monster_w):
+			if sea_monster[sy][sx] == '#':
+				grid[y + sy][x + sx] = '.'
+
+def count_rough(grid):
+	size = len(grid)
+	for y in range(size):
+		for x in range(size):
+			remove_sea_monster_at(grid, x, y)
+
+	rough = 0
+	for y in range(size):
+		for x in range(size):
+			if grid[y][x] == '#':
+				rough += 1
+
+	return rough
+
+def make_image(tiles, square):
+	size = len(square)
+	grid_size = size * (SIZE - 2)
+	grid = []
+	for _ in range(grid_size):
+		grid.append(['.' for _ in range(grid_size)])
+
+	for y in range(size):
+		for x in range(size):
+			tile_no, variation = square[y][x]
+			squares = tiles[tile_no]['variations'][variation]
+			for sq_y in range(1, SIZE-1):
+				for sq_x in range(1, SIZE-1):
+					grid[y * (SIZE - 2) + sq_y - 1][x * (SIZE - 2) + sq_x - 1] = squares[sq_y][sq_x]
+
+	return grid
 
 def get_input():
 	tiles = []
@@ -138,5 +191,17 @@ def get_input():
 		
 	return tiles
 
+# part 1
 tiles = get_input()
-print(backtrack(tiles))
+squares = backtrack(tiles)
+ans = calc_answer(tiles, squares[0])
+print(ans)
+
+# part 2
+rough_amounts = []
+for square in squares:
+	grid = make_image(tiles, square)
+	rough = count_rough(grid)
+	rough_amounts.append(rough)
+
+print(min(rough_amounts))
