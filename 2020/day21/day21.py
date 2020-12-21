@@ -15,25 +15,23 @@ for line in lines:
 	for ingredient in ingredients:
 		all_ingredients[ingredient] += 1
 	for allergen in allergens:
-		if allergen not in groups:
-			groups[allergen] = []
-		groups[allergen].append(ingredients)
+		if allergen in groups:
+			groups[allergen] = groups[allergen].intersection(ingredients)
+		else:
+			groups[allergen] = ingredients
 
-# intersect all
-for allergen in groups:
-	groups[allergen] = reduce(lambda x, y : x.intersection(y), groups[allergen])
 
+# find singles and remove from other sets
 def remove_allergen(groups, ingredient, keep):
 	removed = False
-	for a in groups:
-		if a == keep:
+	for allergen in groups:
+		if allergen == keep:
 			continue
-		if ingredient in groups[a]:
-			groups[a].remove(ingredient)
+		if ingredient in groups[allergen]:
+			groups[allergen].remove(ingredient)
 			removed = True
 	return removed
 
-# find singles and remove from other sets
 done = False
 while done == False:
 	done = True
@@ -54,10 +52,10 @@ for allergen in groups:
 print(sum(all_ingredients.values()))
 
 # part 2
-lst = sorted(groups.keys())
-allgns = []
-for ingredient in lst:
-	(algn,) = groups[ingredient]
-	allgns.append(algn)
+ingredients = sorted(groups.keys())
+allergens = []
+for ingredient in ingredients:
+	(allergen,) = groups[ingredient]
+	allergens.append(allergen)
 
-print(",".join(allgns))
+print(",".join(allergens))
