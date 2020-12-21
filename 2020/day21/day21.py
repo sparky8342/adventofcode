@@ -50,4 +50,14 @@ for allergen in groups:
 	(ingredient,) = st
 	del all_ingredients[ingredient]
 
+# part 1
 print(sum(all_ingredients.values()))
+
+# part 2
+lst = sorted(groups.keys())
+allgns = []
+for ingredient in lst:
+	(algn,) = groups[ingredient]
+	allgns.append(algn)
+
+print(",".join(allgns))
