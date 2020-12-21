@@ -52,10 +52,10 @@ for allergen in groups:
 print(sum(all_ingredients.values()))
 
 # part 2
-ingredients = sorted(groups.keys())
-allergens = []
-for ingredient in ingredients:
-	(allergen,) = groups[ingredient]
-	allergens.append(allergen)
+allergens = sorted(groups.keys())
+ingredients = []
+for allergen in allergens:
+	(ingredient, ) = groups[allergen]
+	ingredients.append(ingredient)
 
-print(",".join(allergens))
+print(",".join(ingredients))
