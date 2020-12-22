@@ -35,16 +35,18 @@ print(score)
 p1 = deque(player1)
 p2 = deque(player2)
 
-cache = {}
+def get_key(q1, q2):
+	return " ".join(str(x) for x in (list(q1) + [':'] + list(q2)))
 
-def play(p1, p2, depth):
-	cache_key = " ".join(str(x) for x in (list(p1) + [':'] + list(p2)))
+cache = {}
+def play(p1, p2):
+	cache_key = get_key(p1, p2)
 	if cache_key in cache:
 		return cache[cache_key]
 
 	seen = set()
 	while len(p1) > 0 and len(p2) > 0:
-		key = " ".join(str(x) for x in (list(p1) + [':'] + list(p2)))
+		key = get_key(p1, p2)
 		if key in seen:
 			cache[cache_key] = [1, p1]
 			return 1, p1
@@ -53,13 +55,9 @@ def play(p1, p2, depth):
 		winner = 0
 		top_cards = [p1.popleft(), p2.popleft()]
 		if top_cards[0] <= len(p1) and top_cards[1] <= len(p2):
-			k = " ".join(str(x) for x in (list(p1) + [':'] + list(p2)))
-			if k in cache:
-				winner, _ = cache[k]
-			else:
-				cp1 = deque(list(p1)[0:top_cards[0]])
-				cp2 = deque(list(p2)[0:top_cards[1]])
-				winner, _ = play(cp1, cp2, depth + 1)
+			cp1 = deque(list(p1)[0:top_cards[0]])
+			cp2 = deque(list(p2)[0:top_cards[1]])
+			winner, _ = play(cp1, cp2)
 		elif top_cards[0] > top_cards[1]:
 			winner = 1
 		else:
@@ -79,7 +77,7 @@ def play(p1, p2, depth):
 		cache[cache_key] = [2, p2]
 		return 2, p2
 
-_, cards = play(p1, p2, 0)
+_, cards = play(p1, p2)
 score = 0
 for i, card in enumerate(cards):
 	score += (len(cards) - i) * card
