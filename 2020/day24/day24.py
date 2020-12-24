@@ -1,12 +1,22 @@
 #!/usr/bin/python3
 import re
 
+dirs = {
+	'se' : (0, -1, 1),
+	'sw' : (-1, 0, 1),
+	'ne' : (1, 0 ,-1),
+	'nw' : (0, 1, -1),
+	'e'  : (1, -1, 0),
+	'w'  : (-1, 1, 0)
+}
+changes = dirs.values()
+
 lines = open('input.txt').read().splitlines()
 
 def get_neighbours(tile):
 	neighbours = 0
 	spaces = set()
-	for d in [(0, -1, 1), (-1, 0, 1), (1, 0 ,-1), (0, 1, -1), (1, -1, 0), (-1, 1, 0)]:
+	for d in changes:
 		space = (tile[0] + d[0], tile[1] + d[1], tile[2] + d[2])
 		if space in tiles:
 			neighbours += 1
@@ -36,31 +46,17 @@ tiles = set()
 
 # part 1
 for line in lines:
-	dirs = re.findall("(se|sw|ne|nw|e|w)", line)
+	steps = re.findall("(se|sw|ne|nw|e|w)", line)
 
 	x = 0
 	y = 0
 	z = 0
 
-	for d in dirs:
-		if d == 'se':
-			z += 1
-			y -= 1
-		elif d == 'sw':
-			x -= 1
-			z += 1
-		elif d == 'ne':
-			x += 1
-			z -= 1
-		elif d == 'nw':
-			z -= 1
-			y += 1
-		elif d == 'e':
-			x += 1
-			y -= 1
-		elif d == 'w':
-			x -= 1
-			y += 1
+	for step in steps:
+		change = dirs[step]
+		x += change[0]
+		y += change[1]
+		z += change[2]
 
 	place = (x, y, z)
 	if place in tiles:
