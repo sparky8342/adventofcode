@@ -25,12 +25,24 @@ def flip(squares):
 	return new_squares
 
 def get_variations(squares):
-	variations = [squares]
-	for i in range(0, 7):
+	variations = []
+	for i in range(0, 8):
 		squares = rotate_right(squares)
-		if i == 3:
+		if i == 4:
 			squares = flip(squares)
-		variations.append(squares)
+
+		# checksums of edges
+		top = int("".join(squares[0]).replace('.','0').replace('#','1'), 2)
+		bottom = int("".join(squares[END]).replace('.','0').replace('#','1'), 2)
+		left = ''
+		right = ''
+		for i in range(SIZE):
+			left += squares[i][0]
+			right += squares[i][END]
+		left = int(left.replace('.','0').replace('#','1'), 2)
+		right = int(right.replace('.','0').replace('#','1'), 2)
+
+		variations.append({'squares' : squares, 'top' : top, 'bottom' : bottom, 'left' : left, 'right' : right})
 
 	return variations
 
@@ -39,25 +51,14 @@ def side_edge_match(tiles, place1, place2):
 	tile2, variation2 = place2
 	tile1 = tiles[tile1]
 	tile2 = tiles[tile2]
-
-	tile1_edge = ''
-	tile2_edge = ''
-	for i in range(SIZE):
-		tile1_edge += tile1['variations'][variation1][i][END]
-		tile2_edge += tile2['variations'][variation2][i][0]
-
-	return tile1_edge == tile2_edge		
+	return tile1['variations'][variation1]['right'] == tile2['variations'][variation2]['left']
 
 def top_bottom_edge_match(tiles, place1, place2):
 	tile1, variation1 = place1
 	tile2, variation2 = place2
 	tile1 = tiles[tile1]
 	tile2 = tiles[tile2]
-
-	tile1_edge = "".join(tile1['variations'][variation1][END])
-	tile2_edge = "".join(tile2['variations'][variation2][0])
-
-	return tile1_edge == tile2_edge
+	return tile1['variations'][variation1]['bottom'] == tile2['variations'][variation2]['top']
 
 def is_valid(tiles, square):
 	size = len(square)
@@ -169,7 +170,7 @@ def make_image(tiles, square):
 	for y in range(size):
 		for x in range(size):
 			tile_no, variation = square[y][x]
-			squares = tiles[tile_no]['variations'][variation]
+			squares = tiles[tile_no]['variations'][variation]['squares']
 			for sq_y in range(1, SIZE-1):
 				for sq_x in range(1, SIZE-1):
 					grid[y * (SIZE - 2) + sq_y - 1][x * (SIZE - 2) + sq_x - 1] = squares[sq_y][sq_x]
