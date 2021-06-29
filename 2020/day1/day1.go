@@ -1,11 +1,11 @@
 package main
 
 import (
-	"io/ioutil"
-	"strings"
-	"strconv"
-	"sort"
 	"fmt"
+	"io/ioutil"
+	"sort"
+	"strconv"
+	"strings"
 )
 
 func sum2(numbers []int, target int) (int, int) {
@@ -27,7 +27,7 @@ func sum2(numbers []int, target int) (int, int) {
 
 func sum3(numbers []int, target int) (int, int, int) {
 	for _, n := range numbers {
-		num1, num2 := sum2(numbers, target - n)
+		num1, num2 := sum2(numbers, target-n)
 		if num1 != n && num2 != n {
 			return n, num1, num2
 		}
