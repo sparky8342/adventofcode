@@ -11,16 +11,9 @@ type Pos struct {
 	y int
 }
 
-type Door struct {
-	id rune
-	x  int
-	y  int
-}
-
 type Grid struct {
 	squares []string
 	player  Pos
-	doors   []Door
 	goal    int
 }
 
@@ -41,7 +34,6 @@ func get_grid() Grid {
 	squares := strings.Split(string(data), "\n")
 
 	var player Pos
-	doors := []Door{}
 	goal := 0
 
 	for y, row := range squares {
@@ -49,8 +41,6 @@ func get_grid() Grid {
 			if space == '@' {
 				player.x = x
 				player.y = y
-			} else if space >= 'A' && space <= 'Z' {
-				doors = append(doors, Door{id: space, x: y, y: y})
 			} else if space >= 'a' && space <= 'z' && int(space-'a') > goal {
 				goal = int(space - 'a')
 			}
@@ -58,7 +48,7 @@ func get_grid() Grid {
 		}
 	}
 
-	grid := Grid{squares: squares, player: player, doors: doors, goal: goal}
+	grid := Grid{squares: squares, player: player, goal: goal}
 	return grid
 }
 
