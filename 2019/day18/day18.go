@@ -1,9 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"io/ioutil"
-	"strings"
+	"log"
+	"os"
 )
 
 type Pos struct {
@@ -29,14 +30,18 @@ type QueueEntry struct {
 }
 
 func get_grid() Grid {
-	data, _ := ioutil.ReadFile("input.txt")
-	data = data[:len(data)-1]
-	lines := strings.Split(string(data), "\n")
-
 	squares := [][]byte{{}}
-	for _, line := range lines {
+
+	file, err := os.Open("input.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
 		squares = append(squares, []byte(line))
 	}
+	file.Close()
 
 	var player Pos
 	goal := 0
