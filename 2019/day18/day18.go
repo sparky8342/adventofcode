@@ -12,7 +12,7 @@ type Pos struct {
 }
 
 type Grid struct {
-	squares []string
+	squares [][]byte
 	player  Pos
 	goal    int
 }
@@ -31,7 +31,12 @@ type QueueEntry struct {
 func get_grid() Grid {
 	data, _ := ioutil.ReadFile("input.txt")
 	data = data[:len(data)-1]
-	squares := strings.Split(string(data), "\n")
+	lines := strings.Split(string(data), "\n")
+
+	squares := [][]byte{{}}
+	for _, line := range lines {
+		squares = append(squares, []byte(line))
+	}
 
 	var player Pos
 	goal := 0
@@ -70,19 +75,19 @@ func bfs(grid Grid) int {
 		}
 		visited[state] = true
 
-		if grid.squares[state.y][state.x] == '#' {
+		if grid.squares[state.y][state.x] == byte('#') {
 			continue
 		}
 
 		keys := state.keys
 		space := grid.squares[state.y][state.x]
 
-		if space >= 'A' && space <= 'Z' && keys[space-65] == false {
+		if space >= byte('A') && space <= byte('Z') && keys[space-65] == false {
 			// at door without key
 			continue
 		}
 
-		if space >= 'a' && space <= 'z' {
+		if space >= byte('a') && space <= byte('z') {
 			// found a key
 			keys[space-97] = true
 
