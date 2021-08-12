@@ -7,26 +7,44 @@ import (
 	"os"
 )
 
+type Dir struct {
+	dx int
+	dy int
+}
+
 type Pos struct {
 	x int
 	y int
 }
 
 type Grid struct {
-	squares [][]byte
-	player  Pos
-	goal    int
+	squares     [][]byte
+	robots      [4]Pos
+	robot_count int
+	player      Pos
+	goal        int
 }
 
 type State struct {
-	x    int
-	y    int
-	keys [26]bool
+	robots      [4]Pos
+	robot_count int
+	keys        [26]bool
 }
 
 type QueueEntry struct {
 	state    State
 	distance int
+}
+
+var dirs [4]Dir
+
+func init() {
+	dirs = [4]Dir{
+		Dir{dx: 1, dy: 0},
+		Dir{dx: -1, dy: 0},
+		Dir{dx: 0, dy: 1},
+		Dir{dx: 0, dy: -1},
+	}
 }
 
 func get_grid() Grid {
@@ -43,14 +61,16 @@ func get_grid() Grid {
 	}
 	file.Close()
 
-	var player Pos
+	robots := [4]Pos{}
+	robot_count := 0
 	goal := 0
 
 	for y, row := range squares {
 		for x, space := range row {
 			if space == '@' {
-				player.x = x
-				player.y = y
+				robots[robot_count].x = x
+				robots[robot_count].y = y
+				robot_count++
 			} else if space >= 'a' && space <= 'z' && int(space-'a') > goal {
 				goal = int(space - 'a')
 			}
@@ -58,12 +78,12 @@ func get_grid() Grid {
 		}
 	}
 
-	grid := Grid{squares: squares, player: player, goal: goal}
+	grid := Grid{squares: squares, robots: robots, robot_count: robot_count, goal: goal}
 	return grid
 }
 
 func bfs(grid Grid) int {
-	start := State{x: grid.player.x, y: grid.player.y}
+	start := State{robots: grid.robots, robot_count: grid.robot_count}
 	entry := QueueEntry{state: start, distance: 0}
 	queue := []QueueEntry{entry}
 
@@ -80,38 +100,49 @@ func bfs(grid Grid) int {
 		}
 		visited[state] = true
 
-		if grid.squares[state.y][state.x] == byte('#') {
-			continue
-		}
+		for i := 0; i < state.robot_count; i++ {
+			robot := state.robots[i]
+			keys := state.keys
 
-		keys := state.keys
-		space := grid.squares[state.y][state.x]
+			space := grid.squares[robot.y][robot.x]
 
-		if space >= byte('A') && space <= byte('Z') && keys[space-65] == false {
-			// at door without key
-			continue
-		}
+			if space == byte('#') {
+				continue
+			}
 
-		if space >= byte('a') && space <= byte('z') {
-			// found a key
-			keys[space-97] = true
+			if space >= byte('A') && space <= byte('Z') && keys[space-65] == false {
+				// at door without key
+				continue
+			}
 
-			all_found := true
-			for i := 0; i <= grid.goal; i++ {
-				if keys[i] == false {
-					all_found = false
-					break
+			if space >= byte('a') && space <= byte('z') {
+				// found a key
+				keys[space-97] = true
+
+				all_found := true
+				for i := 0; i <= grid.goal; i++ {
+					if keys[i] == false {
+						all_found = false
+						break
+					}
+				}
+				if all_found {
+					return entry.distance
 				}
 			}
-			if all_found {
-				return entry.distance
+
+			for _, dir := range dirs {
+				robots_copy := state.robots
+				robots_copy[i].x += dir.dx
+				robots_copy[i].y += dir.dy
+				new_state := State{
+					robots:      robots_copy,
+					robot_count: state.robot_count,
+					keys:        keys,
+				}
+				queue = append(queue, QueueEntry{state: new_state, distance: entry.distance + 1})
 			}
 		}
-
-		queue = append(queue, QueueEntry{state: State{x: state.x + 1, y: state.y, keys: keys}, distance: entry.distance + 1})
-		queue = append(queue, QueueEntry{state: State{x: state.x - 1, y: state.y, keys: keys}, distance: entry.distance + 1})
-		queue = append(queue, QueueEntry{state: State{x: state.x, y: state.y + 1, keys: keys}, distance: entry.distance + 1})
-		queue = append(queue, QueueEntry{state: State{x: state.x, y: state.y - 1, keys: keys}, distance: entry.distance + 1})
 	}
 
 	return 0
