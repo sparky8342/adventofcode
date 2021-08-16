@@ -47,25 +47,28 @@ func init() {
 	}
 }
 
-func get_grid() Grid {
+func load_grid() Grid {
 	squares := [][]byte{{}}
-
 	file, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
 		squares = append(squares, []byte(line))
 	}
-	file.Close()
+	grid := Grid{squares: squares}
+	return grid
+}
 
+func find_elements(grid Grid) Grid {
 	robots := [4]Pos{}
 	robot_count := 0
 	goal := 0
 
-	for y, row := range squares {
+	for y, row := range grid.squares {
 		for x, space := range row {
 			if space == '@' {
 				robots[robot_count].x = x
@@ -78,7 +81,9 @@ func get_grid() Grid {
 		}
 	}
 
-	grid := Grid{squares: squares, robots: robots, robot_count: robot_count, goal: goal}
+	grid.robots = robots
+	grid.robot_count = robot_count
+	grid.goal = goal
 	return grid
 }
 
@@ -149,7 +154,8 @@ func bfs(grid Grid) int {
 }
 
 func main() {
-	grid := get_grid()
+	grid := load_grid()
+	grid = find_elements(grid)
 	distance := bfs(grid)
 	fmt.Println(distance)
 }
