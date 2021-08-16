@@ -21,14 +21,12 @@ type Grid struct {
 	squares     [][]byte
 	robots      [4]Pos
 	robot_count int
-	player      Pos
 	goal        int
 }
 
 type State struct {
-	robots      [4]Pos
-	robot_count int
-	keys        [26]bool
+	robot Pos
+	keys  [26]bool
 }
 
 type QueueEntry struct {
@@ -88,25 +86,30 @@ func find_elements(grid Grid) Grid {
 }
 
 func bfs(grid Grid) int {
-	start := State{robots: grid.robots, robot_count: grid.robot_count}
-	entry := QueueEntry{state: start, distance: 0}
-	queue := []QueueEntry{entry}
+	queues := [][]QueueEntry{{}}
+
+	for i := 0; i < grid.robot_count; i++ {
+		start := State{robot: Pos{x: grid.robots[i].x, y: grid.robots[i].y}}
+		entry := QueueEntry{state: start, distance: 0}
+		queue := []QueueEntry{entry}
+		queues = append(queues, queue)
+	}
 
 	visited := make(map[State]bool)
 
-	for len(queue) > 0 {
-		entry := queue[0]
-		queue = queue[1:]
+	for i, _ := range queues {
+		for len(queues[i]) > 0 {
+			entry := queues[i][0]
+			queues[i] = queues[i][1:]
 
-		state := entry.state
+			state := entry.state
 
-		if visited[state] {
-			continue
-		}
-		visited[state] = true
+			if visited[state] {
+				continue
+			}
+			visited[state] = true
 
-		for i := 0; i < state.robot_count; i++ {
-			robot := state.robots[i]
+			robot := state.robot
 			keys := state.keys
 
 			space := grid.squares[robot.y][robot.x]
@@ -137,15 +140,11 @@ func bfs(grid Grid) int {
 			}
 
 			for _, dir := range dirs {
-				robots_copy := state.robots
-				robots_copy[i].x += dir.dx
-				robots_copy[i].y += dir.dy
 				new_state := State{
-					robots:      robots_copy,
-					robot_count: state.robot_count,
-					keys:        keys,
+					robot: Pos{x: state.robot.x + dir.dx, y: state.robot.y + dir.dy},
+					keys:  keys,
 				}
-				queue = append(queue, QueueEntry{state: new_state, distance: entry.distance + 1})
+				queues[i] = append(queues[i], QueueEntry{state: new_state, distance: entry.distance + 1})
 			}
 		}
 	}
@@ -155,7 +154,27 @@ func bfs(grid Grid) int {
 
 func main() {
 	grid := load_grid()
-	grid = find_elements(grid)
-	distance := bfs(grid)
+
+	// part 1
+	g := find_elements(grid)
+	distance := bfs(g)
 	fmt.Println(distance)
+
+	// part 2
+	x := g.robots[0].x
+	y := g.robots[0].y
+
+	grid.squares[y-1][x-1] = '@'
+	grid.squares[y-1][x] = '#'
+	grid.squares[y-1][x+1] = '@'
+
+	grid.squares[y][x-1] = '#'
+	grid.squares[y][x] = '#'
+	grid.squares[y][x+1] = '#'
+
+	grid.squares[y+1][x-1] = '@'
+	grid.squares[y+1][x] = '#'
+	grid.squares[y+1][x+1] = '@'
+
+	//g2 := find_elements(grid)
 }
