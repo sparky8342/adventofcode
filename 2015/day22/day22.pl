@@ -2,6 +2,9 @@
 use strict;
 use warnings;
 
+use constant START_HEALTH => 50;
+use constant START_MANA => 500;
+
 use constant MAGIC_MISSILE_COST => 53;
 use constant MAGIC_MISSILE_DAMAGE => 4;
 
@@ -45,6 +48,10 @@ sub process_effects {
 		$state->{mana} += RECHARGE_MANA;
 		$state->{recharge}--;
 	}
+	if ($state->{shield} > 0) {
+		$state->{armour} = SHIELD_ARMOUR;
+		$state->{shield}--;
+	}
 }
 
 sub bfs {
@@ -54,12 +61,13 @@ sub bfs {
 	
 	my $start = {
 		player_turn => 1,
-		hp => 50,
-		mana => 500,
+		hp => START_HEALTH,
+		mana => START_MANA,
 		enemy_hp => $enemy_hp,
 		shield => 0,
 		poison => 0,
 		recharge => 0,
+		armour => 0,
 		mana_used => 0
 	};
 
@@ -91,6 +99,7 @@ sub bfs {
 					shield => $state->{shield},
 					poison => $state->{poison},
 					recharge => $state->{recharge},
+					armour => 0,
 					mana_used => $state->{mana_used}
 				};
 
@@ -145,6 +154,7 @@ sub bfs {
 				shield => $state->{shield},
 				poison => $state->{poison},
 				recharge => $state->{recharge},
+				armour => 0,
 				mana_used => $state->{mana_used}
 			};
 
@@ -157,10 +167,7 @@ sub bfs {
 				next;
 			}
 
-			my $damage = $enemy_damage;
-			if ($new_state->{shield} > 0) {
-				$damage -= SHIELD_ARMOUR;
-			}
+			my $damage = $enemy_damage - $new_state->{armour};
 			$damage = 1 if $damage < 1;
 			$new_state->{hp} -= $damage;
 
