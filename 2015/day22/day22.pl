@@ -90,20 +90,32 @@ sub bfs {
 				}
 			}
 
+			my $state2 = {
+				player_turn => 0,
+				hp => $hp,
+				mana => $state->{mana},
+				enemy_hp => $state->{enemy_hp},
+				shield => $state->{shield},
+				poison => $state->{poison},
+				recharge => $state->{recharge},
+				armour => 0,
+				mana_used => $state->{mana_used}
+			};
+
+			process_effects($state2);
+
 			foreach my $spell ('magic_missile', 'drain', 'shield', 'poison', 'recharge') {
 				my $new_state = {
 					player_turn => 0,
 					hp => $hp,
-					mana => $state->{mana},
-					enemy_hp => $state->{enemy_hp},
-					shield => $state->{shield},
-					poison => $state->{poison},
-					recharge => $state->{recharge},
+					mana => $state2->{mana},
+					enemy_hp => $state2->{enemy_hp},
+					shield => $state2->{shield},
+					poison => $state2->{poison},
+					recharge => $state2->{recharge},
 					armour => 0,
-					mana_used => $state->{mana_used}
+					mana_used => $state2->{mana_used}
 				};
-
-				process_effects($new_state);
 
 				if ($spell eq 'magic_missile' && $new_state->{mana} >= MAGIC_MISSILE_COST) {
 					$new_state->{mana} -= MAGIC_MISSILE_COST;
