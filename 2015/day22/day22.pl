@@ -76,7 +76,7 @@ sub bfs {
 	while (@queue > 0) {
 		my $state = shift @queue;
 
-		if ($state->{mana_used} > $smallest_mana_used) {
+		if ($state->{mana_used} >= $smallest_mana_used) {
 			next;
 		}
 
@@ -103,6 +103,13 @@ sub bfs {
 			};
 
 			process_effects($state2);
+
+			if ($state2->{enemy_hp} <= 0) {
+				if ($state2->{mana_used} < $smallest_mana_used) {
+					$smallest_mana_used = $state2->{mana_used};
+				}
+				next;
+			}
 
 			foreach my $spell ('magic_missile', 'drain', 'shield', 'poison', 'recharge') {
 				my $new_state = {
