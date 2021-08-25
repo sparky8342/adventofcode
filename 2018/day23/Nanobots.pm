@@ -2,6 +2,8 @@ package Nanobots;
 use strict;
 use warnings;
 
+use Data::Dumper;
+
 use parent "Exporter";
 our @EXPORT_OK = qw(in_range most_in_range);
 
@@ -12,163 +14,68 @@ sub in_range {
 	@bots = sort { $b->{r} <=> $a->{r} } @bots;
 	my $strongest = $bots[0];
 
+	return bots_in_range($strongest, \@bots);	
+}
+
+sub bots_in_range {
+	my ($point, $bots) = @_;
 	my $in_range = 0;
-	foreach my $bot (@bots) {
-		my $dist = abs($bot->{x} - $strongest->{x}) + abs($bot->{y} - $strongest->{y}) + abs($bot->{z} - $strongest->{z});
-		if ($dist <= $strongest->{r}) {
+	foreach my $bot (@$bots) {
+		my $dist = abs($bot->{x} - $point->{x}) + abs($bot->{y} - $point->{y}) + abs($bot->{z} - $point->{z});
+		if ($dist <= $point->{r}) {
 			$in_range++;
 		}
 	}
-
 	return $in_range;
 }
-
-
+	
 sub most_in_range {
 	my @data = @_;
 	my @bots = parse_data(@data);
 
-	my $limits = {};
+	my $start = {};
 
 	foreach my $bot (@bots) {
 		foreach my $key ('x','y','z') {
-			$limits->{minx} = $bot->{x} if $bot->{x} < $limits->{minx} || !exists($limits->{minx});
-			$limits->{maxx} = $bot->{x} if $bot->{x} > $limits->{maxx} || !exists($limits->{maxx});
-			$limits->{miny} = $bot->{y} if $bot->{y} < $limits->{miny} || !exists($limits->{miny});
-			$limits->{maxy} = $bot->{y} if $bot->{y} < $limits->{maxy} || !exists($limits->{maxy});
-			$limits->{minz} = $bot->{z} if $bot->{z} < $limits->{minz} || !exists($limits->{minz});
-			$limits->{maxz} = $bot->{z} if $bot->{z} < $limits->{maxz} || !exists($limits->{maxz});
+			$start->{min_x} = $bot->{x} if !exists($start->{min_x}) || $bot->{x} < $start->{min_x};
+			$start->{max_x} = $bot->{x} if !exists($start->{max_x}) || $bot->{x} > $start->{max_x};
+			$start->{min_y} = $bot->{y} if !exists($start->{min_y}) || $bot->{y} < $start->{min_y};
+			$start->{max_y} = $bot->{y} if !exists($start->{max_y}) || $bot->{y} > $start->{max_y};
+			$start->{min_z} = $bot->{z} if !exists($start->{min_z}) || $bot->{z} < $start->{min_z};
+			$start->{max_z} = $bot->{z} if !exists($start->{max_z}) || $bot->{z} > $start->{max_z};
 		}
 	}
 
-	my @points;
-	for (1..1000) {
-		my $x = $limits->{minx} + int(rand($limits->{maxx} - $limits->{minx}));
-		my $y = $limits->{miny} + int(rand($limits->{maxy} - $limits->{miny}));
-		my $z = $limits->{minz} + int(rand($limits->{maxz} - $limits->{minz}));
-		my $point = { x => $x, y => $y, z => $z };
-		$point->{bots} = bots_in_range($point,\@bots);
-		push @points, $point;
-	}
+	print Dumper $start;
+}
 
-	for (1..1000) {
-		foreach my $point (@points) {
-	
-			my $dx = int(rand(200)) - 10;
-			my $dy = int(rand(200)) - 10;
-			my $dz = int(rand(200)) - 10;
+sub divide {
+	my ($box) = @_;
 
-			$point->{x} += $dx;
-			$point->{y} += $dy;
-			$point->{z} += $dz;
+	my $mid_x = $box->{min_x} + int(($box->{max_x} - $box->{min_x}) / 2);
+	my $mid_y = $box->{min_y} + int(($box->{max_y} - $box->{min_y}) / 2);
+	my $mid_z = $box->{min_z} + int(($box->{max_z} - $box->{min_z}) / 2);
 
-			my $amount = bots_in_range($point,\@bots);
+	my @new_boxes;
 
-			if ($amount < $point->{bots}) {
-				$point->{x} -= $dx;
-				$point->{y} -= $dy;
-				$point->{z} -= $dz;
-			}
-			elsif ($amount > $point->{bots}) {
-				$point->{bots} = $amount;
+	foreach my $x ('min_x', 'max_x') {
+		foreach my $y ('min_y', 'max_y') {
+			foreach my $z ('min_z', 'max_z') {
+				my $b = {
+					min_x => $box->{min_x}, max_x => $box->{max_x},
+					min_y => $box->{min_y}, max_y => $box->{max_y},
+					min_z => $box->{min_z}, max_z => $box->{max_z}
+				};
+				$b->{$x} = $mid_x;
+				$b->{$y} = $mid_y;
+				$b->{$z} = $mid_z;
+				push @new_boxes, $b;
 			}
 		}
 	}
 
-	@points = sort { $b->{bots} <=> $a->{bots} } @points;
-
-	use Data::Dumper;
-	print Dumper $points[0];
-
-
+	return \@new_boxes;
 }
-
-sub bots_in_range {
-	my ($point,$bots) = @_;
-	my $in_range = 0;
-	foreach my $bot (@$bots) {
-		my $dist = abs($bot->{x} - $point->{x}) + abs($bot->{y} - $point->{y}) + abs($bot->{z} - $point->{z});
-		if ($dist <= $bot->{r}) {
-			$in_range++;
-		}
-	}
-	return $in_range;
-}
-	
-
-
-sub most_in_range_old {
-	my @data = @_;
-	my @bots = parse_data(@data);
-
-	my %galaxy;
-	my $best = 0;
-	my $bestpoint = [];
-	foreach my $bot (@bots) {
-		use Data::Dumper;
-		print Dumper $bot;
-		my $points = get_bot_points2($bot);
-		foreach my $point (@$points) {
-			$galaxy{$point->{x}}{$point->{y}}{$point->{z}}++;
-			if ($galaxy{$point->{x}}{$point->{y}}{$point->{z}} > $best) {
-				$best = $galaxy{$point->{x}}{$point->{y}}{$point->{z}};
-				$bestpoint = $point;
-			}
-		}
-	}
-	
-	return $bestpoint;
-}
-
-sub get_bot_points {
-	my ($bot) = @_;
-
-	my $points = {$bot->{x} => { $bot->{y} => { $bot->{z} => 1}}};
-	for (1..$bot->{r}) {
-		my $newpoints = {};
-		foreach my $x (keys %$points) {
-			foreach my $y (keys %{$points->{$x}}) {
-				foreach my $z (keys %{$points->{$x}{$y}}) {
-					$newpoints->{$x  }{$y  }{$z  } = 1;
-					$newpoints->{$x+1}{$y  }{$z  } = 1;
-					$newpoints->{$x-1}{$y  }{$z  } = 1;
-					$newpoints->{$x  }{$y+1}{$z  } = 1;
-					$newpoints->{$x  }{$y-1}{$z  } = 1;
-					$newpoints->{$x  }{$y  }{$z+1} = 1;
-					$newpoints->{$x  }{$y  }{$z-1} = 1;
-				}
-			}
-		}
-		$points = $newpoints;
-		#use Data::Dumper;
-		#print Dumper $points;
-	}	
-
-	return $points;
-}
-
-sub get_bot_points2 {
-	my ($bot) = @_;
-
-	my $points = [];
-	for my $dx (-$bot->{r}..$bot->{r}) {
-		for my $dy (-$bot->{r}..$bot->{r}) {
-			for my $dz (-$bot->{r}..$bot->{r}) {
-				my $point = { x => $bot->{x} + $dx, y => $bot->{y} + $dy, z => $bot->{z} + $dz };
-				my $dist = abs($bot->{x} - $point->{x}) + abs($bot->{y} - $point->{y}) + abs($bot->{z} - $point->{z});
-				if ($dist <= $bot->{r}) {
-					push @$points, $point;
-					use Data::Dumper;
-					print Dumper $point;
-				}
-			}
-		}
-	}
-
-	return $points;
-}
-
-
 
 sub parse_data {
 	my @data = @_;
