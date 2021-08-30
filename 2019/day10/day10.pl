@@ -5,9 +5,6 @@ use Storable qw(dclone);
 use Math::Round;
 use Test::More tests => 5;
 use Math::Trig;
-use POSIX "fmod";
-
-use constant PI => 3.14159265358979;
 
 sub view_count {
 	my ($grid,$asteroid) = @_;
@@ -53,7 +50,6 @@ sub view_count {
 sub best_location {
 	my ($grid) = @_;
 
-	#my $grid = [map { [split(//, $_)] } split(/\n/, $data)];
 	my @asteroids;
 	for (my $y = 0; $y < @$grid; $y++) {
 		for (my $x = 0; $x < @{$grid->[0]}; $x++) {
@@ -74,10 +70,6 @@ sub zap {
 	my $height = @$grid;
 	my $width = @{$grid->[0]};
 
-	print "w $width h $height\n";
-
-	my $shots = 0;
-
 	my %angles;
 	for (my $y = 0; $y < @$grid; $y++) {
 		for (my $x = 0; $x < @{$grid->[0]}; $x++) {
@@ -88,26 +80,11 @@ sub zap {
 					y => $y,
 					sq_dist => ($x - $asteroid->{x}) ** 2 + ($y - $asteroid->{y}) ** 2
 				};
-				print "$x $y\n";
-				#my $angle = rad2deg(atan2(($y - $asteroid->{y}), ($x - $asteroid->{x})));
-
-				#my $angle = atan2(($y - $asteroid->{y}), ($x - $asteroid->{x})) * (180/PI) + 90;
-				my $angle = atan2(($y - $asteroid->{y}), ($x - $asteroid->{x})) % (2 * PI);
-				#my $angle = atan2(($y - $asteroid->{y}), ($x - $asteroid->{x}));# - PI / 2;
-				#$angle = fmod(($angle - 90),360);
-				#$angle += 90;
-				#if ($angle < 0) {
-				#	$angle = 360 - $angle;
-				#}
-
-				#$angle = fmod($angle,360);
+				my $angle = 180 - rad2deg(atan2($x - $asteroid->{x}, $y - $asteroid->{y}));
 				push @{$angles{$angle}}, $target;
 			}
 		}
 	}
-
-	use Data::Dumper;
-	print Dumper \%angles;
 
 	foreach my $angle (keys %angles) {
 		@{$angles{$angle}} = sort { $a->{sq_dist} <=> $b->{sq_dist} } @{$angles{$angle}};
@@ -121,14 +98,7 @@ sub zap {
 				my $asteroid = shift @{$angles{$angle}};
 				
 				$shots++;
-				#print "$shots\n";
 				$grid->[$asteroid->{y}][$asteroid->{x}] = '.';
-				foreach my $row (@$grid) {
-					if (ref($row)) {
-						print join('', @$row) . "\n";
-					}
-				}
-				<STDIN>;
 	
 				if ($shots == 200) {
 					return $asteroid->{x} * 100 + $asteroid->{y};
@@ -246,8 +216,3 @@ my $asteroid = best_location($grid);
 print $asteroid->{view_count} . "\n";
 
 print zap($grid, $asteroid) . "\n";
-
-# 3510 too high
-
-# 3101 incorrect
-# 3215 incorrect
