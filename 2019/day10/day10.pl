@@ -93,7 +93,6 @@ sub zap {
 	my $shots = 0;
 	while (1) {
 		foreach my $angle (sort { $a <=> $b } keys %angles) {
-			#print "$angle\n";
 			if (@{$angles{$angle}}) {
 				my $asteroid = shift @{$angles{$angle}};
 				
@@ -111,17 +110,39 @@ sub zap {
 	}
 }
 
-my @tests;
-my $data = <<GRID;
+# tests
+while (my $view_count = <DATA>) {
+	chomp($view_count);
+	my $line = <DATA>;
+	my $grid_data;
+	while ($line !~ /^$/) {
+		$grid_data .= $line;
+		$line = <DATA>;
+	}
+	my $grid = [map { [split(//, $_)] } split(/\n/, $grid_data)];
+	my $asteroid = best_location($grid);
+	is($asteroid->{view_count}, $view_count);
+}
+
+open my $fh, '<', 'input.txt';
+chomp(my @data = <$fh>);
+close $fh;
+
+my $grid = [map { [split(//, $_)] } @data];
+my $asteroid = best_location($grid);
+print $asteroid->{view_count} . "\n";
+
+print zap($grid, $asteroid) . "\n";
+
+__DATA__
+8
 .#..#
 .....
 #####
 ....#
 ...##
-GRID
-my $grid = [map { [split(//, $_)] } split(/\n/, $data)];
-push @tests, { grid => $grid, result => 8 };
-$data = <<GRID;
+
+33
 ......#.#.
 #..#.#....
 ..#######.
@@ -132,10 +153,8 @@ $data = <<GRID;
 .##.#..###
 ##...#..#.
 .#....####
-GRID
-$grid = [map { [split(//, $_)] } split(/\n/, $data)];
-push @tests, { grid => $grid, result => 33 };
-$data = <<GRID;
+
+35
 #.#...#.#.
 .###....#.
 .#....#...
@@ -146,10 +165,8 @@ $data = <<GRID;
 ..##....##
 ......#...
 .####.###.
-GRID
-$grid = [map { [split(//, $_)] } split(/\n/, $data)];
-push @tests, { grid => $grid, result => 35 };
-$data = <<GRID;
+
+41
 .#..#..###
 ####.###.#
 ....###.#.
@@ -160,10 +177,8 @@ $data = <<GRID;
 #..#.#.###
 .##...##.#
 .....#.#..
-GRID
-$grid = [map { [split(//, $_)] } split(/\n/, $data)];
-push @tests, { grid => $grid, result => 41 };
-$data = <<GRID;
+
+210
 .#..##.###...#######
 ##.############..##.
 .#.######.########.#
@@ -184,21 +199,4 @@ $data = <<GRID;
 .#.#.###########.###
 #.#.#.#####.####.###
 ###.##.####.##.#..##
-GRID
-$grid = [map { [split(//, $_)] } split(/\n/, $data)];
-push @tests, { grid => $grid, result => 210 };
 
-foreach my $test (@tests) {
-	my $asteroid = best_location($test->{grid});
-	is($asteroid->{view_count},$test->{result});
-}
-
-open my $fh, '<', 'input.txt';
-chomp(my @data = <$fh>);
-close $fh;
-
-$grid = [map { [split(//, $_)] } @data];
-my $asteroid = best_location($grid);
-print $asteroid->{view_count} . "\n";
-
-print zap($grid, $asteroid) . "\n";
