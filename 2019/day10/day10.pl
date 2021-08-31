@@ -193,20 +193,6 @@ foreach my $test (@tests) {
 	is($asteroid->{view_count},$test->{result});
 }
 
-
-my $d = <<GRID;
-.#....#####...#..
-##...##.#####..##
-##...#...#.#####.
-..#.....X...###..
-..#.#.....#....##
-GRID
-
-$grid = [map { [split(//, $_)] } split(/\n/, $d)];
-my $a = { x => 8, y => 3 };
-#print zap($grid, $a) . "\n";
-#exit;
-
 open my $fh, '<', 'input.txt';
 chomp(my @data = <$fh>);
 close $fh;
