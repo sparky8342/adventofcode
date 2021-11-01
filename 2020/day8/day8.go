@@ -12,8 +12,14 @@ type Ins struct {
 	arg int
 }
 
-func get_program() []Ins {
-	program := []Ins{}
+type Program struct {
+	acm          int
+	pos          int
+	instructions []Ins
+}
+
+func get_program() Program {
+	instructions := []Ins{}
 
 	data, _ := ioutil.ReadFile("input.txt")
 	data = data[:len(data)-1]
@@ -22,63 +28,64 @@ func get_program() []Ins {
 		parts := strings.Split(line, " ")
 		op := parts[0]
 		arg, _ := strconv.Atoi(parts[1])
-		program = append(program, Ins{op: op, arg: arg})
+		instructions = append(instructions, Ins{op: op, arg: arg})
 	}
-	return program
+	p := Program{instructions: instructions}
+	return p
 }
 
-func run(program []Ins) (bool, int) {
-	acm := 0
-	pos := 0
+func run(program *Program) (bool, int) {
+	program.acm = 0
+	program.pos = 0
 	seen := make(map[int]bool)
 
-	for pos >= 0 && pos < len(program) {
-		if seen[pos] {
-			return true, acm
+	for program.pos >= 0 && program.pos < len(program.instructions) {
+		if seen[program.pos] {
+			return true, program.acm
 		}
-		seen[pos] = true
+		seen[program.pos] = true
 
-		ins := program[pos]
+		ins := program.instructions[program.pos]
 
 		switch ins.op {
 		case "acc":
 			{
-				acm += ins.arg
-				pos++
+				program.acm += ins.arg
+				program.pos++
 			}
 		case "jmp":
 			{
-				pos += ins.arg
+				program.pos += ins.arg
 			}
 		case "nop":
 			{
-				pos++
+				program.pos++
 			}
 		}
 	}
 
-	return false, acm
+	return false, program.acm
 }
 
 func main() {
 	program := get_program()
 
 	// part 1
-	_, acm := run(program)
+	_, acm := run(&program)
 	fmt.Println(acm)
 
 	// part 2
-	for i, _ := range program {
-		ins := program[i]
+	for i, _ := range program.instructions {
+		ins := program.instructions[i]
 
 		switch ins.op {
 		case "nop":
 			{
-				program[i].op = "jmp"
+				program.instructions[i].op = "jmp"
 			}
 		case "jmp":
 			{
-				program[i].op = "nop"
+				program.instructions[i].op = "nop"
 			}
 		default:
 			{
@@ -86,13 +93,13 @@ func main() {
 			}
 		}
 
-		looped, acm := run(program)
+		looped, acm := run(&program)
 
 		if looped == false {
 			fmt.Println(acm)
 			break
 		}
 
-		program[i].op = ins.op
+		program.instructions[i].op = ins.op
 	}
 }
