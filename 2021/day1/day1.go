@@ -27,12 +27,8 @@ func main() {
 		if numbers[i] < numbers[i+1] {
 			part1++
 		}
-		if i < len(numbers)-3 {
-			sum1 := numbers[i] + numbers[i+1] + numbers[i+2]
-			sum2 := numbers[i+1] + numbers[i+2] + numbers[i+3]
-			if sum2 > sum1 {
-				part2++
-			}
+		if i < len(numbers)-3 && numbers[i+3] > numbers[i] {
+			part2++
 		}
 	}
 	fmt.Println(part1)
