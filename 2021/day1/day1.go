@@ -34,7 +34,6 @@ func main() {
 				part2++
 			}
 		}
-
 	}
 	fmt.Println(part1)
 	fmt.Println(part2)
