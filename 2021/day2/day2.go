@@ -12,6 +12,12 @@ type instruction struct {
 	amount    int
 }
 
+type sub struct {
+	pos   int
+	depth int
+	aim   int
+}
+
 func get_data() []instruction {
 	data, _ := ioutil.ReadFile("input.txt")
 	data = data[:len(data)-1]
@@ -29,47 +35,29 @@ func get_data() []instruction {
 func main() {
 	instructions := get_data()
 
-	// part 1
-	pos := 0
-	depth := 0
-	for _, instruction := range instructions {
-		switch instruction.direction {
-		case "forward":
-			{
-				pos += instruction.amount
-			}
-		case "down":
-			{
-				depth += instruction.amount
-			}
-		case "up":
-			{
-				depth -= instruction.amount
-			}
-		}
-	}
-	fmt.Println(pos * depth)
+	part1 := sub{pos: 0, depth: 0}
+	part2 := sub{pos: 0, depth: 0, aim: 0}
 
-	// part 2
-	pos = 0
-	depth = 0
-	aim := 0
 	for _, instruction := range instructions {
 		switch instruction.direction {
 		case "forward":
 			{
-				pos += instruction.amount
-				depth += instruction.amount * aim
+				part1.pos += instruction.amount
+				part2.pos += instruction.amount
+				part2.depth += instruction.amount * part2.aim
 			}
 		case "down":
 			{
-				aim += instruction.amount
+				part1.depth += instruction.amount
+				part2.aim += instruction.amount
 			}
 		case "up":
 			{
-				aim -= instruction.amount
+				part1.depth -= instruction.amount
+				part2.aim -= instruction.amount
 			}
 		}
 	}
-	fmt.Println(pos * depth)
+	fmt.Println(part1.pos * part1.depth)
+	fmt.Println(part2.pos * part2.depth)
 }
