@@ -33,12 +33,19 @@ func main() {
 	pos := 0
 	depth := 0
 	for _, instruction := range instructions {
-		if instruction.direction == "forward" {
-			pos += instruction.amount
-		} else if instruction.direction == "down" {
-			depth += instruction.amount
-		} else if instruction.direction == "up" {
-			depth -= instruction.amount
+		switch instruction.direction {
+		case "forward":
+			{
+				pos += instruction.amount
+			}
+		case "down":
+			{
+				depth += instruction.amount
+			}
+		case "up":
+			{
+				depth -= instruction.amount
+			}
 		}
 	}
 	fmt.Println(pos * depth)
@@ -48,13 +55,20 @@ func main() {
 	depth = 0
 	aim := 0
 	for _, instruction := range instructions {
-		if instruction.direction == "forward" {
-			pos += instruction.amount
-			depth += instruction.amount * aim
-		} else if instruction.direction == "down" {
-			aim += instruction.amount
-		} else if instruction.direction == "up" {
-			aim -= instruction.amount
+		switch instruction.direction {
+		case "forward":
+			{
+				pos += instruction.amount
+				depth += instruction.amount * aim
+			}
+		case "down":
+			{
+				aim += instruction.amount
+			}
+		case "up":
+			{
+				aim -= instruction.amount
+			}
 		}
 	}
 	fmt.Println(pos * depth)
