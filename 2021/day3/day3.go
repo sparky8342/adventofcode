@@ -25,24 +25,25 @@ func count_at_pos(numbers []string, pos int) (int, int) {
 	return len(numbers) - ones, ones
 }
 
-func find_number(numbers []string, most bool) string {
+func get_oxygen_generator_rating(numbers []string) int64 {
+	return find_number(numbers, true)
+}
+
+func get_co2_scrubber_rating(numbers []string) int64 {
+	return find_number(numbers, false)
+}
+
+func find_number(numbers []string, most bool) int64 {
 	pos := 0
 	for len(numbers) > 1 {
 		zeroes, ones := count_at_pos(numbers, pos)
 
 		var match byte
-		if most {
-			if ones >= zeroes {
-				match = '1'
-			} else {
-				match = '0'
-			}
+
+		if (most && ones >= zeroes) || (!most && ones < zeroes) {
+			match = '1'
 		} else {
-			if ones < zeroes {
-				match = '1'
-			} else {
-				match = '0'
-			}
+			match = '0'
 		}
 
 		new_numbers := []string{}
@@ -55,7 +56,8 @@ func find_number(numbers []string, most bool) string {
 		numbers = new_numbers
 		pos++
 	}
-	return numbers[0]
+	num, _ := strconv.ParseInt(numbers[0], 2, 64)
+	return num
 }
 
 func main() {
@@ -77,9 +79,7 @@ func main() {
 	fmt.Println(gamma * epsilon)
 
 	// part 2
-	ogr_str := find_number(numbers, true)
-	ogr, _ := strconv.ParseInt(ogr_str, 2, 64)
-	csr_str := find_number(numbers, false)
-	csr, _ := strconv.ParseInt(csr_str, 2, 64)
+	ogr := get_oxygen_generator_rating(numbers)
+	csr := get_co2_scrubber_rating(numbers)
 	fmt.Println(ogr * csr)
 }
