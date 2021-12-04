@@ -23,24 +23,20 @@ func unmarked_sum(card Card) int {
 
 func check_win(card Card) bool {
 	for i := 0; i < 5; i++ {
-		win := true
+		win1 := true
+		win2 := true
 		for j := 0; j < 5; j++ {
 			if card[i][j] != -1 {
-				win = false
-				break
+				win1 = false
 			}
-		}
-		if win {
-			return true
-		}
-		win = true
-		for j := 0; j < 5; j++ {
 			if card[j][i] != -1 {
-				win = false
+				win2 = false
+			}
+			if !win1 && !win2 {
 				break
 			}
 		}
-		if win {
+		if win1 || win2 {
 			return true
 		}
 	}
@@ -58,23 +54,28 @@ func update_card(card Card, number int) {
 	}
 }
 
-func draw(numbers []int, cards []Card) {
-	amount := len(cards)
+func draw(numbers []int, cards []Card) (int, int) {
+	winners := []int{}
+	initial_amount := len(cards)
 	for _, num := range numbers {
 		next_cards := []Card{}
 		for _, card := range cards {
 			update_card(card, num)
 			if check_win(card) {
-				if len(cards) == amount || len(cards) == 1 {
-					sum := unmarked_sum(card)
-					fmt.Println(sum * num)
+				if len(cards) == initial_amount || len(cards) == 1 {
+					score := unmarked_sum(card) * num
+					winners = append(winners, score)
 				}
 			} else {
 				next_cards = append(next_cards, card)
 			}
 		}
+		if len(next_cards) == 0 {
+			break
+		}
 		cards = next_cards
 	}
+	return winners[0], winners[1]
 }
 
 func get_data() ([]int, []Card) {
@@ -109,5 +110,7 @@ func get_data() ([]int, []Card) {
 
 func main() {
 	numbers, cards := get_data()
-	draw(numbers, cards)
+	first_winner, last_winner := draw(numbers, cards)
+	fmt.Println(first_winner)
+	fmt.Println(last_winner)
 }
