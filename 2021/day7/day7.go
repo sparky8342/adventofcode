@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+var incremental_moves []int
+
 func get_data() []int {
 	data, _ := ioutil.ReadFile("input.txt")
 	line := strings.TrimSuffix(string(data), "\n")
@@ -36,27 +38,31 @@ func abs(n int) int {
 	return n
 }
 
-func incremental_move(n int) int {
+func populate_incremental_moves(max int) {
+	incremental_moves = make([]int, max)
 	cost := 0
 	step_cost := 1
-	for i := 0; i < n; i++ {
+	for i := 1; i < max; i++ {
 		cost += step_cost
 		step_cost++
+		incremental_moves[i] = cost
 	}
-	return cost
 }
 
 func main() {
 	crabs := get_data()
 
+	max_val := max(crabs)
+	populate_incremental_moves(max_val + 1)
+
 	best_fuel := -1
 	best_fuel_inc := -1
-	for target := 0; target < max(crabs); target++ {
+	for target := 0; target < max_val; target++ {
 		fuel := 0
 		fuel_inc := 0
 		for _, crab := range crabs {
 			fuel += abs(crab - target)
-			fuel_inc += incremental_move(abs(crab - target))
+			fuel_inc += incremental_moves[abs(crab-target)]
 		}
 		if best_fuel == -1 || fuel < best_fuel {
 			best_fuel = fuel
