@@ -42,14 +42,14 @@ func main() {
 	max_val := max(crabs)
 
 	best_fuel := -1
-	best_fuel_inc := -1.0
+	best_fuel_inc := -1
 	for target := 0; target < max_val; target++ {
 		fuel := 0
-		fuel_inc := 0.0
+		fuel_inc := 0
 		for _, crab := range crabs {
 			diff := abs(crab - target)
 			fuel += diff
-			fuel_inc += float64(diff) * (float64(diff+1) / 2.0)
+			fuel_inc += (diff * (diff + 1)) / 2
 		}
 		if best_fuel == -1 || fuel < best_fuel {
 			best_fuel = fuel
@@ -60,5 +60,5 @@ func main() {
 	}
 
 	fmt.Println(best_fuel)
-	fmt.Println(int(best_fuel_inc))
+	fmt.Println(best_fuel_inc)
 }
