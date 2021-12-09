@@ -12,6 +12,12 @@ type Grid struct {
 	height  int
 }
 
+type Pos struct {
+	x   int
+	y   int
+	val int
+}
+
 func get_data() Grid {
 	data, _ := ioutil.ReadFile("input.txt")
 	data = data[:len(data)-1]
@@ -30,21 +36,34 @@ func get_data() Grid {
 	return grid
 }
 
-func lower_than_surrounding(grid Grid, x int, y int) bool {
-	val := grid.squares[y][x]
-	for dy := -1; dy <= 1; dy++ {
-		for dx := -1; dx <= 1; dx++ {
-			new_y := y + dy
-			new_x := x + dx
-			if new_y < 0 || new_y == grid.height || new_x < 0 || new_x == grid.width {
-				continue
-			}
-			if grid.squares[new_y][new_x] < val {
-				return false
-			}
+func get_neighbours(grid Grid, pos Pos) []Pos {
+	neighbours := []Pos{}
+	if pos.x > 0 {
+		neighbours = append(neighbours, Pos{x: pos.x - 1, y: pos.y, val: grid.squares[pos.y][pos.x-1]})
+	}
+	if pos.x < grid.width-1 {
+		neighbours = append(neighbours, Pos{x: pos.x + 1, y: pos.y, val: grid.squares[pos.y][pos.x+1]})
+	}
+	if pos.y > 0 {
+		neighbours = append(neighbours, Pos{x: pos.x, y: pos.y - 1, val: grid.squares[pos.y-1][pos.x]})
+	}
+	if pos.y < grid.height-1 {
+		neighbours = append(neighbours, Pos{x: pos.x, y: pos.y + 1, val: grid.squares[pos.y+1][pos.x]})
+	}
+	return neighbours
+}
+
+func lower_than_surrounding(grid Grid, pos Pos) bool {
+	neighbours := get_neighbours(grid, pos)
+	higher_neighbour := false
+	for _, neighbour := range neighbours {
+		if grid.squares[neighbour.y][neighbour.x] < pos.val {
+			return false
+		} else if grid.squares[neighbour.y][neighbour.x] > pos.val {
+			higher_neighbour = true
 		}
 	}
-	return true
+	return higher_neighbour
 }
 
 func main() {
@@ -53,8 +72,9 @@ func main() {
 	risk_sum := 0
 	for y := 0; y < grid.height; y++ {
 		for x := 0; x < grid.width; x++ {
-			if lower_than_surrounding(grid, x, y) {
-				risk_sum += grid.squares[y][x] + 1
+			pos := Pos{x: x, y: y, val: grid.squares[y][x]}
+			if lower_than_surrounding(grid, pos) {
+				risk_sum += pos.val + 1
 			}
 		}
 	}
