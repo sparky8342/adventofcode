@@ -37,22 +37,17 @@ func get_data() Grid {
 }
 
 func (grid *Grid) step() bool {
-	for y := 0; y < grid.height; y++ {
-		for x := 0; x < grid.width; x++ {
-			grid.squares[y][x]++
-		}
-	}
-
-	flashed_this_step := 0
 	queue := []Pos{}
 	for y := 0; y < grid.height; y++ {
 		for x := 0; x < grid.width; x++ {
+			grid.squares[y][x]++
 			if grid.squares[y][x] > 9 {
 				queue = append(queue, Pos{x: x, y: y})
 			}
 		}
 	}
 
+	flashed_this_step := 0
 	flashed := map[Pos]bool{}
 	for len(queue) > 0 {
 		pos := queue[0]
