@@ -13,21 +13,19 @@ type Node struct {
 }
 
 type State struct {
-	node    *Node
-	visited map[string]bool
-	path    []string
+	node                *Node
+	visited             map[string]bool
+	small_visited_twice bool
 }
 
 func (state *State) copy_state() State {
-	cp := State{node: state.node}
+	cp := State{node: state.node, small_visited_twice: state.small_visited_twice}
 
 	cp.visited = map[string]bool{}
 	for k, _ := range state.visited {
 		cp.visited[k] = true
 	}
 
-	cp.path = make([]string, len(state.path))
-	copy(cp.path, state.path)
 	return cp
 }
 
@@ -47,24 +45,23 @@ func get_data() *Node {
 
 	nodes := map[string]*Node{}
 
+	pairs := [][2]string{}
 	for _, line := range lines {
-		parts := strings.Split(line, "-")
-		for _, part := range parts {
-			if _, found := nodes[part]; !found {
-				big := false
-				if all_caps(part) {
-					big = true
-				}
-				nodes[part] = &Node{name: part, big: big}
+		pair := strings.Split(line, "-")
+		pairs = append(pairs, [2]string{pair[0], pair[1]})
+	}
 
+	for _, pair := range pairs {
+		for _, name := range pair {
+			if _, found := nodes[name]; !found {
+				nodes[name] = &Node{name: name, big: all_caps(name)}
 			}
 		}
 	}
 
-	for _, line := range lines {
-		parts := strings.Split(line, "-")
-		left := nodes[parts[0]]
-		right := nodes[parts[1]]
+	for _, pair := range pairs {
+		left := nodes[pair[0]]
+		right := nodes[pair[1]]
 		left.neighbours = append(left.neighbours, right)
 		right.neighbours = append(right.neighbours, left)
 	}
@@ -72,8 +69,8 @@ func get_data() *Node {
 	return nodes["start"]
 }
 
-func walk(start *Node) int {
-	queue := []State{State{node: start, visited: map[string]bool{"start": true}, path: []string{"start"}}}
+func walk(start *Node, twice_visit bool) int {
+	queue := []State{State{node: start, visited: map[string]bool{"start": true}}}
 
 	path_count := 0
 
@@ -87,15 +84,21 @@ func walk(start *Node) int {
 		}
 
 		for _, neighbour := range state.node.neighbours {
-			if _, found := state.visited[neighbour.name]; !found {
-				new_state := state.copy_state()
-				new_state.node = neighbour
-				if !neighbour.big {
-					new_state.visited[neighbour.name] = true
-				}
-				new_state.path = append(new_state.path, neighbour.name)
-				queue = append(queue, new_state)
+			_, found := state.visited[neighbour.name]
+
+			if found && !(twice_visit && neighbour.name != "start" && neighbour.big == false && state.small_visited_twice == false) {
+				continue
 			}
+
+			new_state := state.copy_state()
+			new_state.node = neighbour
+			if !neighbour.big {
+				new_state.visited[neighbour.name] = true
+			}
+			if found {
+				new_state.small_visited_twice = true
+			}
+			queue = append(queue, new_state)
 		}
 	}
 
@@ -105,6 +108,9 @@ func walk(start *Node) int {
 func main() {
 	start := get_data()
 
-	path_count := walk(start)
+	path_count := walk(start, false)
+	fmt.Println(path_count)
+
+	path_count = walk(start, true)
 	fmt.Println(path_count)
 }
