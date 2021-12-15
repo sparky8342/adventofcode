@@ -69,8 +69,6 @@ func (grid *Grid) search() int {
 		state := queue[0]
 		queue = queue[1:]
 
-		fmt.Println(state)
-
 		if state.pos.x == grid.width-1 && state.pos.y == grid.height-1 {
 			return state.risk
 		}
@@ -93,8 +91,48 @@ func (grid *Grid) search() int {
 	return 0
 }
 
+func (grid *Grid) expand() Grid {
+	new_grid := Grid{height: grid.height * 5, width: grid.width * 5}
+
+	new_grid.squares = make([][]int, new_grid.height)
+	for i := range new_grid.squares {
+		new_grid.squares[i] = make([]int, new_grid.width)
+	}
+
+	// copy initial grid data
+	for y := 0; y < grid.height; y++ {
+		for x := 0; x < grid.width; x++ {
+			new_grid.squares[y][x] = grid.squares[y][x]
+		}
+	}
+
+	// fill in expanded squares
+	for square_y := 0; square_y < 5; square_y++ {
+		for square_x := 0; square_x < 5; square_x++ {
+			if square_x == 0 && square_y == 0 {
+				continue
+			}
+			for y := 0; y < grid.height; y++ {
+				for x := 0; x < grid.width; x++ {
+					new_val := grid.squares[y][x] + square_x + square_y
+					if new_val > 9 {
+						new_val -= 9
+					}
+					new_grid.squares[square_y*grid.height+y][square_x*grid.width+x] = new_val
+				}
+			}
+		}
+	}
+
+	return new_grid
+}
+
 func main() {
 	grid := get_data()
 	risk := grid.search()
+	fmt.Println(risk)
+
+	expanded_grid := grid.expand()
+	risk = expanded_grid.search()
 	fmt.Println(risk)
 }
