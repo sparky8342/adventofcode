@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"sort"
 	"strings"
 )
 
@@ -22,6 +21,67 @@ type Pos struct {
 type State struct {
 	pos  Pos
 	risk int
+}
+
+type Heap struct {
+	hslice []State
+}
+
+func heap_parent(i int) int {
+	return (i - 1) / 2
+}
+
+func heap_left(i int) int {
+	return 2*i + 1
+}
+
+func heap_right(i int) int {
+	return 2*i + 2
+}
+
+func (heap *Heap) insert(state State) {
+	heap.hslice = append(heap.hslice, state)
+
+	i := len(heap.hslice) - 1
+	for i != 0 {
+		parent := heap_parent(i)
+		if heap.hslice[parent].risk > heap.hslice[i].risk {
+			heap.hslice[i], heap.hslice[parent] = heap.hslice[parent], heap.hslice[i]
+			i = parent
+		} else {
+			break
+		}
+	}
+}
+
+func (heap *Heap) pop_min() State {
+	if len(heap.hslice) == 1 {
+		state := heap.hslice[0]
+		heap.hslice = []State{}
+		return state
+	}
+
+	min := heap.hslice[0]
+	heap.hslice[0] = heap.hslice[len(heap.hslice)-1]
+	heap.hslice = heap.hslice[0 : len(heap.hslice)-1]
+	heap.min_heapify(0)
+	return min
+}
+
+func (heap *Heap) min_heapify(i int) {
+	l := heap_left(i)
+	r := heap_right(i)
+	smallest := i
+	if l < len(heap.hslice) && heap.hslice[l].risk < heap.hslice[i].risk {
+		smallest = l
+	}
+	if r < len(heap.hslice) && heap.hslice[r].risk < heap.hslice[smallest].risk {
+		smallest = r
+	}
+	if smallest != i {
+		heap.hslice[i], heap.hslice[smallest] = heap.hslice[smallest], heap.hslice[i]
+		heap.min_heapify(smallest)
+	}
 }
 
 func get_data() Grid {
@@ -62,12 +122,12 @@ func (grid *Grid) get_neighbours(pos *Pos) []Pos {
 func (grid *Grid) search() int {
 	start_pos := Pos{x: 0, y: 0, risk: grid.squares[0][0]}
 	start_state := State{pos: start_pos, risk: 0}
-	queue := []State{start_state}
+	queue := Heap{}
+	queue.insert(start_state)
 
 	visited := map[Pos]bool{}
-	for len(queue) > 0 {
-		state := queue[0]
-		queue = queue[1:]
+	for len(queue.hslice) > 0 {
+		state := queue.pop_min()
 
 		if state.pos.x == grid.width-1 && state.pos.y == grid.height-1 {
 			return state.risk
@@ -81,12 +141,8 @@ func (grid *Grid) search() int {
 		neighbours := grid.get_neighbours(&state.pos)
 		for _, neighbour := range neighbours {
 			new_state := State{pos: neighbour, risk: state.risk + neighbour.risk}
-			queue = append(queue, new_state)
+			queue.insert(new_state)
 		}
-
-		sort.Slice(queue, func(i, j int) bool {
-			return queue[i].risk < queue[j].risk
-		})
 	}
 	return 0
 }
