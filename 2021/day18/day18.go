@@ -7,11 +7,18 @@ import (
 	"strings"
 )
 
-func get_data() []string {
+func get_data() [][]string {
 	data, _ := ioutil.ReadFile("input.txt")
 	data = data[:len(data)-1]
 	lines := strings.Split(string(data), "\n")
-	return lines
+
+	numbers := [][]string{}
+	for _, line := range lines {
+		num := strings.Split(line, "")
+		numbers = append(numbers, num)
+	}
+
+	return numbers
 }
 
 func add(num1 []string, num2 []string) []string {
@@ -142,13 +149,7 @@ func magnitude(num []string) int {
 }
 
 func main() {
-	data := get_data()
-
-	numbers := [][]string{}
-	for _, line := range data {
-		num := strings.Split(line, "")
-		numbers = append(numbers, num)
-	}
+	numbers := get_data()
 
 	total := numbers[0]
 	for i := 1; i < len(numbers); i++ {
