@@ -159,4 +159,18 @@ func main() {
 	mag := magnitude(total)
 	fmt.Println(mag)
 
+	max_mag := 0
+	for i := 0; i < len(numbers); i++ {
+		for j := 0; j < len(numbers); j++ {
+			if i == j {
+				continue
+			}
+			total := reduce(add(numbers[i], numbers[j]))
+			mag := magnitude(total)
+			if mag > max_mag {
+				max_mag = mag
+			}
+		}
+	}
+	fmt.Println(max_mag)
 }
