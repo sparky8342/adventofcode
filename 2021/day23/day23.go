@@ -114,6 +114,10 @@ func (pos *Pos) get_moves(part int) []Move {
 	*/
 
 	moves := []Move{}
+	depth := 4
+	if part == 1 {
+		depth = 2
+	}
 
 	// moves from hallway to rooms
 outer:
@@ -132,10 +136,8 @@ outer:
 				continue outer
 			}
 		}
-		depth := 4
 		if part == 1 {
 			room -= 2
-			depth = 2
 		}
 		for j := room; j >= room-3; j-- {
 			if pos[j] == 0 {
