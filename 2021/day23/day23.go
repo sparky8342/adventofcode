@@ -16,6 +16,12 @@ type State struct {
 	cost int
 }
 
+type Move struct {
+	from int
+	to   int
+	cost int
+}
+
 type PriorityQueue []*State
 
 func (pq PriorityQueue) Len() int { return len(pq) }
@@ -45,11 +51,13 @@ func (pq *PriorityQueue) Pop() interface{} {
 var nums map[byte]int
 var destinations [][]int
 var moves_out map[int]int
+var costs [5]int
 
 func init() {
 	nums = map[byte]int{'A': 1, 'B': 2, 'C': 3, 'D': 4}
 	destinations = [][]int{{0, 0}, {2, 14}, {4, 18}, {6, 22}, {8, 26}}
 	moves_out = map[int]int{11: 2, 15: 4, 19: 6, 23: 8}
+	costs = [5]int{0, 1, 10, 100, 1000}
 }
 
 func get_data() Pos {
@@ -96,7 +104,7 @@ func abs(n int) int {
 	}
 }
 
-func (pos *Pos) get_moves(part int) [][]int {
+func (pos *Pos) get_moves(part int) []Move {
 	/*
 		00 01 02 03 04 05 06 07 08 09 10
 		      11    15    19    23
@@ -105,7 +113,7 @@ func (pos *Pos) get_moves(part int) [][]int {
 		      14    18    22    26
 	*/
 
-	var moves [][]int
+	moves := []Move{}
 
 	// moves from hallway to rooms
 outer:
@@ -131,7 +139,13 @@ outer:
 		}
 		for j := room; j >= room-3; j-- {
 			if pos[j] == 0 {
-				moves = append(moves, []int{i, j, abs(i-top) + depth - (room - j)})
+				moves = append(moves,
+					Move{
+						from: i,
+						to:   j,
+						cost: (abs(i-top) + depth - (room - j)) * costs[piece],
+					},
+				)
 				break
 			}
 			if pos[j] != piece {
@@ -151,7 +165,13 @@ outer:
 					continue
 				}
 				if pos[k] == 0 {
-					moves = append(moves, []int{i + j, k, j + 1 + moves_out[i] - k})
+					moves = append(moves,
+						Move{
+							from: i + j,
+							to:   k,
+							cost: (j + 1 + moves_out[i] - k) * costs[pos[i+j]],
+						},
+					)
 				} else {
 					break
 				}
@@ -161,7 +181,13 @@ outer:
 					continue
 				}
 				if pos[k] == 0 {
-					moves = append(moves, []int{i + j, k, j + 1 + k - moves_out[i]})
+					moves = append(moves,
+						Move{
+							from: i + j,
+							to:   k,
+							cost: (j + 1 + k - moves_out[i]) * costs[pos[i+j]],
+						},
+					)
 				} else {
 					break
 				}
@@ -175,7 +201,6 @@ outer:
 
 func search(start_pos Pos, part int) int {
 	start_state := State{pos: start_pos, cost: 0}
-	costs := [5]int{0, 1, 10, 100, 1000}
 	visited := map[Pos]int{}
 
 	var end_pos Pos
@@ -207,11 +232,11 @@ func search(start_pos Pos, part int) int {
 
 		for _, move := range moves {
 			new_pos := state.pos.copy_pos()
-			new_pos[move[0]] = 0
-			new_pos[move[1]] = state.pos[move[0]]
+			new_pos[move.from] = 0
+			new_pos[move.to] = state.pos[move.from]
 			heap.Push(&queue, &State{
 				pos:  new_pos,
-				cost: state.cost + move[2]*costs[state.pos[move[0]]],
+				cost: state.cost + move.cost,
 			})
 		}
 	}
