@@ -2,16 +2,33 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"strconv"
+	"strings"
 )
 
 var div_z [14]int
 var add_x [14]int
 var add_y [14]int
 
-func init() {
-	div_z = [14]int{1, 1, 1, 26, 1, 1, 1, 26, 26, 1, 26, 26, 26, 26}
-	add_x = [14]int{11, 14, 10, 0, 12, 12, 12, -8, -9, 11, 0, -5, -6, -12}
-	add_y = [14]int{8, 13, 2, 7, 11, 4, 13, 13, 10, 1, 2, 14, 6, 14}
+func get_data() {
+	data, _ := ioutil.ReadFile("input.txt")
+	data = data[:len(data)-1]
+	lines := strings.Split(string(data), "\n")
+
+	for i := 0; i < 14; i++ {
+		l := lines[i*18+4]
+		parts := strings.Split(l, " ")
+		div_z[i], _ = strconv.Atoi(parts[2])
+
+		l = lines[i*18+5]
+		parts = strings.Split(l, " ")
+		add_x[i], _ = strconv.Atoi(parts[2])
+
+		l = lines[i*18+15]
+		parts = strings.Split(l, " ")
+		add_y[i], _ = strconv.Atoi(parts[2])
+	}
 }
 
 func run_section(section int, z int, digit int) int {
@@ -32,9 +49,6 @@ func run_section(section int, z int, digit int) int {
 }
 
 func pow10(p int) int {
-	if p == 0 {
-		return 1
-	}
 	r := 1
 	for i := 0; i < p; i++ {
 		r = r * 10
@@ -43,6 +57,8 @@ func pow10(p int) int {
 }
 
 func main() {
+	get_data()
+
 	max_z_map := map[int]int{0: 0}
 	min_z_map := map[int]int{0: 0}
 
