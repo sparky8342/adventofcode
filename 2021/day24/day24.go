@@ -32,19 +32,15 @@ func get_data() {
 }
 
 func run_section(section int, z int, digit int) int {
-	x := z % 26
-	z = z / div_z[section]
-	x += add_x[section]
-	if x == digit {
+	var x int
+	if z%26+add_x[section] == digit {
 		x = 0
 	} else {
 		x = 1
 	}
-	y := 25*x + 1
-	z = z * y
-	y = digit + add_y[section]
-	y = y * x
-	z = z + y
+	z = z / div_z[section]
+	z *= 25*x + 1
+	z += (digit + add_y[section]) * x
 	return z
 }
 
@@ -56,25 +52,10 @@ func pow10(p int) int {
 	return r
 }
 
-func dedupe(nums []int) []int {
-	mp := map[int]struct{}{}
-	for _, num := range nums {
-		mp[num] = struct{}{}
-	}
-	ret := []int{}
-	for num, _ := range mp {
-		ret = append(ret, num)
-	}
-	return ret
-}
-
 func main() {
 	get_data()
 
 	z_map := map[int][]int{0: []int{0}}
-
-	//max_z_map := map[int]int{0: 0}
-	//min_z_map := map[int]int{0: 0}
 
 	// run the sections in reverse, keeping tracking of
 	// which inputs lead to 0 at the last step
@@ -92,7 +73,7 @@ func main() {
 					}
 
 					if vals2, found2 := new_z_map[z]; found2 {
-						new_vals = dedupe(append(new_vals, vals2...))
+						new_vals = append(new_vals, vals2...)
 					}
 					new_z_map[z] = new_vals
 				}
