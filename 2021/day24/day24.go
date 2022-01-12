@@ -56,49 +56,62 @@ func pow10(p int) int {
 	return r
 }
 
+func dedupe(nums []int) []int {
+	mp := map[int]struct{}{}
+	for _, num := range nums {
+		mp[num] = struct{}{}
+	}
+	ret := []int{}
+	for num, _ := range mp {
+		ret = append(ret, num)
+	}
+	return ret
+}
+
 func main() {
 	get_data()
 
-	max_z_map := map[int]int{0: 0}
-	min_z_map := map[int]int{0: 0}
+	z_map := map[int][]int{0: []int{0}}
+
+	//max_z_map := map[int]int{0: 0}
+	//min_z_map := map[int]int{0: 0}
 
 	// run the sections in reverse, keeping tracking of
 	// which inputs lead to 0 at the last step
 	for section := 13; section >= 0; section-- {
-		new_max_z_map := map[int]int{}
-		new_min_z_map := map[int]int{}
+		new_z_map := map[int][]int{}
 		for z := 0; z <= 10000000; z++ {
 			for digit := 1; digit <= 9; digit++ {
 				new_z := run_section(section, z, digit)
 
-				if val, found := max_z_map[new_z]; found {
-					new_val := val + (digit * pow10(13-section))
-					if val2, found2 := new_max_z_map[z]; found2 {
-						if new_val > val2 {
-							new_max_z_map[z] = new_val
-						}
-					} else {
-						new_max_z_map[z] = new_val
+				if vals, found := z_map[new_z]; found {
+					new_vals := []int{}
+					for _, val := range vals {
+						new_val := val + (digit * pow10(13-section))
+						new_vals = append(new_vals, new_val)
 					}
-				}
 
-				if val, found := min_z_map[new_z]; found {
-					new_val := val + (digit * pow10(13-section))
-					if val2, found2 := new_min_z_map[z]; found2 {
-						if new_val < val2 {
-							new_min_z_map[z] = new_val
-						}
-					} else {
-						new_min_z_map[z] = new_val
+					if vals2, found2 := new_z_map[z]; found2 {
+						new_vals = dedupe(append(new_vals, vals2...))
 					}
+					new_z_map[z] = new_vals
 				}
-
 			}
 		}
-		max_z_map = new_max_z_map
-		min_z_map = new_min_z_map
+		z_map = new_z_map
 	}
 
-	fmt.Println(max_z_map[0])
-	fmt.Println(min_z_map[0])
+	ids := z_map[0]
+	min := ids[0]
+	max := ids[0]
+	for i := 1; i < len(ids); i++ {
+		if ids[i] < min {
+			min = ids[i]
+		}
+		if ids[i] > max {
+			max = ids[i]
+		}
+	}
+	fmt.Println(max)
+	fmt.Println(min)
 }
