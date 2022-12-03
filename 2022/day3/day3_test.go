@@ -19,3 +19,12 @@ func TestPrioritySum(t *testing.T) {
 		t.Errorf("got %d, wanted %d", got_sum, want_sum)
 	}
 }
+
+func TestBadgeSum(t *testing.T) {
+	got_sum := badge_sum(data)
+	want_sum := 70
+
+	if got_sum != want_sum {
+		t.Errorf("got %d, wanted %d", got_sum, want_sum)
+	}
+}
