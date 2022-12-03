@@ -24,7 +24,6 @@ func priority_sum(data []string) int {
 		letters := map[byte]Empty{}
 		for i := 0; i < len(line)/2; i++ {
 			letters[line[i]] = Empty{}
-			fmt.Printf(string(line[i]))
 		}
 
 		for i := len(line) / 2; i < len(line); i++ {
@@ -41,8 +40,38 @@ func priority_sum(data []string) int {
 	return sum
 }
 
+func badge_sum(data []string) int {
+	sum := 0
+
+	for i := 0; i < len(data); i += 3 {
+		letter_sets := []map[byte]Empty{}
+		for j := 0; j < 3; j++ {
+			line := data[i+j]
+			letter_set := map[byte]Empty{}
+			for k := 0; k < len(line); k++ {
+				letter_set[line[k]] = Empty{}
+			}
+			letter_sets = append(letter_sets, letter_set)
+		}
+		for letter, _ := range letter_sets[0] {
+			if _, seen := letter_sets[1][letter]; seen {
+				if _, seen2 := letter_sets[2][letter]; seen2 {
+					if letter >= 'a' {
+						sum += int(letter) - 'a' + 1
+					} else {
+						sum += int(letter) - 'A' + 27
+					}
+				}
+			}
+		}
+	}
+	return sum
+}
+
 func main() {
 	data := load_data("input.txt")
 	sum := priority_sum(data)
+	fmt.Println(sum)
+	sum = badge_sum(data)
 	fmt.Println(sum)
 }
