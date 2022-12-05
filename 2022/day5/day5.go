@@ -74,15 +74,11 @@ func move_crate(stacks Stacks, source int, destination int) {
 	stacks[destination] = append(stacks[destination], crate)
 }
 
-func move(stacks Stacks, instruction Instruction) {
-	for i := 1; i <= instruction.amount; i++ {
-		move_crate(stacks, instruction.source, instruction.destination)
-	}
-}
-
 func process_instructions(stacks Stacks, instructions []Instruction) {
-	for _, ins := range instructions {
-		move(stacks, ins)
+	for _, instruction := range instructions {
+		for i := 1; i <= instruction.amount; i++ {
+			move_crate(stacks, instruction.source, instruction.destination)
+		}
 	}
 }
 
