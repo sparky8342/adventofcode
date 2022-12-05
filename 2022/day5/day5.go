@@ -47,15 +47,6 @@ func parse_data(data string) (Stacks, []Instruction) {
 		}
 	}
 
-	/*
-		for i := 0; i < no_of_stacks; i++ {
-			for _, crate := range stacks[i] {
-				fmt.Print(string(crate))
-			}
-			fmt.Println()
-		}
-	*/
-
 	// parse instructions
 	lines = strings.Split(parts[1], "\n")
 	r := regexp.MustCompile("move (\\d+) from (\\d+) to (\\d+)")
@@ -95,6 +86,16 @@ func process_instructions(stacks Stacks, instructions []Instruction) {
 	}
 }
 
+func process_instructions_9001(stacks Stacks, instructions []Instruction) {
+	for _, ins := range instructions {
+		source := ins.source - 1
+		destination := ins.destination - 1
+		crates := stacks[source][len(stacks[source])-ins.amount:]
+		stacks[source] = stacks[source][:len(stacks[source])-ins.amount]
+		stacks[destination] = append(stacks[destination], crates...)
+	}
+}
+
 func top_of_stacks(stacks Stacks) string {
 	top := ""
 	for i := 0; i < len(stacks); i++ {
@@ -105,9 +106,14 @@ func top_of_stacks(stacks Stacks) string {
 
 func main() {
 	data := load_data("input.txt")
-	stacks, instructions := parse_data(data)
 
+	stacks, instructions := parse_data(data)
 	process_instructions(stacks, instructions)
 	top := top_of_stacks(stacks)
+	fmt.Println(top)
+
+	stacks, instructions = parse_data(data)
+	process_instructions_9001(stacks, instructions)
+	top = top_of_stacks(stacks)
 	fmt.Println(top)
 }
