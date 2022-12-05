@@ -22,3 +22,14 @@ func TestTopOfStack(t *testing.T) {
 		t.Errorf("got %s, wanted %s", got_top, want_top)
 	}
 }
+
+func TestTopOfStackWith9001(t *testing.T) {
+	stacks, instructions := parse_data(data)
+	process_instructions_9001(stacks, instructions)
+	got_top := top_of_stacks(stacks)
+	want_top := "MCD"
+
+	if got_top != want_top {
+		t.Errorf("got %s, wanted %s", got_top, want_top)
+	}
+}
