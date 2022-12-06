@@ -13,20 +13,20 @@ func load_data(filename string) string {
 	return string(data)
 }
 
-func find_marker(data string) int {
+func find_marker(data string, no_chars int) int {
 	letters := map[byte]int{}
-	for i := 0; i < 4; i++ {
+	for i := 0; i < no_chars; i++ {
 		letters[data[i]]++
 	}
 
-	for i := 4; i < len(data); i++ {
-		if len(letters) == 4 {
+	for i := no_chars; i < len(data); i++ {
+		if len(letters) == no_chars {
 			return i
 		}
 
 		letters[data[i]]++
 
-		previous := data[i-4]
+		previous := data[i-no_chars]
 		letters[previous]--
 		if letters[previous] == 0 {
 			delete(letters, previous)
@@ -37,6 +37,10 @@ func find_marker(data string) int {
 
 func main() {
 	data := load_data("input.txt")
-	marker := find_marker(data)
+
+	marker := find_marker(data, 4)
+	fmt.Println(marker)
+
+	marker = find_marker(data, 14)
 	fmt.Println(marker)
 }
