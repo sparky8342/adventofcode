@@ -32,32 +32,39 @@ func load_data(filename string) []string {
 }
 
 func get_sizes(top *Dir) (int, int) {
-	sum := 0
-	smallest := 0
-	total := find_sizes(top, &sum, 0, &smallest)
+	sizes := []int{}
 
-	sum = 0
+	total := find_sizes(top, &sizes)
+
+	sum := 0
+	for _, size := range sizes {
+		if size <= MAX_DIR_SIZE {
+			sum += size
+		}
+	}
+
 	free := TOTAL_DISK - total
 	needed := SPACE_NEEDED - free
-	smallest = math.MaxInt32
-	_ = find_sizes(top, &sum, needed, &smallest)
+
+	smallest := math.MaxInt32
+	for _, size := range sizes {
+		if size >= needed && size <= smallest {
+			smallest = size
+		}
+	}
+
 	return sum, smallest
 }
 
-func find_sizes(dir *Dir, sum *int, needed int, smallest *int) int {
+func find_sizes(dir *Dir, sizes *[]int) int {
 	total := 0
 	for _, file := range dir.files {
 		total += file.size
 	}
 	for _, sub_dir := range dir.dirs {
-		total += find_sizes(sub_dir, sum, needed, smallest)
+		total += find_sizes(sub_dir, sizes)
 	}
-	if total <= MAX_DIR_SIZE {
-		*sum += total
-	}
-	if total >= needed && total < *smallest {
-		*smallest = total
-	}
+	*sizes = append(*sizes, total)
 	return total
 }
 
