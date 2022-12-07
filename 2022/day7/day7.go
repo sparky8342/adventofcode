@@ -23,6 +23,13 @@ type Dir struct {
 	files  []File
 }
 
+func NewDir(parent *Dir) *Dir {
+	d := new(Dir)
+	d.parent = parent
+	d.dirs = map[string]*Dir{}
+	return d
+}
+
 func load_data(filename string) []string {
 	data, _ := ioutil.ReadFile(filename)
 	if data[len(data)-1] == '\n' {
@@ -69,7 +76,7 @@ func find_sizes(dir *Dir, sizes *[]int) int {
 }
 
 func create_tree(data []string) *Dir {
-	top := &Dir{dirs: map[string]*Dir{}}
+	top := NewDir(nil)
 	node := top
 
 	for _, line := range data {
@@ -85,7 +92,7 @@ func create_tree(data []string) *Dir {
 				}
 			}
 		} else if parts[0] == "dir" {
-			node.dirs[parts[1]] = &Dir{parent: node, dirs: map[string]*Dir{}}
+			node.dirs[parts[1]] = NewDir(node)
 		} else {
 			size, _ := strconv.Atoi(parts[0])
 			node.files = append(node.files, File{name: parts[1], size: size})
