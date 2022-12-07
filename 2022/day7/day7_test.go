@@ -31,10 +31,14 @@ $ ls
 
 func TestGetSize(t *testing.T) {
 	tree := create_tree(strings.Split(data, "\n"))
-	got_size := get_sizes(tree)
-	want_size := 95437
+	got_size, got_smallest := get_sizes(tree)
+	want_size, want_smallest := 95437, 24933642
 
 	if got_size != want_size {
 		t.Errorf("got %d, wanted %d", got_size, want_size)
+	}
+
+	if got_smallest != want_smallest {
+		t.Errorf("got %d, wanted %d", got_smallest, want_smallest)
 	}
 }

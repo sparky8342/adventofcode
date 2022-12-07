@@ -3,9 +3,14 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"strconv"
 	"strings"
 )
+
+const MAX_DIR_SIZE = 100000
+const TOTAL_DISK = 70000000
+const SPACE_NEEDED = 30000000
 
 type File struct {
 	name string
@@ -26,22 +31,32 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func get_sizes(top *Dir) int {
+func get_sizes(top *Dir) (int, int) {
 	sum := 0
-	_ = find_sizes(top, &sum)
-	return sum
+	smallest := 0
+	total := find_sizes(top, &sum, 0, &smallest)
+
+	sum = 0
+	free := TOTAL_DISK - total
+	needed := SPACE_NEEDED - free
+	smallest = math.MaxInt32
+	_ = find_sizes(top, &sum, needed, &smallest)
+	return sum, smallest
 }
 
-func find_sizes(dir *Dir, sum *int) int {
+func find_sizes(dir *Dir, sum *int, needed int, smallest *int) int {
 	total := 0
 	for _, file := range dir.files {
 		total += file.size
 	}
 	for _, sub_dir := range dir.dirs {
-		total += find_sizes(sub_dir, sum)
+		total += find_sizes(sub_dir, sum, needed, smallest)
 	}
-	if total <= 100000 {
+	if total <= MAX_DIR_SIZE {
 		*sum += total
+	}
+	if total >= needed && total < *smallest {
+		*smallest = total
 	}
 	return total
 }
@@ -76,6 +91,7 @@ func main() {
 	data := load_data("input.txt")
 
 	tree := create_tree(data)
-	size := get_sizes(tree)
+	size, smallest := get_sizes(tree)
 	fmt.Println(size)
+	fmt.Println(smallest)
 }
