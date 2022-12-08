@@ -12,15 +12,10 @@ const MAX_DIR_SIZE = 100000
 const TOTAL_DISK = 70000000
 const SPACE_NEEDED = 30000000
 
-type File struct {
-	name string
-	size int
-}
-
 type Dir struct {
 	dirs   map[string]*Dir
 	parent *Dir
-	files  []File
+	files  []int
 }
 
 func NewDir(parent *Dir) *Dir {
@@ -65,8 +60,8 @@ func get_sizes(top *Dir) (int, int) {
 
 func find_sizes(dir *Dir, sizes *[]int) int {
 	total := 0
-	for _, file := range dir.files {
-		total += file.size
+	for _, size := range dir.files {
+		total += size
 	}
 	for _, sub_dir := range dir.dirs {
 		total += find_sizes(sub_dir, sizes)
@@ -95,7 +90,7 @@ func create_tree(data []string) *Dir {
 			node.dirs[parts[1]] = NewDir(node)
 		} else {
 			size, _ := strconv.Atoi(parts[0])
-			node.files = append(node.files, File{name: parts[1], size: size})
+			node.files = append(node.files, size)
 		}
 	}
 	return top
