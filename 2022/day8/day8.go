@@ -17,7 +17,23 @@ type Pos struct {
 	y int
 }
 
+type Dir struct {
+	x int
+	y int
+}
+
 type Empty struct {
+}
+
+var dirs []Dir
+
+func init() {
+	dirs = []Dir{
+		Dir{x: -1, y: 0},
+		Dir{x: +1, y: 0},
+		Dir{x: 0, y: -1},
+		Dir{x: 0, y: +1},
+	}
 }
 
 func load_data(filename string) []string {
@@ -49,7 +65,7 @@ func make_grid(data []string) Grid {
 func visible(grid Grid) int {
 	trees := map[Pos]Empty{}
 
-	// from top
+	// from top and bottom
 	for x := 0; x < grid.width; x++ {
 		var max uint8 = 0
 		for y := 0; y < grid.height; y++ {
@@ -58,11 +74,7 @@ func visible(grid Grid) int {
 				max = grid.squares[y][x]
 			}
 		}
-	}
-
-	// from bottom
-	for x := 0; x < grid.width; x++ {
-		var max uint8 = 0
+		max = 0
 		for y := grid.height - 1; y >= 0; y-- {
 			if y == grid.height-1 || grid.squares[y][x] > max {
 				trees[Pos{x: x, y: y}] = Empty{}
@@ -71,7 +83,7 @@ func visible(grid Grid) int {
 		}
 	}
 
-	// from left
+	// from left and right
 	for y := 0; y < grid.height; y++ {
 		var max uint8 = 0
 		for x := 0; x < grid.width; x++ {
@@ -80,11 +92,7 @@ func visible(grid Grid) int {
 				max = grid.squares[y][x]
 			}
 		}
-	}
-
-	// from right
-	for y := 0; y < grid.height; y++ {
-		var max uint8 = 0
+		max = 0
 		for x := grid.width - 1; x >= 0; x-- {
 			if x == grid.height-1 || grid.squares[y][x] > max {
 				trees[Pos{x: x, y: y}] = Empty{}
@@ -100,52 +108,21 @@ func scenic_score(grid Grid, pos Pos) int {
 	score := 1
 	tree_height := grid.squares[pos.y][pos.x]
 
-	// up
-	distance := 0
-	for y := pos.y - 1; y >= 0; y-- {
-		distance++
-		if grid.squares[y][pos.x] >= tree_height {
-			break
+	for _, dir := range dirs {
+		distance := 0
+		x := pos.x + dir.x
+		y := pos.y + dir.y
+		for x >= 0 && x < grid.width && y >= 0 && y < grid.height {
+			distance++
+			if grid.squares[y][x] >= tree_height {
+				break
+			}
+			x += dir.x
+			y += dir.y
 		}
-	}
-	if distance > 0 {
-		score = score * distance
-	}
-
-	// down
-	distance = 0
-	for y := pos.y + 1; y < grid.height; y++ {
-		distance++
-		if grid.squares[y][pos.x] >= tree_height {
-			break
+		if distance > 0 {
+			score *= distance
 		}
-	}
-	if distance > 0 {
-		score = score * distance
-	}
-
-	// left
-	distance = 0
-	for x := pos.x - 1; x >= 0; x-- {
-		distance++
-		if grid.squares[pos.y][x] >= tree_height {
-			break
-		}
-	}
-	if distance > 0 {
-		score = score * distance
-	}
-
-	// right
-	distance = 0
-	for x := pos.x + 1; x < grid.width; x++ {
-		distance++
-		if grid.squares[pos.y][x] >= tree_height {
-			break
-		}
-	}
-	if distance > 0 {
-		score = score * distance
 	}
 
 	return score
