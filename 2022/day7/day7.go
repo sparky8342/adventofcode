@@ -37,19 +37,15 @@ func get_sizes(top *Dir) (int, int) {
 	sizes := []int{}
 
 	total := find_sizes(top, &sizes)
+	free := TOTAL_DISK - total
+	needed := SPACE_NEEDED - free
+	smallest := math.MaxInt32
 
 	sum := 0
 	for _, size := range sizes {
 		if size <= MAX_DIR_SIZE {
 			sum += size
 		}
-	}
-
-	free := TOTAL_DISK - total
-	needed := SPACE_NEEDED - free
-
-	smallest := math.MaxInt32
-	for _, size := range sizes {
 		if size >= needed && size <= smallest {
 			smallest = size
 		}
