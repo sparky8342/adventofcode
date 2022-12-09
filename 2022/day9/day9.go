@@ -62,42 +62,30 @@ func abs(n int) int {
 	}
 }
 
+func min(a int, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func max(a int, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
 func move_tail(head *Pos, tail *Pos) {
 	// close enough
 	if abs(head.x-tail.x) <= 1 && abs(head.y-tail.y) <= 1 {
 		return
 	}
 
-	// in same line
-	if head.x == tail.x || head.y == tail.y {
-		if head.x == tail.x {
-			if head.y > tail.y {
-				tail.y++
-			} else {
-				tail.y--
-			}
-		}
-		if head.y == tail.y {
-			if head.x > tail.x {
-				tail.x++
-			} else {
-				tail.x--
-			}
-		}
-		return
-	}
-
-	// diagonal movement
-	if head.x > tail.x {
-		tail.x++
-	} else {
-		tail.x--
-	}
-	if head.y > tail.y {
-		tail.y++
-	} else {
-		tail.y--
-	}
+	tail.x += min(max(head.x-tail.x, -1), 1)
+	tail.y += min(max(head.y-tail.y, -1), 1)
 }
 
 func run_commands(commands []Command, knots int) int {
@@ -111,8 +99,8 @@ func run_commands(commands []Command, knots int) int {
 	visited[rope[len(rope)-1]] = Empty{}
 
 	for _, command := range commands {
-
 		dir := dirs[command.dir]
+
 		for i := 0; i < command.steps; i++ {
 			rope[0].x += dir.x
 			rope[0].y += dir.y
@@ -120,6 +108,7 @@ func run_commands(commands []Command, knots int) int {
 			for i := 0; i < knots-1; i++ {
 				move_tail(&rope[i], &rope[i+1])
 			}
+
 			visited[rope[len(rope)-1]] = Empty{}
 		}
 
