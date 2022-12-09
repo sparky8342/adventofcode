@@ -100,7 +100,7 @@ func move_tail(head *Pos, tail *Pos) {
 	}
 }
 
-func run_commands(commands []Command) int {
+func run_commands_part1(commands []Command) int {
 	visited := map[Pos]Empty{}
 
 	head := Pos{x: 0, y: 0}
@@ -122,10 +122,40 @@ func run_commands(commands []Command) int {
 	return len(visited)
 }
 
+func run_commands_part2(commands []Command) int {
+	visited := map[Pos]Empty{}
+
+	rope := make([]Pos, 10)
+	for i := 0; i < 10; i++ {
+		rope[i] = Pos{x: 0, y: 0}
+	}
+	visited[rope[9]] = Empty{}
+
+	for _, command := range commands {
+
+		dir := dirs[command.dir]
+		for i := 0; i < command.steps; i++ {
+			rope[0].x += dir.x
+			rope[0].y += dir.y
+
+			for i := 0; i < 9; i++ {
+				move_tail(&rope[i], &rope[i+1])
+			}
+			visited[rope[9]] = Empty{}
+		}
+
+	}
+
+	return len(visited)
+}
+
 func main() {
 	data := load_data("input.txt")
 	commands := parse_data(data)
 
-	squares := run_commands(commands)
+	squares := run_commands_part1(commands)
+	fmt.Println(squares)
+
+	squares = run_commands_part2(commands)
 	fmt.Println(squares)
 }
