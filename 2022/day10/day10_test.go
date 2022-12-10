@@ -155,14 +155,13 @@ func TestProgram1(t *testing.T) {
 		"noop",
 	}
 
-	got_sum := run_program(data)
+	got_sum, got_crt := run_program(data)
 	want_sum := 13140
 
 	if got_sum != want_sum {
 		t.Errorf("got %d, wanted %d", got_sum, want_sum)
 	}
 
-	got_crt := run_program_part2(data)
 	crt_strings := []string{
 		"##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ",
 		"###   ###   ###   ###   ###   ###   ### ",
