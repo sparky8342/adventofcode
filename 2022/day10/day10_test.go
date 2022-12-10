@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -159,5 +160,33 @@ func TestProgram1(t *testing.T) {
 
 	if got_sum != want_sum {
 		t.Errorf("got %d, wanted %d", got_sum, want_sum)
+	}
+
+	got_crt := run_program_part2(data)
+	crt_strings := []string{
+		"##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ",
+		"###   ###   ###   ###   ###   ###   ### ",
+		"####    ####    ####    ####    ####    ",
+		"#####     #####     #####     #####     ",
+		"######      ######      ######      ####",
+		"#######       #######       #######     ",
+	}
+	want_crt := Crt{}
+	for row, line := range crt_strings {
+		for col, ch := range line {
+			if ch == '#' {
+				want_crt[row][col] = true
+			} else {
+				want_crt[row][col] = false
+			}
+		}
+	}
+
+	if got_crt != want_crt {
+		t.Errorf("crt doesn't match")
+		fmt.Println("got:")
+		print_crt(&got_crt)
+		fmt.Println("wanted:")
+		print_crt(&want_crt)
 	}
 }
