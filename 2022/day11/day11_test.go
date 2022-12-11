@@ -34,10 +34,10 @@ Monkey 3:
     If false: throw to monkey 1`
 
 func TestMonkeys(t *testing.T) {
-	monkeys := parse_data(data)
+	monkeys, mod_no := parse_data(data)
 
 	for i := 0; i < 20; i++ {
-		one_round(monkeys)
+		one_round(monkeys, true, mod_no)
 	}
 
 	sort.Slice(monkeys, func(i, j int) bool {
@@ -46,6 +46,24 @@ func TestMonkeys(t *testing.T) {
 
 	got := monkeys[0].inspected * monkeys[1].inspected
 	want := 10605
+	if got != want {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
+
+func TestMonkeys2(t *testing.T) {
+	monkeys, mod_no := parse_data(data)
+
+	for i := 0; i < 10000; i++ {
+		one_round(monkeys, false, mod_no)
+	}
+
+	sort.Slice(monkeys, func(i, j int) bool {
+		return monkeys[i].inspected > monkeys[j].inspected
+	})
+
+	got := monkeys[0].inspected * monkeys[1].inspected
+	want := 2713310158
 	if got != want {
 		t.Errorf("got %d, wanted %d", got, want)
 	}
