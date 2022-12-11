@@ -28,7 +28,9 @@ func load_data(filename string) string {
 	return string(data)
 }
 
-func parse_data(data string) []*Monkey {
+func parse_data(data string) ([]*Monkey, int) {
+	mod_no := 1
+
 	monkeys := []*Monkey{}
 
 	sections := strings.Split(data, "\n\n")
@@ -68,6 +70,8 @@ func parse_data(data string) []*Monkey {
 		parts = strings.Split(lines[3], " ")
 		monkey.test, _ = strconv.Atoi(parts[5])
 
+		mod_no *= monkey.test
+
 		parts = strings.Split(lines[4], " ")
 		monkey.True, _ = strconv.Atoi(parts[9])
 
@@ -77,10 +81,10 @@ func parse_data(data string) []*Monkey {
 		monkeys = append(monkeys, &monkey)
 	}
 
-	return monkeys
+	return monkeys, mod_no
 }
 
-func one_round(monkeys []*Monkey) {
+func one_round(monkeys []*Monkey, divide bool, mod_no int) {
 	for _, monkey := range monkeys {
 		for _, item := range monkey.items {
 			if monkey.multiply_self {
@@ -88,7 +92,11 @@ func one_round(monkeys []*Monkey) {
 			} else {
 				item = item*monkey.multiply + monkey.add
 			}
-			item /= 3
+			if divide {
+				item /= 3
+			}
+
+			item = item % mod_no
 
 			var dest_monkey *Monkey
 			if item%monkey.test == 0 {
@@ -106,15 +114,25 @@ func one_round(monkeys []*Monkey) {
 
 func main() {
 	data := load_data("input.txt")
-	monkeys := parse_data(data)
 
-	for i := 0; i < 20; i++ {
-		one_round(monkeys)
+	for part := 1; part <= 2; part++ {
+		divide := true
+		rounds := 20
+		if part == 2 {
+			divide = false
+			rounds = 10000
+		}
+
+		monkeys, mod_no := parse_data(data)
+
+		for i := 0; i < rounds; i++ {
+			one_round(monkeys, divide, mod_no)
+		}
+
+		sort.Slice(monkeys, func(i, j int) bool {
+			return monkeys[i].inspected > monkeys[j].inspected
+		})
+
+		fmt.Println(monkeys[0].inspected * monkeys[1].inspected)
 	}
-
-	sort.Slice(monkeys, func(i, j int) bool {
-		return monkeys[i].inspected > monkeys[j].inspected
-	})
-
-	fmt.Println(monkeys[0].inspected * monkeys[1].inspected)
 }
