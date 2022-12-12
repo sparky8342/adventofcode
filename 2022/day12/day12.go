@@ -52,7 +52,6 @@ func parse_data(data []string) (map[Pos]*Node, Pos, Pos) {
 			pos := Pos{x: x, y: y}
 			node := Node{elevation: ru}
 			if ru == 'S' {
-				node.distance = 0
 				node.elevation = 'a'
 				start = pos
 			} else if ru == 'E' {
@@ -76,6 +75,7 @@ func get_neighbours(pos Pos) []Pos {
 }
 
 func bfs(nodes map[Pos]*Node, start Pos, end Pos) int {
+	nodes[start].distance = 0
 	queue := []Pos{start}
 	visited := map[Pos]Empty{}
 
@@ -119,4 +119,14 @@ func main() {
 	distance := bfs(nodes, start, end)
 	fmt.Println(distance)
 
+	min_distance := 99999
+	for pos, node := range nodes {
+		if node.elevation == 'a' {
+			distance := bfs(nodes, pos, end)
+			if distance > 0 && distance < min_distance {
+				min_distance = distance
+			}
+		}
+	}
+	fmt.Println(min_distance)
 }
