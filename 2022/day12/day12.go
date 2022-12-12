@@ -78,6 +78,7 @@ func bfs(nodes map[Pos]*Node, start Pos, end Pos) int {
 	nodes[start].distance = 0
 	queue := []Pos{start}
 	visited := map[Pos]Empty{}
+	visited[start] = Empty{}
 
 	for len(queue) > 0 {
 		pos := queue[0]
@@ -87,25 +88,26 @@ func bfs(nodes map[Pos]*Node, start Pos, end Pos) int {
 			return nodes[pos].distance
 		}
 
-		if _, seen := visited[pos]; seen {
-			continue
-		}
-		visited[pos] = Empty{}
-
 		current := nodes[pos]
 		neighbours := get_neighbours(pos)
 
 		for _, neighbour := range neighbours {
-			if _, exists := nodes[neighbour]; exists {
-				if _, visited := visited[neighbour]; visited {
-					continue
-				}
-				elevation := nodes[neighbour].elevation
-				if current.elevation >= elevation-1 {
-					queue = append(queue, neighbour)
-					nodes[neighbour].distance = current.distance + 1
-				}
+			if _, exists := nodes[neighbour]; !exists {
+				continue
 			}
+
+			elevation := nodes[neighbour].elevation
+			if current.elevation < elevation-1 {
+				continue
+			}
+
+			if _, visited := visited[neighbour]; visited {
+				continue
+			}
+			visited[neighbour] = Empty{}
+
+			queue = append(queue, neighbour)
+			nodes[neighbour].distance = current.distance + 1
 		}
 	}
 
