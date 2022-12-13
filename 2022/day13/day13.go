@@ -102,10 +102,32 @@ func compare_pairs(pairs [][]string) int {
 	return sum
 }
 
+func find_divider_places(pairs [][]string) int {
+	dividers := []string{"[[2]]", "[[6]]"}
+	places := []int{}
+
+	for _, divider := range dividers {
+		packets_before := 0
+		for _, pair := range pairs {
+			if compare_pair(pair[0], divider) {
+				packets_before++
+			}
+			if compare_pair(pair[1], divider) {
+				packets_before++
+			}
+		}
+		places = append(places, packets_before)
+	}
+
+	return (places[0] + 1) * (places[1] + 2)
+}
+
 func main() {
 	data := load_data("input.txt")
 
 	pairs := parse_data(data)
 	sum := compare_pairs(pairs)
 	fmt.Println(sum)
+
+	fmt.Println(find_divider_places(pairs))
 }
