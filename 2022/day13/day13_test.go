@@ -37,3 +37,13 @@ func TestCompares(t *testing.T) {
 		t.Errorf("got %d, wanted %d", got_sum, want_sum)
 	}
 }
+
+func TestDividers(t *testing.T) {
+	pairs := parse_data(data)
+	got_product := find_divider_places(pairs)
+	want_product := 140
+
+	if got_product != want_product {
+		t.Errorf("got %d, wanted %d", got_product, want_product)
+	}
+}
