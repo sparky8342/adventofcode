@@ -80,33 +80,35 @@ func (cave *Cave) draw_points(data []string) {
 	cave.max_y = max_y
 }
 
-func (cave *Cave) drop_one_sand() bool {
+func (cave *Cave) drop_one_sand(fall bool) bool {
 	x := 500
 	y := 0
 
 	for {
-		if _, exists := cave.points[Pos{x: x, y: y + 1}]; !exists {
+		if _, exists := cave.points[Pos{x: x, y: y + 1}]; !exists && y < cave.max_y+1 {
 			y++
-		} else if _, exists := cave.points[Pos{x: x - 1, y: y + 1}]; !exists {
+		} else if _, exists := cave.points[Pos{x: x - 1, y: y + 1}]; !exists && y < cave.max_y+1 {
 			x--
 			y++
-		} else if _, exists := cave.points[Pos{x: x + 1, y: y + 1}]; !exists {
+		} else if _, exists := cave.points[Pos{x: x + 1, y: y + 1}]; !exists && y < cave.max_y+1 {
 			x++
 			y++
-		} else {
+		} else if _, exists := cave.points[Pos{x: x, y: y}]; !exists {
 			cave.points[Pos{x: x, y: y}] = Empty{}
 			return true
+		} else {
+			return false
 		}
 
-		if y > cave.max_y {
+		if fall && y > cave.max_y {
 			return false
 		}
 	}
 }
 
-func (cave *Cave) drop_sand() int {
+func (cave *Cave) drop_sand(fall bool) int {
 	sand := 0
-	for cave.drop_one_sand() {
+	for cave.drop_one_sand(fall) {
 		sand++
 	}
 	return sand
@@ -124,6 +126,12 @@ func main() {
 	data := load_data("input.txt")
 	cave := NewCave()
 	cave.draw_points(data)
-	sand := cave.drop_sand()
+	sand := cave.drop_sand(true)
 	fmt.Println(sand)
+
+	cave = NewCave()
+	cave.draw_points(data)
+	sand = cave.drop_sand(false)
+	fmt.Println(sand)
+
 }
