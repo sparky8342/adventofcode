@@ -135,5 +135,4 @@ func main() {
 	cave.draw_points(data)
 	sand = cave.drop_sand(false)
 	fmt.Println(sand)
-
 }
