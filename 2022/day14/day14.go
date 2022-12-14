@@ -20,6 +20,22 @@ type Cave struct {
 	max_y  int
 }
 
+func min(a int, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func max(a int, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
 func NewCave() *Cave {
 	c := new(Cave)
 	c.points = map[Pos]Empty{}
@@ -27,25 +43,11 @@ func NewCave() *Cave {
 }
 
 func (cave *Cave) set_in_between(pos_a Pos, pos_b Pos) {
-	inc_x := 0
-	inc_y := 0
-
-	if pos_a.x == pos_b.x {
-		if pos_a.y < pos_b.y {
-			inc_y = 1
-		} else {
-			inc_y = -1
-		}
-	} else if pos_a.y == pos_b.y {
-		if pos_a.x < pos_b.x {
-			inc_x = 1
-		} else {
-			inc_x = -1
-		}
-	}
-
 	x := pos_a.x
 	y := pos_a.y
+
+	inc_x := min(max(pos_b.x-pos_a.x, -1), 1)
+	inc_y := min(max(pos_b.y-pos_a.y, -1), 1)
 
 	for !(x == pos_b.x && y == pos_b.y) {
 		cave.points[Pos{x: x, y: y}] = Empty{}
