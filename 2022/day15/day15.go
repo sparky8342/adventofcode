@@ -10,6 +10,13 @@ import (
 )
 
 const ROW = 2000000
+const BEACON_MIN = 0
+const BEACON_MAX = 4000000
+const MULTIPLIER = 4000000
+
+const True = 1
+const False = 2
+const Beacon = 3
 
 type Sensor struct {
 	x                  int
@@ -45,6 +52,22 @@ func get_manhattan_distance(x1 int, y1 int, x2 int, y2 int) int {
 	return abs(x1-x2) + abs(y1-y2)
 }
 
+func min(a int, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func max(a int, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
 func parse_data(data []string) Area {
 	r := regexp.MustCompile(".*?([\\-0-9]+).*?([\\-0-9]+).*?([\\-0-9]+).*?([\\-0-9]+)")
 	sensors := []Sensor{}
@@ -59,54 +82,89 @@ func parse_data(data []string) Area {
 		beacon_y, _ := strconv.Atoi(match[4])
 		manhattan_distance := get_manhattan_distance(x, y, beacon_x, beacon_y)
 		sensors = append(sensors, Sensor{x: x, y: y, beacon_x: beacon_x, beacon_y: beacon_y, manhattan_distance: manhattan_distance})
-		if x < x_min {
-			x_min = x
-		}
-		if beacon_x < x_min {
-			x_min = beacon_x
-		}
-		if x > x_max {
-			x_max = x
-		}
-		if beacon_x > x_max {
-			x_max = beacon_x
-		}
+		x_min = min(min(x_min, x), beacon_x)
+		x_max = max(max(x_max, x), beacon_x)
 	}
 
 	return Area{sensors: sensors, x_min: x_min, x_max: x_max}
 }
 
-func location_invalid(area Area, x int, y int) bool {
+func location_invalid(area Area, x int, y int) int {
 	for _, sensor := range area.sensors {
 		if x == sensor.beacon_x && y == sensor.beacon_y {
-			return false
+			return Beacon
 		}
 		dist := get_manhattan_distance(x, y, sensor.x, sensor.y)
 		if dist <= sensor.manhattan_distance {
-			return true
+			return True
 		}
 	}
-	return false
+	return False
 }
 
 func invalid_line(area Area, y int) int {
 	invalid := 0
 	for x := area.x_min; x < area.x_max; x++ {
-		if location_invalid(area, x, y) {
+		if location_invalid(area, x, y) == True {
 			invalid++
 		}
 	}
-	for x := area.x_min - 1; location_invalid(area, x, y); x-- {
+	for x := area.x_min - 1; location_invalid(area, x, y) == True; x-- {
 		invalid++
 	}
-	for x := area.x_max; location_invalid(area, x, y); x++ {
+	for x := area.x_max; location_invalid(area, x, y) == True; x++ {
 		invalid++
 	}
 	return invalid
+}
+
+func find_beacon(area Area, min int, max int) int {
+	// check spaces around edge of sensor range
+	for _, sensor := range area.sensors {
+		for x, y := sensor.x, sensor.y-sensor.manhattan_distance-1; x < sensor.x+sensor.manhattan_distance+1 && y <= sensor.y; x, y = x+1, y+1 {
+			if x < min || x > max || y < min || y > max {
+				continue
+			}
+			if location_invalid(area, x, y) == False {
+				return x*MULTIPLIER + y
+			}
+		}
+
+		for x, y := sensor.x+sensor.manhattan_distance+1, sensor.y; x >= sensor.x && y < sensor.y+sensor.manhattan_distance+1; x, y = x-1, y+1 {
+			if x < min || x > max || y < min || y > max {
+				continue
+			}
+			if location_invalid(area, x, y) == False {
+				return x*MULTIPLIER + y
+			}
+		}
+
+		for x, y := sensor.x, sensor.y+sensor.manhattan_distance+1; x > sensor.x-sensor.manhattan_distance-1 && y >= sensor.y; x, y = x-1, y-1 {
+			if x < min || x > max || y < min || y > max {
+				continue
+			}
+			if location_invalid(area, x, y) == False {
+				return x*MULTIPLIER + y
+			}
+		}
+
+		for x, y := sensor.x-sensor.manhattan_distance-1, sensor.y; x <= sensor.x && y > sensor.y-sensor.manhattan_distance-1; x, y = x+1, y-1 {
+			if x < min || x > max || y < min || y > max {
+				continue
+			}
+			if location_invalid(area, x, y) == False {
+				return x*MULTIPLIER + y
+			}
+		}
+	}
+
+	return 0
 }
 
 func main() {
 	data := load_data("input.txt")
 	area := parse_data(data)
 	fmt.Println(invalid_line(area, ROW))
+
+	fmt.Println(find_beacon(area, BEACON_MIN, BEACON_MAX))
 }

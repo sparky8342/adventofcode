@@ -21,8 +21,10 @@ Sensor at x=14, y=3: closest beacon is at x=15, y=3
 Sensor at x=20, y=1: closest beacon is at x=15, y=3`
 
 const TEST_ROW = 10
+const TEST_BEACON_MIN = 0
+const TEST_BEACON_MAX = 20
 
-func TestSand(t *testing.T) {
+func TestInvalidLine(t *testing.T) {
 	area := parse_data(strings.Split(data, "\n"))
 
 	got_invalid := invalid_line(area, TEST_ROW)
@@ -30,5 +32,16 @@ func TestSand(t *testing.T) {
 
 	if got_invalid != want_invalid {
 		t.Errorf("got %d, wanted %d", got_invalid, want_invalid)
+	}
+}
+
+func TestFindBeacon(t *testing.T) {
+	area := parse_data(strings.Split(data, "\n"))
+
+	got_frequency := find_beacon(area, TEST_BEACON_MIN, TEST_BEACON_MAX)
+	want_frequency := 56000011
+
+	if got_frequency != want_frequency {
+		t.Errorf("got %d, wanted %d", got_frequency, want_frequency)
 	}
 }
