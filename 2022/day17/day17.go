@@ -34,9 +34,6 @@ func NewChamber(jets string) *Chamber {
 	c.jets = jets
 	c.spaces = map[Pos]Empty{}
 	c.top_y = -1
-	//for x := 0; x < 7; x++ {
-	//	c.spaces[Pos{x: x, y: 0}] = Empty{}
-	//}
 	return c
 }
 
@@ -59,9 +56,6 @@ func (chamber *Chamber) drop_piece() {
 
 outer:
 	for {
-
-		//fmt.Println(parts[0])
-
 		// jet move
 		var dx int
 		if chamber.jets[chamber.jet_pos] == '<' {
@@ -90,8 +84,6 @@ outer:
 				part.x += dx
 			}
 		}
-
-		//fmt.Println(parts[0])
 
 		// move down
 		for _, part := range parts {
