@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"strconv"
 )
 
 type Pos struct {
@@ -126,6 +127,48 @@ func (chamber *Chamber) draw() {
 	}
 }
 
+func part2(chamber *Chamber) int {
+	states := map[string][2]int{}
+	turn := 0
+
+	var start, height, next, height2 int
+
+	for {
+		chamber.drop_piece()
+		state := strconv.Itoa(chamber.piece_id)
+		state += ":" + strconv.Itoa(chamber.jet_pos)
+		for x := 0; x < 7; x++ {
+			dist := 0
+			for y := chamber.top_y; y >= 0; y-- {
+				if _, rock := chamber.spaces[Pos{x: x, y: y}]; rock {
+					state += ":" + strconv.Itoa(dist)
+					break
+				}
+				dist++
+			}
+		}
+		if val, seen := states[state]; seen {
+			start = val[0]
+			height = val[1]
+			next = turn
+			height2 = chamber.top_y
+			break
+		}
+		states[state] = [2]int{turn, chamber.top_y}
+		turn++
+	}
+
+	turns := next - start
+	height_gain := height2 - height
+
+	amount := 1000000000000 - next
+	for i := 0; i < amount%turns; i++ {
+		chamber.drop_piece()
+	}
+
+	return (amount/turns)*height_gain + chamber.top_y
+}
+
 func main() {
 	data := load_data("input.txt")
 
@@ -136,4 +179,7 @@ func main() {
 	}
 
 	fmt.Println(chamber.top_y + 1)
+
+	chamber = NewChamber(data)
+	fmt.Println(part2(chamber))
 }
