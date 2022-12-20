@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -11,6 +12,7 @@ func TestSum(t *testing.T) {
 	list.print_list()
 	list.move_nums()
 	list.print_list()
+	fmt.Println()
 
 	got_sum := list.find_sum()
 	want_sum := 3
