@@ -19,6 +19,7 @@ type List struct {
 	start *Node
 	order []*Node
 	zero  *Node
+	size  int
 }
 
 func load_data(filename string) []int {
@@ -54,6 +55,7 @@ func create_list(nums []int) List {
 
 	node.right = list.start
 	list.start.left = node
+	list.size = len(nums)
 
 	return list
 }
@@ -70,11 +72,11 @@ func (list *List) move_nums() {
 
 		pos := node
 		if node.val > 0 {
-			for i := 0; i < node.val%(len(list.order)-1); i++ {
+			for i := 0; i < node.val%(list.size-1); i++ {
 				pos = pos.right
 			}
 		} else {
-			for i := 0; i < (node.val*-1)%(len(list.order)-1)+1; i++ {
+			for i := 0; i < (node.val*-1)%(list.size-1)+1; i++ {
 				pos = pos.left
 			}
 		}
@@ -89,10 +91,10 @@ func (list *List) move_nums() {
 
 func (list *List) print_list() {
 	node := list.start
-	fmt.Println(node)
+	fmt.Print(strconv.Itoa(node.val) + " ")
 	node = node.right
 	for node != list.start {
-		fmt.Println(node)
+		fmt.Print(strconv.Itoa(node.val) + " ")
 		node = node.right
 	}
 	fmt.Println()
