@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const KEY = 811589153
+
 type Node struct {
 	val   int
 	left  *Node
@@ -68,11 +70,11 @@ func (list *List) move_nums() {
 
 		pos := node
 		if node.val > 0 {
-			for i := 0; i < node.val; i++ {
+			for i := 0; i < node.val%(len(list.order)-1); i++ {
 				pos = pos.right
 			}
 		} else {
-			for i := 0; i < node.val*-1+1; i++ {
+			for i := 0; i < (node.val*-1)%(len(list.order)-1)+1; i++ {
 				pos = pos.left
 			}
 		}
@@ -108,10 +110,29 @@ func (list *List) find_sum() int {
 	return sum
 }
 
+func (list *List) apply_key() {
+	start := list.start
+	node := start
+
+	node.val *= KEY
+	node = node.right
+	for node != start {
+		node.val *= KEY
+		node = node.right
+	}
+}
+
 func main() {
 	nums := load_data("input.txt")
 
 	list := create_list(nums)
 	list.move_nums()
+	fmt.Println(list.find_sum())
+
+	list = create_list(nums)
+	list.apply_key()
+	for i := 0; i < 10; i++ {
+		list.move_nums()
+	}
 	fmt.Println(list.find_sum())
 }
