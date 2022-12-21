@@ -24,7 +24,7 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func parse_data(data []string) *Monkey {
+func parse_data(data []string) (*Monkey, *Monkey) {
 	monkeys := map[string]*Monkey{}
 	left := map[string]string{}
 	right := map[string]string{}
@@ -54,7 +54,7 @@ func parse_data(data []string) *Monkey {
 		monkey.right = monkeys[right[monkey.name]]
 	}
 
-	return monkeys["root"]
+	return monkeys["root"], monkeys["humn"]
 }
 
 func eval(monkey *Monkey) int {
@@ -74,13 +74,58 @@ func eval(monkey *Monkey) int {
 		return left - right
 	case "/":
 		return left / right
+	case "==":
+		if left == right {
+			return 1
+		} else {
+			return 0
+		}
 	}
 
 	return -1
 }
 
+func find_humn_simple(root *Monkey, humn *Monkey) int {
+	root.operator = "=="
+	humn.val = 0
+	for {
+		ev := eval(root)
+		if ev == 1 {
+			return humn.val
+		}
+		humn.val++
+	}
+}
+
+func find_humn(root *Monkey, humn *Monkey) int {
+	// from inspection the right value is constant
+	// so we just have to get the correct humn
+	// for the left value to match
+	right := eval(root.right)
+
+	// works in this range for this input (but not the test case)
+	// not sure what the general search would be
+	low := 0
+	high := 10000000000000
+
+	for low < high-1 {
+		mid := low + (high-low)/2
+		humn.val = mid
+		ev := eval(root.left)
+
+		if ev <= right {
+			high = mid
+		} else if ev > right {
+			low = mid
+		}
+	}
+
+	return high
+}
+
 func main() {
 	data := load_data("input.txt")
-	root := parse_data(data)
+	root, humn := parse_data(data)
 	fmt.Println(eval(root))
+	fmt.Println(find_humn(root, humn))
 }

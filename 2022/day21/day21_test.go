@@ -22,11 +22,21 @@ drzm: hmdt - zczc
 hmdt: 32`
 
 func TestRoot(t *testing.T) {
-	root := parse_data(strings.Split(data, "\n"))
+	root, _ := parse_data(strings.Split(data, "\n"))
 	got_root := eval(root)
 	want_root := 152
 
 	if got_root != want_root {
 		t.Errorf("got %d, wanted %d", got_root, want_root)
+	}
+}
+
+func TestFindHumn(t *testing.T) {
+	root, humn := parse_data(strings.Split(data, "\n"))
+	got_humn := find_humn_simple(root, humn)
+	want_humn := 301
+
+	if got_humn != want_humn {
+		t.Errorf("got %d, wanted %d", got_humn, want_humn)
 	}
 }
