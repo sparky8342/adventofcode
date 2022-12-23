@@ -88,7 +88,7 @@ func (grove *Grove) rotate_check_order() {
 	grove.check_order = append(grove.check_order, first)
 }
 
-func (grove *Grove) move_elves() {
+func (grove *Grove) move_elves() bool {
 	proposed_destinations := map[Elf][]Elf{}
 
 	for elf := range grove.elves {
@@ -117,14 +117,15 @@ func (grove *Grove) move_elves() {
 		}
 	}
 
-	//fmt.Println(proposed_destinations)
-
+	moved := false
 	for destination, elves := range proposed_destinations {
 		if len(elves) == 1 {
 			delete(grove.elves, elves[0])
 			grove.elves[destination] = Empty{}
+			moved = true
 		}
 	}
+	return moved
 }
 
 func (grove *Grove) print_grove() int {
@@ -177,12 +178,15 @@ func main() {
 	data := load_data("input.txt")
 	grove := parse_data(data)
 
-	for i := 0; i < 10; i++ {
-		grove.move_elves()
+	i := 0
+	moved := true
+	for moved {
+		moved = grove.move_elves()
 		grove.rotate_check_order()
+		i++
+		if i == 10 {
+			fmt.Println(grove.print_grove())
+		}
 	}
-
-	empty := grove.print_grove()
-	fmt.Println(empty)
-
+	fmt.Println(i)
 }
