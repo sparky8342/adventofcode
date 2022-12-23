@@ -84,8 +84,10 @@ func (grove *Grove) SE(elf Elf) bool {
 
 func (grove *Grove) rotate_check_order() {
 	first := grove.check_order[0]
-	grove.check_order = grove.check_order[1:]
-	grove.check_order = append(grove.check_order, first)
+	for i := 1; i < 4; i++ {
+		grove.check_order[i-1] = grove.check_order[i]
+	}
+	grove.check_order[3] = first
 }
 
 func (grove *Grove) move_elves() bool {
