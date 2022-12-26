@@ -13,40 +13,18 @@ type Valve struct {
 	name         string
 	rate         int
 	destinations []*Valve
+	open         bool
 }
 
 type Empty struct {
 }
 
-type State struct {
-	location       *Valve
-	open_valves    map[string]Empty
-	minute         int
-	total_pressure int
-}
+func get_hash(valve *Valve, open_valves map[string]Empty, pressure int, minute int) string {
+	hash := valve.name
 
-func (state *State) Clone(minute int) *State {
-	new_state := State{
-		location:       state.location,
-		total_pressure: state.total_pressure,
-		minute:         minute,
-	}
-
-	open := map[string]Empty{}
-	for name, _ := range state.open_valves {
-		open[name] = Empty{}
-	}
-	new_state.open_valves = open
-
-	return &new_state
-}
-
-func (state *State) Hash() string {
-	hash := state.location.name
-
-	keys := make([]string, len(state.open_valves))
+	keys := make([]string, len(open_valves))
 	i := 0
-	for k := range state.open_valves {
+	for k := range open_valves {
 		keys[i] = k
 		i++
 	}
@@ -55,7 +33,7 @@ func (state *State) Hash() string {
 		hash += name
 	}
 
-	hash += strconv.Itoa(state.total_pressure)
+	hash += strconv.Itoa(pressure) + ":" + strconv.Itoa(minute)
 
 	return hash
 }
@@ -68,13 +46,12 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func parse_data(data []string) (*Valve, int) {
+func parse_data(data []string) *Valve {
 	r := regexp.MustCompile("Valve (\\w+) has flow rate=(\\d+); tunnels? leads? to valves? (.*)")
 
 	var start *Valve = nil
 	valves_map := map[string]*Valve{}
 	destinations_map := map[string][]string{}
-	valves_to_switch_on := 0
 
 	// make all valves first
 	for _, line := range data {
@@ -94,10 +71,6 @@ func parse_data(data []string) (*Valve, int) {
 		if name == "AA" {
 			start = valve
 		}
-
-		if rate > 0 {
-			valves_to_switch_on++
-		}
 	}
 
 	// set destinations
@@ -107,63 +80,52 @@ func parse_data(data []string) (*Valve, int) {
 		}
 	}
 
-	return start, valves_to_switch_on
+	return start
 }
 
-func bfs(start *Valve, valves_to_switch_on int) int {
-	start_state := &State{location: start}
-
-	queue := []*State{start_state}
+func find_best_pressure(start *Valve) int {
+	best_pressure := 0
+	open_valves := map[string]Empty{}
 	visited := map[string]Empty{}
+	dfs(start, 0, 0, &best_pressure, open_valves, visited)
+	return best_pressure
+}
 
-	best := 0
-
-	for len(queue) > 0 {
-		state := queue[0]
-		queue = queue[1:]
-
-		if len(state.open_valves) == valves_to_switch_on || state.minute == 30 {
-			if state.total_pressure > best {
-				best = state.total_pressure
-			}
-			continue
+func dfs(valve *Valve, minute int, pressure int, best_pressure *int, open_valves map[string]Empty, visited map[string]Empty) {
+	if minute >= 30 {
+		if pressure > *best_pressure {
+			*best_pressure = pressure
 		}
-
-		// possible actions - turn on or move
-
-		// turn on
-		if _, on := state.open_valves[state.location.name]; !on {
-			if state.location.rate > 0 {
-				new_state := state.Clone(state.minute + 1)
-				new_state.total_pressure = state.total_pressure + state.location.rate*(30-state.minute-1)
-				new_state.open_valves[state.location.name] = Empty{}
-
-				hash := new_state.Hash()
-				if _, seen := visited[hash]; !seen {
-					visited[hash] = Empty{}
-					queue = append(queue, new_state)
-				}
-			}
-		}
-
-		// moves
-		for _, destination := range state.location.destinations {
-			new_state := state.Clone(state.minute + 1)
-			new_state.location = destination
-
-			hash := new_state.Hash()
-			if _, seen := visited[hash]; !seen {
-				visited[hash] = Empty{}
-				queue = append(queue, new_state)
-			}
-		}
+		return
 	}
 
-	return best
+	// use visited hash, but only before minute 25 to save
+	// memory
+	if minute < 25 {
+		hash := get_hash(valve, open_valves, pressure, minute)
+		if _, exists := visited[hash]; exists {
+			return
+		}
+		visited[hash] = Empty{}
+	}
+
+	// turn on
+	if valve.rate > 0 && !valve.open {
+		valve.open = true
+		open_valves[valve.name] = Empty{}
+		dfs(valve, minute+1, pressure+(30-minute-1)*valve.rate, best_pressure, open_valves, visited)
+		valve.open = false
+		delete(open_valves, valve.name)
+	}
+
+	// move
+	for _, destination := range valve.destinations {
+		dfs(destination, minute+1, pressure, best_pressure, open_valves, visited)
+	}
 }
 
 func main() {
 	data := load_data("input.txt")
-	start, valves_to_switch_on := parse_data(data)
-	fmt.Println(bfs(start, valves_to_switch_on))
+	start := parse_data(data)
+	fmt.Println(find_best_pressure(start))
 }

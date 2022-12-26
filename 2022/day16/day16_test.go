@@ -17,9 +17,9 @@ Valve II has flow rate=0; tunnels lead to valves AA, JJ
 Valve JJ has flow rate=21; tunnel leads to valve II`
 
 func TestPressure(t *testing.T) {
-	start, amount := parse_data(strings.Split(data, "\n"))
+	start := parse_data(strings.Split(data, "\n"))
 
-	got_pressure := bfs(start, amount)
+	got_pressure := find_best_pressure(start)
 	want_pressure := 1651
 
 	if got_pressure != want_pressure {
