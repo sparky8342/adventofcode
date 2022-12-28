@@ -128,10 +128,10 @@ func (g *Grid) next_grid() *Grid {
 	return grid
 }
 
-func bfs(grid *Grid) int {
+func bfs(grid *Grid, start_pos Pos, end_pos Pos, start_time int) int {
 	grids := []*Grid{grid}
 
-	start := State{pos: grid.start, time: 0}
+	start := State{pos: start_pos, time: start_time}
 	queue := []State{start}
 	visited := map[State]Empty{}
 	visited[start] = Empty{}
@@ -140,14 +140,14 @@ func bfs(grid *Grid) int {
 		state := queue[0]
 		queue = queue[1:]
 
-		if state.time >= len(grids)-1 {
+		for state.time >= len(grids)-1 {
 			grids = append(grids, grids[len(grids)-1].next_grid())
 		}
 
 		for _, dir := range dirs {
 			new_x := state.pos.x + dir.dx
 			new_y := state.pos.y + dir.dy
-			if new_x == grid.end.x && new_y == grid.end.y {
+			if new_x == end_pos.x && new_y == end_pos.y {
 				return state.time + 1
 			}
 			if new_x < 1 || new_x > grid.width-2 || new_y < 1 || new_y > grid.height-2 {
@@ -209,5 +209,11 @@ func (grid *Grid) print_grid(pos_x int, pos_y int) {
 func main() {
 	data := load_data("input.txt")
 	grid := parse_data(data)
-	fmt.Println(bfs(&grid))
+
+	time := bfs(&grid, grid.start, grid.end, 0)
+	fmt.Println(time)
+
+	time2 := bfs(&grid, grid.end, grid.start, time)
+	time3 := bfs(&grid, grid.start, grid.end, time2)
+	fmt.Println(time3)
 }
