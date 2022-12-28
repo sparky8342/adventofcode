@@ -21,9 +21,6 @@ type Grid struct {
 	height    int
 	blizzards []Blizzard
 	lookup    map[Pos]Empty
-	start     Pos
-	end       Pos
-	cycle     int
 }
 
 type State struct {
@@ -58,14 +55,15 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func parse_data(data []string) Grid {
+func parse_data(data []string) (Grid, int, Pos, Pos) {
 	grid := Grid{height: len(data), width: len(data[0]), lookup: map[Pos]Empty{}}
+	var start_pos, end_pos Pos
 	for y, line := range data {
 		for x, ru := range line {
 			if y == 0 && ru == '.' {
-				grid.start = Pos{x: x, y: y}
+				start_pos = Pos{x: x, y: y}
 			} else if y == grid.height-1 && ru == '.' {
-				grid.end = Pos{x: x, y: y}
+				end_pos = Pos{x: x, y: y}
 			} else if ru == '<' || ru == '>' || ru == '^' || ru == 'v' {
 				pos := Pos{x: x, y: y}
 				grid.blizzards = append(grid.blizzards, Blizzard{pos: pos, dir: ru})
@@ -73,7 +71,8 @@ func parse_data(data []string) Grid {
 			}
 		}
 	}
-	return grid
+	cycle := lcm(grid.height, grid.width)
+	return grid, cycle, start_pos, end_pos
 }
 
 func gcd(a int, b int) int {
@@ -93,8 +92,6 @@ func (g *Grid) next_grid() *Grid {
 	grid := new(Grid)
 	grid.width = g.width
 	grid.height = g.height
-	grid.start = g.start
-	grid.end = g.end
 	grid.lookup = map[Pos]Empty{}
 
 	for _, blizzard := range g.blizzards {
@@ -128,7 +125,7 @@ func (g *Grid) next_grid() *Grid {
 	return grid
 }
 
-func bfs(grid *Grid, start_pos Pos, end_pos Pos, start_time int) int {
+func bfs(grid *Grid, cycle int, start_pos Pos, end_pos Pos, start_time int) int {
 	grids := []*Grid{grid}
 
 	start := State{pos: start_pos, time: start_time}
@@ -140,7 +137,7 @@ func bfs(grid *Grid, start_pos Pos, end_pos Pos, start_time int) int {
 		state := queue[0]
 		queue = queue[1:]
 
-		for state.time >= len(grids)-1 {
+		for state.time%cycle >= len(grids)-1 {
 			grids = append(grids, grids[len(grids)-1].next_grid())
 		}
 
@@ -155,7 +152,7 @@ func bfs(grid *Grid, start_pos Pos, end_pos Pos, start_time int) int {
 			}
 			new_pos := Pos{x: new_x, y: new_y}
 
-			_, exists := grids[state.time+1].lookup[new_pos]
+			_, exists := grids[(state.time+1)%cycle].lookup[new_pos]
 			if !exists {
 				new_state := State{pos: new_pos, time: state.time + 1}
 				if _, exists := visited[new_state]; exists {
@@ -165,7 +162,7 @@ func bfs(grid *Grid, start_pos Pos, end_pos Pos, start_time int) int {
 				queue = append(queue, new_state)
 			}
 		}
-		_, exists := grids[state.time+1].lookup[state.pos]
+		_, exists := grids[(state.time+1)%cycle].lookup[state.pos]
 		if !exists {
 			new_state := State{pos: state.pos, time: state.time + 1}
 			if _, exists := visited[new_state]; exists {
@@ -208,12 +205,12 @@ func (grid *Grid) print_grid(pos_x int, pos_y int) {
 
 func main() {
 	data := load_data("input.txt")
-	grid := parse_data(data)
+	grid, cycle, start, end := parse_data(data)
 
-	time := bfs(&grid, grid.start, grid.end, 0)
+	time := bfs(&grid, cycle, start, end, 0)
 	fmt.Println(time)
 
-	time2 := bfs(&grid, grid.end, grid.start, time)
-	time3 := bfs(&grid, grid.start, grid.end, time2)
+	time2 := bfs(&grid, cycle, end, start, time)
+	time3 := bfs(&grid, cycle, start, end, time2)
 	fmt.Println(time3)
 }
