@@ -55,7 +55,7 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func parse_data(data []string) (Grid, int, Pos, Pos) {
+func parse_data(data []string) ([]*Grid, int, Pos, Pos) {
 	grid := Grid{height: len(data), width: len(data[0]), lookup: map[Pos]Empty{}}
 	var start_pos, end_pos Pos
 	for y, line := range data {
@@ -71,8 +71,16 @@ func parse_data(data []string) (Grid, int, Pos, Pos) {
 			}
 		}
 	}
-	cycle := lcm(grid.height, grid.width)
-	return grid, cycle, start_pos, end_pos
+	cycle := lcm(grid.height-2, grid.width-2)
+
+	grids := []*Grid{&grid}
+	g := &grid
+	for i := 0; i < cycle; i++ {
+		g = g.next_grid()
+		grids = append(grids, g)
+	}
+
+	return grids, cycle, start_pos, end_pos
 }
 
 func gcd(a int, b int) int {
@@ -125,9 +133,7 @@ func (g *Grid) next_grid() *Grid {
 	return grid
 }
 
-func bfs(grid *Grid, cycle int, start_pos Pos, end_pos Pos, start_time int) int {
-	grids := []*Grid{grid}
-
+func bfs(grids []*Grid, cycle int, start_pos Pos, end_pos Pos, start_time int) int {
 	start := State{pos: start_pos, time: start_time}
 	queue := []State{start}
 	visited := map[State]Empty{}
@@ -137,17 +143,13 @@ func bfs(grid *Grid, cycle int, start_pos Pos, end_pos Pos, start_time int) int 
 		state := queue[0]
 		queue = queue[1:]
 
-		for state.time%cycle >= len(grids)-1 {
-			grids = append(grids, grids[len(grids)-1].next_grid())
-		}
-
 		for _, dir := range dirs {
 			new_x := state.pos.x + dir.dx
 			new_y := state.pos.y + dir.dy
 			if new_x == end_pos.x && new_y == end_pos.y {
 				return state.time + 1
 			}
-			if new_x < 1 || new_x > grid.width-2 || new_y < 1 || new_y > grid.height-2 {
+			if new_x < 1 || new_x > grids[0].width-2 || new_y < 1 || new_y > grids[0].height-2 {
 				continue
 			}
 			new_pos := Pos{x: new_x, y: new_y}
@@ -205,12 +207,12 @@ func (grid *Grid) print_grid(pos_x int, pos_y int) {
 
 func main() {
 	data := load_data("input.txt")
-	grid, cycle, start, end := parse_data(data)
+	grids, cycle, start, end := parse_data(data)
 
-	time := bfs(&grid, cycle, start, end, 0)
+	time := bfs(grids, cycle, start, end, 0)
 	fmt.Println(time)
 
-	time2 := bfs(&grid, cycle, end, start, time)
-	time3 := bfs(&grid, cycle, start, end, time2)
+	time2 := bfs(grids, cycle, end, start, time)
+	time3 := bfs(grids, cycle, start, end, time2)
 	fmt.Println(time3)
 }
