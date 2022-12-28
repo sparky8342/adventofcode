@@ -13,8 +13,8 @@ const data = `#.######
 ######.#`
 
 func TestPath(t *testing.T) {
-	grid, cycle, start, end := parse_data(strings.Split(string(data), "\n"))
-	got_time := bfs(&grid, cycle, start, end, 0)
+	grids, cycle, start, end := parse_data(strings.Split(string(data), "\n"))
+	got_time := bfs(grids, cycle, start, end, 0)
 	want_time := 18
 
 	if got_time != want_time {
@@ -23,10 +23,10 @@ func TestPath(t *testing.T) {
 }
 
 func TestBackAgainPath(t *testing.T) {
-	grid, cycle, start, end := parse_data(strings.Split(string(data), "\n"))
-	time := bfs(&grid, cycle, start, end, 0)
-	time2 := bfs(&grid, cycle, end, start, time)
-	got_time := bfs(&grid, cycle, start, end, time2)
+	grids, cycle, start, end := parse_data(strings.Split(string(data), "\n"))
+	time := bfs(grids, cycle, start, end, 0)
+	time2 := bfs(grids, cycle, end, start, time)
+	got_time := bfs(grids, cycle, start, end, time2)
 	want_time := 54
 
 	if got_time != want_time {
