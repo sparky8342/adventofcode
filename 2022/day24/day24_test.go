@@ -12,10 +12,22 @@ const data = `#.######
 #<^v^^>#
 ######.#`
 
-func Test(t *testing.T) {
+func TestPath(t *testing.T) {
 	grid := parse_data(strings.Split(string(data), "\n"))
-	got_time := bfs(&grid)
+	got_time := bfs(&grid, grid.start, grid.end, 0)
 	want_time := 18
+
+	if got_time != want_time {
+		t.Errorf("got %d, wanted %d", got_time, want_time)
+	}
+}
+
+func TestBackAgainPath(t *testing.T) {
+	grid := parse_data(strings.Split(string(data), "\n"))
+	time := bfs(&grid, grid.start, grid.end, 0)
+	time2 := bfs(&grid, grid.end, grid.start, time)
+	got_time := bfs(&grid, grid.start, grid.end, time2)
+	want_time := 54
 
 	if got_time != want_time {
 		t.Errorf("got %d, wanted %d", got_time, want_time)
