@@ -26,3 +26,14 @@ func TestPressure(t *testing.T) {
 		t.Errorf("got %d, wanted %d", got_pressure, want_pressure)
 	}
 }
+
+func TestPressureWithElephant(t *testing.T) {
+	start := parse_data(strings.Split(data, "\n"))
+
+	got_pressure := find_best_pressure_with_elephant(start)
+	want_pressure := 1707
+
+	if got_pressure != want_pressure {
+		t.Errorf("got %d, wanted %d", got_pressure, want_pressure)
+	}
+}
