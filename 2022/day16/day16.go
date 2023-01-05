@@ -19,6 +19,11 @@ type Valve struct {
 type Empty struct {
 }
 
+type Path struct {
+	nodes    map[string]Empty
+	pressure int
+}
+
 func get_hash(valve *Valve, open_valves map[string]Empty, pressure int, minute int) string {
 	hash := valve.name
 
@@ -83,24 +88,84 @@ func parse_data(data []string) *Valve {
 	return start
 }
 
+func paths_cross(a Path, b Path) bool {
+	for key := range a.nodes {
+		if _, exists := b.nodes[key]; exists {
+			return true
+		}
+	}
+	return false
+}
+
+func find_best_pair(paths map[string]Path) int {
+	best_pressure := 0
+
+	path_slice := []Path{}
+	for _, path := range paths {
+		path_slice = append(path_slice, path)
+	}
+
+	sort.Slice(path_slice, func(i, j int) bool {
+		return path_slice[i].pressure > path_slice[j].pressure
+	})
+
+	for i := 0; i < len(path_slice); i++ {
+		for j := i + 1; j < len(path_slice); j++ {
+			pressure := path_slice[i].pressure + path_slice[j].pressure
+			if pressure < best_pressure {
+				break
+			}
+			if paths_cross(path_slice[i], path_slice[j]) {
+				continue
+			}
+			if pressure > best_pressure {
+				best_pressure = pressure
+			}
+		}
+	}
+
+	return best_pressure
+}
+
 func find_best_pressure(start *Valve) int {
 	best_pressure := 0
 	open_valves := map[string]Empty{}
 	visited := map[string]Empty{}
-	dfs(start, 0, 0, &best_pressure, open_valves, visited)
+	paths := map[string]Path{}
+	dfs(start, 0, 0, &best_pressure, open_valves, visited, []string{}, paths, 30, false)
 	return best_pressure
 }
 
-func dfs(valve *Valve, minute int, pressure int, best_pressure *int, open_valves map[string]Empty, visited map[string]Empty) {
-	if minute >= 30 {
+func find_best_pressure_with_elephant(start *Valve) int {
+	best_pressure := 0
+	open_valves := map[string]Empty{}
+	visited := map[string]Empty{}
+	paths := map[string]Path{}
+	dfs(start, 0, 0, &best_pressure, open_valves, visited, []string{}, paths, 26, true)
+	return find_best_pair(paths)
+}
+
+func dfs(valve *Valve, minute int, pressure int, best_pressure *int, open_valves map[string]Empty, visited map[string]Empty, path []string, paths map[string]Path, cutoff int, store_paths bool) {
+	if minute >= cutoff {
+		if store_paths {
+			p := strings.Join(path, " ")
+			val, exists := paths[p]
+			if !exists || val.pressure < pressure {
+				new_p := Path{nodes: map[string]Empty{}, pressure: pressure}
+				for _, name := range path {
+					new_p.nodes[name] = Empty{}
+				}
+				paths[p] = new_p
+			}
+		}
+
 		if pressure > *best_pressure {
 			*best_pressure = pressure
 		}
 		return
 	}
 
-	// use visited hash, but only before minute 25 to save
-	// memory
+	// use visited hash, but only before minute 25 to save memory
 	if minute < 25 {
 		hash := get_hash(valve, open_valves, pressure, minute)
 		if _, exists := visited[hash]; exists {
@@ -113,14 +178,18 @@ func dfs(valve *Valve, minute int, pressure int, best_pressure *int, open_valves
 	if valve.rate > 0 && !valve.open {
 		valve.open = true
 		open_valves[valve.name] = Empty{}
-		dfs(valve, minute+1, pressure+(30-minute-1)*valve.rate, best_pressure, open_valves, visited)
+		if store_paths {
+			dfs(valve, minute+1, pressure+(cutoff-minute-1)*valve.rate, best_pressure, open_valves, visited, append(path, valve.name), paths, cutoff, store_paths)
+		} else {
+			dfs(valve, minute+1, pressure+(cutoff-minute-1)*valve.rate, best_pressure, open_valves, visited, path, paths, cutoff, store_paths)
+		}
 		valve.open = false
 		delete(open_valves, valve.name)
 	}
 
 	// move
 	for _, destination := range valve.destinations {
-		dfs(destination, minute+1, pressure, best_pressure, open_valves, visited)
+		dfs(destination, minute+1, pressure, best_pressure, open_valves, visited, path, paths, cutoff, store_paths)
 	}
 }
 
@@ -128,4 +197,5 @@ func main() {
 	data := load_data("input.txt")
 	start := parse_data(data)
 	fmt.Println(find_best_pressure(start))
+	fmt.Println(find_best_pressure_with_elephant(start))
 }
