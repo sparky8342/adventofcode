@@ -19,21 +19,15 @@ Valve JJ has flow rate=21; tunnel leads to valve II`
 func TestPressure(t *testing.T) {
 	start := parse_data(strings.Split(data, "\n"))
 
-	got_pressure := find_best_pressure(start)
+	got_pressure, got_pressure_with_elephant := find_best_pressure(start)
 	want_pressure := 1651
+	want_pressure_with_elephant := 1707
 
 	if got_pressure != want_pressure {
 		t.Errorf("got %d, wanted %d", got_pressure, want_pressure)
 	}
-}
 
-func TestPressureWithElephant(t *testing.T) {
-	start := parse_data(strings.Split(data, "\n"))
-
-	got_pressure := find_best_pressure_with_elephant(start)
-	want_pressure := 1707
-
-	if got_pressure != want_pressure {
-		t.Errorf("got %d, wanted %d", got_pressure, want_pressure)
+	if got_pressure_with_elephant != want_pressure_with_elephant {
+		t.Errorf("got %d, wanted %d", got_pressure_with_elephant, want_pressure_with_elephant)
 	}
 }
