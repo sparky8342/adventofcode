@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+const CUTOFF1 = 30
+const CUTOFF2 = 26
+
 type Valve struct {
 	name         string
 	rate         int
@@ -127,38 +130,28 @@ func find_best_pair(paths map[string]Path) int {
 	return best_pressure
 }
 
-func find_best_pressure(start *Valve) int {
+func find_best_pressure(start *Valve) (int, int) {
 	best_pressure := 0
 	open_valves := map[string]Empty{}
 	visited := map[string]Empty{}
 	paths := map[string]Path{}
-	dfs(start, 0, 0, &best_pressure, open_valves, visited, []string{}, paths, 30, false)
-	return best_pressure
+	dfs(start, 0, 0, 0, &best_pressure, open_valves, visited, []string{}, paths)
+	return best_pressure, find_best_pair(paths)
 }
 
-func find_best_pressure_with_elephant(start *Valve) int {
-	best_pressure := 0
-	open_valves := map[string]Empty{}
-	visited := map[string]Empty{}
-	paths := map[string]Path{}
-	dfs(start, 0, 0, &best_pressure, open_valves, visited, []string{}, paths, 26, true)
-	return find_best_pair(paths)
-}
-
-func dfs(valve *Valve, minute int, pressure int, best_pressure *int, open_valves map[string]Empty, visited map[string]Empty, path []string, paths map[string]Path, cutoff int, store_paths bool) {
-	if minute >= cutoff {
-		if store_paths {
-			p := strings.Join(path, " ")
-			val, exists := paths[p]
-			if !exists || val.pressure < pressure {
-				new_p := Path{nodes: map[string]Empty{}, pressure: pressure}
-				for _, name := range path {
-					new_p.nodes[name] = Empty{}
-				}
-				paths[p] = new_p
+func dfs(valve *Valve, minute int, pressure int, pressure2 int, best_pressure *int, open_valves map[string]Empty, visited map[string]Empty, path []string, paths map[string]Path) {
+	if minute == CUTOFF2 {
+		p := strings.Join(path, " ")
+		val, exists := paths[p]
+		if !exists || val.pressure < pressure2 {
+			new_p := Path{nodes: map[string]Empty{}, pressure: pressure2}
+			for _, name := range path {
+				new_p.nodes[name] = Empty{}
 			}
+			paths[p] = new_p
 		}
-
+	}
+	if minute >= CUTOFF1 {
 		if pressure > *best_pressure {
 			*best_pressure = pressure
 		}
@@ -178,24 +171,21 @@ func dfs(valve *Valve, minute int, pressure int, best_pressure *int, open_valves
 	if valve.rate > 0 && !valve.open {
 		valve.open = true
 		open_valves[valve.name] = Empty{}
-		if store_paths {
-			dfs(valve, minute+1, pressure+(cutoff-minute-1)*valve.rate, best_pressure, open_valves, visited, append(path, valve.name), paths, cutoff, store_paths)
-		} else {
-			dfs(valve, minute+1, pressure+(cutoff-minute-1)*valve.rate, best_pressure, open_valves, visited, path, paths, cutoff, store_paths)
-		}
+		dfs(valve, minute+1, pressure+(CUTOFF1-minute-1)*valve.rate, pressure2+(CUTOFF2-minute-1)*valve.rate, best_pressure, open_valves, visited, append(path, valve.name), paths)
 		valve.open = false
 		delete(open_valves, valve.name)
 	}
 
 	// move
 	for _, destination := range valve.destinations {
-		dfs(destination, minute+1, pressure, best_pressure, open_valves, visited, path, paths, cutoff, store_paths)
+		dfs(destination, minute+1, pressure, pressure2, best_pressure, open_valves, visited, path, paths)
 	}
 }
 
 func main() {
 	data := load_data("input.txt")
 	start := parse_data(data)
-	fmt.Println(find_best_pressure(start))
-	fmt.Println(find_best_pressure_with_elephant(start))
+	best_pressure, best_pressure2 := find_best_pressure(start)
+	fmt.Println(best_pressure)
+	fmt.Println(best_pressure2)
 }
