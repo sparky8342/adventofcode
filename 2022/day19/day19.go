@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+const TIME_PART1 = 24
+const TIME_PART2 = 32
+
+const VISITED_CACHE_TIME = 30
+
 type BluePrint struct {
 	id             int
 	ore            int
@@ -16,6 +21,7 @@ type BluePrint struct {
 	obsidian_clay  int
 	geode_ore      int
 	geode_obsidian int
+	max_ore_robots int
 }
 
 type State struct {
@@ -66,6 +72,7 @@ func parse_data(data []string) []BluePrint {
 			obsidian_clay:  obsidian_clay,
 			geode_ore:      geode_ore,
 			geode_obsidian: geode_obsidian,
+			max_ore_robots: geode_ore * 2,
 		}
 
 		blueprints = append(blueprints, blueprint)
@@ -87,21 +94,21 @@ func visited_state(state State) VisitedState {
 	}
 }
 
-func bfs(blueprint BluePrint) int {
+func search(blueprint BluePrint, max_time int) int {
 	start := State{ore_robots: 1}
 
-	queue := []State{start}
+	stack := []State{start}
 
 	visited := map[VisitedState]int{}
 	visited[visited_state(start)] = 0
 
 	max := 0
 
-	for len(queue) > 0 {
-		state := queue[0]
-		queue = queue[1:]
+	for len(stack) > 0 {
+		state := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
 
-		if state.time == 24 {
+		if state.time == max_time {
 			if state.geode > max {
 				max = state.geode
 			}
@@ -117,8 +124,10 @@ func bfs(blueprint BluePrint) int {
 			new_state.time++
 			vstate := visited_state(new_state)
 			if val, exists := visited[vstate]; !exists || val > new_state.time {
-				queue = append(queue, new_state)
-				visited[vstate] = new_state.time
+				stack = append(stack, new_state)
+				if new_state.time < VISITED_CACHE_TIME {
+					visited[vstate] = new_state.time
+				}
 			}
 			continue
 		}
@@ -132,8 +141,10 @@ func bfs(blueprint BluePrint) int {
 			new_state.time++
 			vstate := visited_state(new_state)
 			if val, exists := visited[vstate]; !exists || val > new_state.time {
-				queue = append(queue, new_state)
-				visited[vstate] = new_state.time
+				stack = append(stack, new_state)
+				if new_state.time < VISITED_CACHE_TIME {
+					visited[vstate] = new_state.time
+				}
 			}
 		}
 
@@ -145,12 +156,14 @@ func bfs(blueprint BluePrint) int {
 			new_state.time++
 			vstate := visited_state(new_state)
 			if val, exists := visited[vstate]; !exists || val > new_state.time {
-				queue = append(queue, new_state)
-				visited[vstate] = new_state.time
+				stack = append(stack, new_state)
+				if new_state.time < VISITED_CACHE_TIME {
+					visited[vstate] = new_state.time
+				}
 			}
 		}
 
-		if state.ore >= blueprint.ore {
+		if state.ore_robots < blueprint.max_ore_robots && state.ore >= blueprint.ore {
 			new_state := state
 			new_state.ore -= blueprint.ore
 			new_state.collect_ore()
@@ -158,8 +171,10 @@ func bfs(blueprint BluePrint) int {
 			new_state.time++
 			vstate := visited_state(new_state)
 			if val, exists := visited[vstate]; !exists || val > new_state.time {
-				queue = append(queue, new_state)
-				visited[vstate] = new_state.time
+				stack = append(stack, new_state)
+				if new_state.time < VISITED_CACHE_TIME {
+					visited[vstate] = new_state.time
+				}
 			}
 		}
 
@@ -168,8 +183,10 @@ func bfs(blueprint BluePrint) int {
 		new_state.time++
 		vstate := visited_state(new_state)
 		if val, exists := visited[vstate]; !exists || val > new_state.time {
-			queue = append(queue, new_state)
-			visited[vstate] = new_state.time
+			stack = append(stack, new_state)
+			if new_state.time < VISITED_CACHE_TIME {
+				visited[vstate] = new_state.time
+			}
 		}
 
 	}
@@ -180,7 +197,7 @@ func bfs(blueprint BluePrint) int {
 func find_quality(blueprints []BluePrint) int {
 	quality := 0
 	for _, blueprint := range blueprints {
-		quality += blueprint.id * bfs(blueprint)
+		quality += blueprint.id * search(blueprint, TIME_PART1)
 	}
 	return quality
 }
@@ -189,4 +206,5 @@ func main() {
 	data := load_data("input.txt")
 	blueprints := parse_data(data)
 	fmt.Println(find_quality(blueprints))
+	fmt.Println(search(blueprints[0], TIME_PART2) * search(blueprints[1], TIME_PART2) * search(blueprints[2], TIME_PART2))
 }
