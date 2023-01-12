@@ -50,6 +50,14 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
+func max(a int, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
 func parse_data(data []string) []BluePrint {
 	r := regexp.MustCompile(".*?([\\-0-9]+).*?([\\-0-9]+).*?([\\-0-9]+).*?([\\-0-9]+).*?([\\-0-9]+).*?([\\-0-9]+).*?([\\-0-9]+)")
 	blueprints := []BluePrint{}
@@ -72,7 +80,7 @@ func parse_data(data []string) []BluePrint {
 			obsidian_clay:  obsidian_clay,
 			geode_ore:      geode_ore,
 			geode_obsidian: geode_obsidian,
-			max_ore_robots: geode_ore * 2,
+			max_ore_robots: max(clay, max(obsidian_ore, geode_ore)),
 		}
 
 		blueprints = append(blueprints, blueprint)
