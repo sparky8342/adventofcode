@@ -1,49 +1,50 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use Data::Dumper;
 
 use constant MAX_CARD => 10006;
-
-my @cards;
-for (0..MAX_CARD) {
-	push @cards, $_;
-}
 
 open my $fh, '<', 'input.txt';
 chomp(my @ops = <$fh>);
 close $fh;
 
+my $pos = 2019;
+
 foreach my $op (@ops) {
 	if ($op eq 'deal into new stack') {
-		@cards = reverse @cards;
+		$pos = MAX_CARD - $pos;
 	}
 	elsif ($op =~ /^cut (.*)$/) {
 		my $cut = $1;
 		if ($cut > 0) {
-			@cards = (@cards[$cut..@cards-1], @cards[0..$cut-1]);
+			if ($pos < $cut) {
+				$pos += MAX_CARD - $cut + 1;
+			}
+			else {
+				$pos -= $cut;
+			}
 		}
 		else {
-			$cut *= -1;
-			@cards = (@cards[@cards-$cut..@cards-1], @cards[0..@cards-$cut-1]);
+			$cut = MAX_CARD + $cut;
+			if ($pos < $cut) {
+				$pos += MAX_CARD - $cut;
+			}
+			else {
+				$pos -= $cut + 1;
+			}
 		}
 	}
 	elsif ($op =~ /^deal with increment (\d+)$/) {
 		my $inc = $1;
-		my $pos = 0;
-		my @new_cards;
-		foreach my $card (@cards) {
-			$new_cards[$pos] = $card;
-			$pos += $inc;
-			$pos = $pos % scalar(@cards);
+
+		my $card_pos = 0;
+		for (0..$pos - 1) {
+			$card_pos += $inc;
+			$card_pos = $card_pos % (MAX_CARD + 1);
 		}
-		@cards = @new_cards;
-	}
-}	
-		
-for (my $i = 0; $i <= MAX_CARD; $i++) {
-	if ($cards[$i] == 2019) {
-		print "$i\n";
-		last;
+
+		$pos = $card_pos;
 	}
 }
+
+print "$pos\n";
