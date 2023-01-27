@@ -36,14 +36,7 @@ foreach my $op (@ops) {
 	}
 	elsif ($op =~ /^deal with increment (\d+)$/) {
 		my $inc = $1;
-
-		my $card_pos = 0;
-		for (0..$pos - 1) {
-			$card_pos += $inc;
-			$card_pos = $card_pos % (MAX_CARD + 1);
-		}
-
-		$pos = $card_pos;
+		$pos = ($pos * $inc) % (MAX_CARD + 1);
 	}
 }
 
