@@ -8,60 +8,51 @@ our @EXPORT_OK = qw(play);
 sub play {
 	my ($players,$no_marbles) = @_;
 
-	# The key to this is to use a linked list.
-	# It gives an incredible speed up when compared
-	# to a regular array, because elements are only
-	# added and no shifting along is needed as in a
-	# splice operation.
+	# linked list, each entry is a hash with prev, next and val keys
 
-	# I don't bother properly deleting elements, just
-	# link past them.
-
-	# The format is:
-	# (value, previous, next)
-
-	my @marbles = [(0,0,0)];
+	my $marble = { val => 0 };
+	$marble->{next} = $marble;
+	$marble->{prev} = $marble;
 
 	my $current = 0;
 	my $player = 0;
 	my @scores = (0) x $players;
 
-	for my $marble (1..$no_marbles) {
-		if ($marble % 23 == 0) {
-			$scores[$player] += $marble;
+	for my $marble_n (1..$no_marbles) {
+		if ($marble_n % 23 == 0) {
+			$scores[$player] += $marble_n;
 
 			# go back 7 marbles
 			for (1..7) {
-				$current = $marbles[$current]->[1];
+				$marble = $marble->{prev};
 			}
 
-			$scores[$player] += $marbles[$current]->[0];
+			$scores[$player] += $marble->{val};
 
 			# 'delete' the marble by linking past it
-			my $next = $marbles[$current]->[2];
-			my $previous = $marbles[$current]->[1];
-			$marbles[$previous]->[2] = $next;
-			$current = $next;
+			my $next = $marble->{next};
+			my $prev = $marble->{prev};
+			$marble->{prev}->{next} = $next;
+			$marble = $next;
 		}
 		else {
 			# move to next marble
-			$current = $marbles[$current]->[2];
+			$marble = $marble->{next};
 
 			# get next from current position
-			my $next = $marbles[$current]->[2];
+			my $next = $marble->{next};
 
 			# create new marble in between current and next
-			push @marbles, [$marble,$current,$next];
-			my $new = @marbles - 1;
+			my $new = { prev => $marble, next => $next, val => $marble_n };
 
 			# set the current one to point to the new one as the next marble
-			$marbles[$current]->[2] = $new;
+			$marble->{next} = $new;
 
 			# set the old next to point back to the new one as the previous marble
-			$marbles[$next]->[1] = $new;
+			$next->{prev} = $new;
 
 			# move current to the new one
-			$current = $new;
+			$marble = $new;
 		}
 		$player++;
 		$player = 0 if $player == $players;
