@@ -45,8 +45,6 @@ int part2() {
 		opposite = opposite->next;
 	}
 
-	int size = NUM_ELVES;
-
 	while (elf != elf->next) {
 		opposite->next = opposite->next->next;
 		elf = elf->next;
@@ -54,8 +52,6 @@ int part2() {
 		opposite->next = opposite->next->next;
 		opposite = opposite->next;
 		elf = elf->next;
-
-		size--;
 	}
 
 	return elf->id;
