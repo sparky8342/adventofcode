@@ -1,93 +1,65 @@
 #include <iostream>
-#include <fstream>
-#include <list>
 using namespace std;
 
 #define NUM_ELVES 3005290
 
-list<int> init_elves() {
-	int num_elves = NUM_ELVES;
+struct Elf {
+	int id;
+	struct Elf *next;
+};
 
-	// use a double linked list
-	list<int> elves;
+Elf* init_elves() {
+	struct Elf* head = new Elf;
+	head->id = 1;
 
-	for (int i = 0; i < num_elves; i++) {
-		elves.push_back(num_elves - i);
+	Elf* elf = head;
+
+	for (int i = 2; i <= NUM_ELVES; i++) {
+		struct Elf* next = new Elf;
+		next->id = i;
+		elf->next = next;
+		elf = elf->next;
 	}
-	return elves;
+
+	elf->next = head;
+	return head;
 }
 
 int part1() {
-	list<int> elves = init_elves();
+	Elf* elf = init_elves();
 
-	list<int>::iterator it;
-	it = elves.end();
-	it--;
-
-	while (elves.size() > 1) {
-		if (it == elves.begin()) {
-			it = elves.end();
-		}
-		it--;
-
-		list<int>::iterator newit = it;
-
-		if (newit == elves.begin()) {
-			newit = elves.end();
-		}
-		newit--;
-
-		elves.erase(it); // erasing invalidates this iterator
-
-		it = newit;
+	while (elf != elf->next) {
+		elf->next = elf->next->next;
+		elf = elf->next;
 	}
 
-	return *elves.begin();
+	return elf->id;
 }
 
 int part2() {
-	list<int> elves = init_elves();
+	Elf* elf = init_elves();
 
-	list<int>::iterator it;
-	it = elves.end();
-	it--;
-
-	list<int>::iterator oppositeit = it;
-	int steps = elves.size() / 2;
-	for (int i = 1; i <= steps; i++) {
-		oppositeit--;
+	Elf* opposite = elf;
+	int steps = NUM_ELVES / 2;
+	for (int i = 1; i < steps; i++) {
+		opposite = opposite->next;
 	}
 
-	while (elves.size() > 1) {
-		list<int>::iterator eraseit = oppositeit;
-		int moves = 1;
-		if (elves.size() % 2 == 1) {
-			moves++;
-		}
-		for (int i = 1; i <= moves; i++) {
-			if (oppositeit == elves.begin()) {
-				oppositeit = elves.end();
-			}
-			oppositeit--;
-		}
-		elves.erase(eraseit);
+	int size = NUM_ELVES;
 
-		if (it == elves.begin()) {
-			it = elves.end();
-		}
-		it--;
+	while (elf != elf->next) {
+		opposite->next = opposite->next->next;
+		elf = elf->next;
 
-		if (it == oppositeit) {
-			if (oppositeit == elves.begin()) {
-				oppositeit = elves.end();
-			}
-			oppositeit--;
-		}
+		opposite->next = opposite->next->next;
+		opposite = opposite->next;
+		elf = elf->next;
+
+		size--;
 	}
 
-	return *elves.begin();
+	return elf->id;
 }
-
 
 int main() {
 	int elf = part1();
