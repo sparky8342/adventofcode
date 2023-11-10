@@ -5,17 +5,17 @@ using namespace std;
 
 struct Elf {
 	int id;
-	struct Elf *next;
+	Elf *next;
 };
 
 Elf* init_elves() {
-	struct Elf* head = new Elf;
+	Elf* head = new Elf;
 	head->id = 1;
 
 	Elf* elf = head;
 
 	for (int i = 2; i <= NUM_ELVES; i++) {
-		struct Elf* next = new Elf;
+		Elf* next = new Elf;
 		next->id = i;
 		elf->next = next;
 		elf = elf->next;
