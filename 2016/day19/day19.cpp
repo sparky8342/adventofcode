@@ -40,8 +40,7 @@ int part2() {
 	Elf* elf = init_elves();
 
 	Elf* opposite = elf;
-	int steps = NUM_ELVES / 2;
-	for (int i = 1; i < steps; i++) {
+	for (int i = 1; i < NUM_ELVES / 2; i++) {
 		opposite = opposite->next;
 	}
 
