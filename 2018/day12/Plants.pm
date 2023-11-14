@@ -10,13 +10,13 @@ sub iterate {
 
 	my @state = split//,$initial;
 
-	my @commands;
+	my %commands;
 	my @change;
 	foreach my $row (@data) {
 		$row =~ /(.*) => (.)/;
 		my ($pattern,$set) = ($1,$2);
 		next if $set eq '.';
-		push @commands, $pattern;
+		$commands{$pattern} = 1;
 	}
 
 	my $left_add = 0;
@@ -31,15 +31,12 @@ sub iterate {
 		my @new_state;
 		for (my $i = 0; $i < @state - 5; $i++) {
 			my $chunk = join('',@state[$i..$i+4]);
-			my $match = 0;
-			foreach my $command (@commands) {
-				if ($chunk eq $command) {
-					push @new_state, '#';
-					$match = 1;
-					last;
-				}
+			if (exists($commands{$chunk})) {
+				push @new_state, '#';
 			}
-			push @new_state, '.' if $match == 0;
+			else {
+				push @new_state, '.';
+			}
 		}
 
 		while ($new_state[0] eq '.') {
