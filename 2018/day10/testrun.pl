@@ -38,4 +38,4 @@ position=<-3,  6> velocity=< 2, -1>
 END_DATA
 
 my @rows = split("\n",$data);
-animate(4,@rows);
+animate(4,8,@rows);

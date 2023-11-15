@@ -8,4 +8,4 @@ my @records = <$fh>;
 close $fh;
 chomp($_) foreach @records;
 
-animate(20000,@records);
+animate(20000,10,@records);
