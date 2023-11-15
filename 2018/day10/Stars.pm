@@ -6,7 +6,7 @@ use parent "Exporter";
 our @EXPORT_OK = qw(animate);
 
 sub animate {
-	my ($iterations,@data) = @_;
+	my ($iterations,$letter_height,@data) = @_;
 
 	my @points;
 	foreach my $row (@data) {
@@ -17,7 +17,6 @@ sub animate {
 
 	for (1..$iterations) {
 		my ($startx,$endx,$starty,$endy);
-		my %grid;
 		foreach my $point (@points) {
 			$point->{x} += $point->{dx};
 			$point->{y} += $point->{dy};
@@ -33,25 +32,27 @@ sub animate {
 			if (!defined($endy) || $point->{y} > $endy) {
 				$endy = $point->{y};
 			}
-
-			$grid{$point->{x}}{$point->{y}} = 1;
 		}
 
-		if ($endx - $startx < 65) {
-			print "Creating candidate $_.stars\n";
-			open my $fh, '>', "$_.stars";
+		if ($endy - $starty <= $letter_height) {
+			my %grid;
+			foreach my $point (@points) {
+				$grid{$point->{x}}{$point->{y}} = 1;
+			}
+
 			for (my $y = $starty; $y <= $endy; $y++) {
 				for (my $x = $startx; $x <= $endx; $x++) {
 					if (exists($grid{$x}{$y})) {
-						print $fh '#';
+						print '#';
 					}
 					else {
-						print $fh ' ';
+						print ' ';
 					}
 				}
-				print $fh "\n";
+				print "\n";
 			}
-			close $fh;
+			print "$_\n";
+			last;
 		}
 	}
 }
