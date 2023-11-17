@@ -13,7 +13,13 @@ sub make {
 	my $e2 = 1;
 
 	for (1..$n + 9) {
-		push @r, split//,$r[$e1] + $r[$e2];
+		my $new = $r[$e1] + $r[$e2];
+		if ($new > 9) {
+			push @r, 1, $new % 10;
+		}
+		else {
+			push @r, $new;
+		}
 		$e1 = ($e1 + $r[$e1] + 1) % @r;
 		$e2 = ($e2 + $r[$e2] + 1) % @r;
 	}
@@ -30,7 +36,13 @@ sub find {
 	my $e2 = 1;
 
 	while (1) {
-		push @r, split//,$r[$e1] + $r[$e2];
+		my $new = $r[$e1] + $r[$e2];
+		if ($new > 9) {
+			push @r, 1, $new % 10;
+		}
+		else {
+			push @r, $new;
+		}
 		$e1 = ($e1 + $r[$e1] + 1) % @r;
 		$e2 = ($e2 + $r[$e2] + 1) % @r;
 		if (join('',@r[@r-$len..@r-1]) eq $n) {
