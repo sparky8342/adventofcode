@@ -35,10 +35,6 @@ sub find_best_square {
 	}
 
 	# partial sums
-	for (my $i = 2; $i <= 300; $i++) {
-		$grid[$i][1] += $grid[$i-1][1];
-		$grid[1][$i] += $grid[1][$i-1];
-	}
 	for my $x (2..300) {
 		for my $y (2..300) {
 			$grid[$x][$y] = $grid[$x][$y] + $grid[$x-1][$y] + $grid[$x][$y-1] - $grid[$x-1][$y-1];
