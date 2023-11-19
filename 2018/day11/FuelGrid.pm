@@ -7,15 +7,13 @@ our @EXPORT_OK = qw(find_best_square);
 
 $| = 1;
 
-my $best_power;
-my $best_x;
-my $best_y;
-my $best_size;
-
 sub find_best_square {
 	my ($serial,$min_size,$max_size) = @_;
 
-	$best_power = 0;
+	my $best_power = 0;
+	my $best_x;
+	my $best_y;
+	my $best_size;
 
 	my @grid;
 	for my $x (1..300) {
@@ -52,7 +50,12 @@ sub find_best_square {
 		for (my $x = $size; $x <= 300; $x++) {
 			for (my $y = $size; $y <= 300; $y++) {
 				my $power = $grid[$x][$y] - $grid[$x-$size][$y] - $grid[$x][$y-$size] + $grid[$x-$size][$y-$size];
-				max_check($power, $x-$size + 1, $y-$size + 1, $size);
+				if ($power > $best_power) {
+					$best_power = $power;
+					$best_x = $x - $size + 1;
+					$best_y = $y - $size + 1;
+					$best_size = $size;
+				}
 			}
 		}
 	}
@@ -62,17 +65,6 @@ sub find_best_square {
 	}
 	else {
 		return "$best_x,$best_y,$best_size";
-	}
-}
-
-
-sub max_check {
-	my ($power,$x,$y,$size) = @_;
-	if ($power > $best_power) {
-		$best_power = $power;
-		$best_x = $x;
-		$best_y = $y;
-		$best_size = $size;
 	}
 }
 
