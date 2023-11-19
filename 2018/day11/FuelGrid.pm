@@ -30,66 +30,33 @@ sub find_best_square {
 			$grid[$x][$y] = $pl;
 		}
 	}
+	$grid[0][0] = 0;
+	for (my $i = 1; $i <= 300; $i++) {
+		$grid[$i][0] = 0;
+		$grid[0][$i] = 0;
+	}
 
-	for my $size ($min_size..$max_size) {
-		my $x = 1;
-		my $y = 1;
-		my $power = 0;
-
-		for my $dx ($x..$x + $size - 1) {
-			for my $dy ($y..$y + $size - 1) {
-				$power += $grid[$dx][$dy];
-			}
-		}
-		max_check($power,$x,$y,$size);
-
-		while ($y < 300 - $size) {
-			# go right
-			while ($x <= 300 - $size) {
-				for (my $dy = $y; $dy < $y + $size; $dy++) {
-					$power -= $grid[$x][$dy];
-				}
-				$x++;
-				for (my $dy = $y; $dy < $y + $size; $dy++) {
-					$power += $grid[$x+$size-1][$dy];
-				}
-				max_check($power,$x,$y,$size);
-			}
-
-			# down 1
-			for (my $dx = $x; $dx < $x + $size; $dx++) {
-				$power -= $grid[$dx][$y]
-			}
-			$y++;
-			for (my $dx = $x; $dx < $x + $size; $dx++) {
-				$power += $grid[$dx][$y+$size-1]
-			}
-
-			max_check($power,$x,$y,$size);
-
-			# go left
-			while ($x > 1) {
-				for (my $dy = $y; $dy < $y + $size; $dy++) {
-					$power -= $grid[$x+$size-1][$dy];
-				}
-				$x--;
-				for (my $dy = $y; $dy < $y + $size; $dy++) {
-					$power += $grid[$x][$dy];
-				}
-				max_check($power,$x,$y,$size);
-			}
-
-			# down 1
-			for (my $dx = $x; $dx < $x + $size; $dx++) {
-				$power -= $grid[$dx][$y]
-			}
-			$y++;
-			for (my $dx = $x; $dx < $x + $size; $dx++) {
-				$power += $grid[$dx][$y+$size-1]
-			}
-			max_check($power,$x,$y,$size);
+	# partial sums
+	for (my $i = 2; $i <= 300; $i++) {
+		$grid[$i][1] += $grid[$i-1][1];
+		$grid[1][$i] += $grid[1][$i-1];
+	}
+	for my $x (2..300) {
+		for my $y (2..300) {
+			$grid[$x][$y] = $grid[$x][$y] + $grid[$x-1][$y] + $grid[$x][$y-1] - $grid[$x-1][$y-1];
 		}
 	}
+
+	# find best power
+	for my $size ($min_size..$max_size) {
+		for (my $x = $size; $x <= 300; $x++) {
+			for (my $y = $size; $y <= 300; $y++) {
+				my $power = $grid[$x][$y] - $grid[$x-$size][$y] - $grid[$x][$y-$size] + $grid[$x-$size][$y-$size];
+				max_check($power, $x-$size + 1, $y-$size + 1, $size);
+			}
+		}
+	}
+
 	if ($min_size == $max_size) {
 		return "$best_x,$best_y";
 	}
