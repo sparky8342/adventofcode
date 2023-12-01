@@ -27,7 +27,7 @@ func calibration(data []string, find_words bool) int {
 		"nine":  9,
 	}
 
-	var num, total int
+	var first, last, total int
 
 	for _, line := range data {
 
@@ -35,13 +35,13 @@ func calibration(data []string, find_words bool) int {
 	outer:
 		for i := 0; i < len(line); i++ {
 			if line[i] >= '0' && line[i] <= '9' {
-				num = 10 * int(line[i]-'0')
+				first = int(line[i]-'0')
 				break
 			} else if find_words {
 				for j := i + 2; j <= i+5 && j < len(line); j++ {
 					sub := line[i:j]
 					if val, exists := words[sub]; exists {
-						num = 10 * val
+						first = val
 						break outer
 					}
 				}
@@ -52,20 +52,20 @@ func calibration(data []string, find_words bool) int {
 	outer2:
 		for i := len(line) - 1; i >= 0; i-- {
 			if line[i] >= '0' && line[i] <= '9' {
-				num += int(line[i] - '0')
+				last = int(line[i] - '0')
 				break
 			} else if find_words {
 				for j := i - 2; j >= i-4 && j >= 0; j-- {
 					sub := line[j : i+1]
 					if val, exists := words[sub]; exists {
-						num += val
+						last = val
 						break outer2
 					}
 				}
 			}
 		}
 
-		total += num
+		total += (first * 10) + last
 	}
 
 	return total
