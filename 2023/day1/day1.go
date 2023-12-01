@@ -35,7 +35,7 @@ func calibration(data []string, find_words bool) int {
 	outer:
 		for i := 0; i < len(line); i++ {
 			if line[i] >= '0' && line[i] <= '9' {
-				first = int(line[i]-'0')
+				first = int(line[i] - '0')
 				break
 			} else if find_words {
 				for j := i + 2; j <= i+5 && j < len(line); j++ {
