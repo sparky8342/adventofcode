@@ -1,0 +1,1 @@
+mcs -out:/tmp/day1.exe day1.cs && /tmp/day1.exe
