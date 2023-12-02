@@ -10,7 +10,7 @@ func Test(t *testing.T) {
 		"treb7uchet",
 	}
 
-	got_calibration := calibration(data, false)
+	got_calibration, _ := calibration(data)
 	want_calibration := 142
 
 	if got_calibration != want_calibration {
@@ -27,7 +27,7 @@ func Test(t *testing.T) {
 		"7pqrstsixteen",
 	}
 
-	got_calibration = calibration(data, true)
+	_, got_calibration = calibration(data)
 	want_calibration = 281
 
 	if got_calibration != want_calibration {

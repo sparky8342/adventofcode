@@ -14,65 +14,57 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func calibration(data []string, find_words bool) int {
-	words := map[string]int{
-		"one":   1,
-		"two":   2,
-		"three": 3,
-		"four":  4,
-		"five":  5,
-		"six":   6,
-		"seven": 7,
-		"eight": 8,
-		"nine":  9,
+func contains_at(str string, str2 string, pos int) bool {
+	if len(str2)+pos > len(str) {
+		return false
 	}
+	for i := 0; i < len(str2); i++ {
+		if str[pos+i] != str2[i] {
+			return false
+		}
+	}
+	return true
+}
 
-	var first, last, total int
+func calibration(data []string) (int, int) {
+	words := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
+
+	total := 0
+	total2 := 0
 
 	for _, line := range data {
+		digits := []int{}
+		digits2 := []int{}
 
-		// first digit
-	outer:
 		for i := 0; i < len(line); i++ {
 			if line[i] >= '0' && line[i] <= '9' {
-				first = int(line[i] - '0')
-				break
-			} else if find_words {
-				for j := i + 2; j <= i+5 && j < len(line); j++ {
-					sub := line[i:j]
-					if val, exists := words[sub]; exists {
-						first = val
-						break outer
-					}
+				n := int(line[i] - '0')
+				digits = append(digits, n)
+				digits2 = append(digits2, n)
+				continue
+			}
+			for word_index, word := range words {
+				if contains_at(line, word, i) {
+					digits2 = append(digits2, word_index+1)
 				}
 			}
+
 		}
 
-		// last digit
-	outer2:
-		for i := len(line) - 1; i >= 0; i-- {
-			if line[i] >= '0' && line[i] <= '9' {
-				last = int(line[i] - '0')
-				break
-			} else if find_words {
-				for j := i - 2; j >= i-4 && j >= 0; j-- {
-					sub := line[j : i+1]
-					if val, exists := words[sub]; exists {
-						last = val
-						break outer2
-					}
-				}
-			}
+		if len(digits) > 0 {
+			total += digits[0]*10 + digits[len(digits)-1]
 		}
-
-		total += (first * 10) + last
+		if len(digits2) > 0 {
+			total2 += digits2[0]*10 + digits2[len(digits2)-1]
+		}
 	}
 
-	return total
+	return total, total2
 }
 
 func main() {
 	data := load_data("input.txt")
-	fmt.Println(calibration(data, false))
-	fmt.Println(calibration(data, true))
+	total, total2 := calibration(data)
+	fmt.Println(total)
+	fmt.Println(total2)
 }
