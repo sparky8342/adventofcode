@@ -7,22 +7,20 @@ import (
 	"strings"
 )
 
-var max_allowed Set
-
-type Set struct {
-	cube map[string]int
-}
+type CubeSet map[string]int
 
 type Game struct {
-	id      int
-	sets    []Set
-	max_set Set
-	valid   bool
-	power   int
+	id        int
+	cube_sets []CubeSet
+	max_set   CubeSet
+	valid     bool
+	power     int
 }
 
+var max_allowed CubeSet
+
 func init() {
-	max_allowed = Set{cube: map[string]int{"red": 12, "green": 13, "blue": 14}}
+	max_allowed = CubeSet{"red": 12, "green": 13, "blue": 14}
 }
 
 func load_data(filename string) []string {
@@ -37,7 +35,7 @@ func parse_line(line string) Game {
 	game := Game{
 		valid:   true,
 		power:   1,
-		max_set: Set{cube: map[string]int{"red": 0, "green": 0, "blue": 0}},
+		max_set: CubeSet{"red": 0, "green": 0, "blue": 0},
 	}
 
 	parts := strings.Split(line, ": ")
@@ -48,26 +46,27 @@ func parse_line(line string) Game {
 	sets_str := strings.Split(parts[1], "; ")
 
 	for _, set_str := range sets_str {
-		set := Set{cube: map[string]int{}}
+		cube_set := CubeSet{}
 		cube_strs := strings.Split(set_str, ", ")
 
 		for _, cube_str := range cube_strs {
 			cube_str_parts := strings.Split(cube_str, " ")
 			amount_str, colour := cube_str_parts[0], cube_str_parts[1]
 			amount, _ := strconv.Atoi(amount_str)
-			set.cube[colour] = amount
 
-			if amount > game.max_set.cube[colour] {
-				game.max_set.cube[colour] = amount
+			cube_set[colour] = amount
+
+			if amount > game.max_set[colour] {
+				game.max_set[colour] = amount
 			}
-			if amount > max_allowed.cube[colour] {
+			if amount > max_allowed[colour] {
 				game.valid = false
 			}
 		}
-		game.sets = append(game.sets, set)
+		game.cube_sets = append(game.cube_sets, cube_set)
 	}
 
-	for _, amount := range game.max_set.cube {
+	for _, amount := range game.max_set {
 		game.power *= amount
 	}
 
