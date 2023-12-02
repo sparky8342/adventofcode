@@ -46,6 +46,7 @@ func calibration(data []string) (int, int) {
 			for word_index, word := range words {
 				if contains_at(line, word, i) {
 					digits2 = append(digits2, word_index+1)
+					break
 				}
 			}
 
