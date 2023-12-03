@@ -15,6 +15,8 @@ type Num struct {
 	star_pos Pos
 }
 
+var width, height int
+
 func load_data(filename string) []string {
 	data, _ := ioutil.ReadFile(filename)
 	if data[len(data)-1] == '\n' {
@@ -28,9 +30,6 @@ func is_digit(b byte) bool {
 }
 
 func adjacent_to_symbol(data []string, x int, x2 int, y int) (bool, int, int) {
-	height := len(data)
-	width := len(data[0])
-
 	for dx := x - 1; dx <= x2+1; dx++ {
 		if dx < 0 || dx == width {
 			continue
@@ -54,8 +53,8 @@ func adjacent_to_symbol(data []string, x int, x2 int, y int) (bool, int, int) {
 }
 
 func sum_and_ratio(data []string) (int, int) {
-	height := len(data)
-	width := len(data[0])
+	height = len(data)
+	width = len(data[0])
 
 	sum := 0
 
