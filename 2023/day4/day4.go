@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -17,8 +16,6 @@ func load_data(filename string) []string {
 }
 
 func points(data []string) (int, int) {
-	re := regexp.MustCompile(".*?: (.*?) \\| (.*)")
-
 	score := 0
 
 	dp := make([]int, len(data))
@@ -27,20 +24,22 @@ func points(data []string) (int, int) {
 	}
 
 	for i, line := range data {
-		match := re.FindStringSubmatch(line)
+		parts := strings.Fields(line)
 
 		winning := map[int]struct{}{}
 
-		for _, num_str := range strings.Fields(match[1]) {
-			num, _ := strconv.Atoi(num_str)
+		pos := 2
+		for parts[pos] != "|" {
+			num, _ := strconv.Atoi(parts[pos])
 			winning[num] = struct{}{}
+			pos++
 		}
 
 		matching_numbers := 0
 		card_score := 0
 
-		for _, num_str := range strings.Fields(match[2]) {
-			num, _ := strconv.Atoi(num_str)
+		for j := pos + 1; j < len(parts); j++ {
+			num, _ := strconv.Atoi(parts[j])
 			if _, exists := winning[num]; exists {
 				matching_numbers++
 				if card_score == 0 {
