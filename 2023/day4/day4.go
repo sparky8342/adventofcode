@@ -16,28 +16,33 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func points(data []string) int {
-	re := regexp.MustCompile("Card\\s+(\\d+): (.*?) \\| (.*)")
+func points(data []string) (int, int) {
+	re := regexp.MustCompile(".*?: (.*?) \\| (.*)")
 
 	score := 0
 
-	for _, line := range data {
-		match := re.FindStringSubmatch(line)
+	dp := make([]int, len(data))
+	for i := 0; i < len(data); i++ {
+		dp[i] = 1
+	}
 
-		//id, _ := strconv.Atoi(match[1])
+	for i, line := range data {
+		match := re.FindStringSubmatch(line)
 
 		winning := map[int]struct{}{}
 
-		for _, num_str := range strings.Fields(match[2]) {
+		for _, num_str := range strings.Fields(match[1]) {
 			num, _ := strconv.Atoi(num_str)
 			winning[num] = struct{}{}
 		}
 
+		matching_numbers := 0
 		card_score := 0
 
-		for _, num_str := range strings.Fields(match[3]) {
+		for _, num_str := range strings.Fields(match[2]) {
 			num, _ := strconv.Atoi(num_str)
 			if _, exists := winning[num]; exists {
+				matching_numbers++
 				if card_score == 0 {
 					card_score = 1
 				} else {
@@ -47,12 +52,26 @@ func points(data []string) int {
 		}
 
 		score += card_score
+
+		if matching_numbers > 0 {
+			for j := 1; j <= matching_numbers; j++ {
+				dp[i+j] += dp[i]
+			}
+		}
+
 	}
 
-	return score
+	cards_won := 0
+	for _, n := range dp {
+		cards_won += n
+	}
+
+	return score, cards_won
 }
 
 func main() {
 	data := load_data("input.txt")
-	fmt.Println(points(data))
+	score, cards_won := points(data)
+	fmt.Println(score)
+	fmt.Println(cards_won)
 }

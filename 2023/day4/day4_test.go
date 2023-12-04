@@ -12,10 +12,16 @@ func Test(t *testing.T) {
 		"Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11",
 	}
 
-	got_points := points(data)
+	got_points, got_cards_won := points(data)
 	want_points := 13
+	want_cards_won := 30
 
 	if got_points != want_points {
 		t.Errorf("got %d, wanted %d", got_points, want_points)
 	}
+
+	if got_cards_won != want_cards_won {
+		t.Errorf("got %d, wanted %d", got_cards_won, want_cards_won)
+	}
+
 }
