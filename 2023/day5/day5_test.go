@@ -39,10 +39,16 @@ func Test(t *testing.T) {
 		"56 93 4",
 	}
 
-	got_lowest_location := lowest_location(data)
+	got_lowest_location, got_lowest_location_from_range := lowest_location(data)
 	want_lowest_location := 35
+	want_lowest_location_from_range := 46
 
 	if got_lowest_location != want_lowest_location {
 		t.Errorf("got %d, wanted %d", got_lowest_location, want_lowest_location)
 	}
+
+	if got_lowest_location_from_range != want_lowest_location_from_range {
+		t.Errorf("got %d, wanted %d", got_lowest_location_from_range, want_lowest_location_from_range)
+	}
+
 }
