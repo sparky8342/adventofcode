@@ -67,10 +67,12 @@ func convert_seed(seed int, conversions []Conversion) int {
 	return seed
 }
 
-func lowest_location(data []string) int {
+func lowest_location(data []string) (int, int) {
 	seeds, conversions := parse_data(data)
 
 	lowest := convert_seed(seeds[0], conversions)
+	lowest_from_range := lowest
+
 	for i := 1; i < len(seeds); i++ {
 		location := convert_seed(seeds[i], conversions)
 		if location < lowest {
@@ -78,10 +80,21 @@ func lowest_location(data []string) int {
 		}
 	}
 
-	return lowest
+	for i := 0; i < len(seeds); i += 2 {
+		for j := seeds[i]; j < seeds[i]+seeds[i+1]; j++ {
+			location := convert_seed(j, conversions)
+			if location < lowest_from_range {
+				lowest_from_range = location
+			}
+		}
+	}
+
+	return lowest, lowest_from_range
 }
 
 func main() {
 	data := load_data("input.txt")
-	fmt.Println(lowest_location(data))
+	lowest, lowest_from_range := lowest_location(data)
+	fmt.Println(lowest)
+	fmt.Println(lowest_from_range)
 }
