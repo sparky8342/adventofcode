@@ -153,37 +153,43 @@ func parse_data(data []string) []Hand {
 	return hands
 }
 
+func comp_cards(a string, b string, wild bool) bool {
+	for i := 0; i < 5; i++ {
+		card_a := card_to_num(a[i], wild)
+		card_b := card_to_num(b[i], wild)
+		if card_a != card_b {
+			return card_a > card_b
+		}
+	}
+	return true
+}
+
 func winnings(hands []Hand) (int, int) {
-	scores := make([]int, 2)
-
-	for typ := 0; typ <= 1; typ++ {
-		wild := false
-		if typ == 1 {
-			wild = true
+	sort.Slice(hands, func(i, j int) bool {
+		if hands[i].typ == hands[j].typ {
+			return comp_cards(hands[i].cards, hands[j].cards, false)
+		} else {
+			return hands[i].typ > hands[j].typ
 		}
-		sort.Slice(hands, func(i, j int) bool {
-			if (typ == 0 && hands[i].typ == hands[j].typ) || (typ == 1 && hands[i].typ2 == hands[j].typ2) {
-				for k := 0; k < 5; k++ {
-					a := card_to_num(hands[i].cards[k], wild)
-					b := card_to_num(hands[j].cards[k], wild)
-					if a != b {
-						return a > b
-					}
-				}
-				return true
-			} else {
-				return (typ == 0 && hands[i].typ > hands[j].typ) || (typ == 1 && hands[i].typ2 > hands[j].typ2)
-			}
-		})
-
-		score := 0
-		for i := 0; i < len(hands); i++ {
-			score += (len(hands) - i) * hands[i].bid
-		}
-		scores[typ] = score
+	})
+	score := 0
+	for i := 0; i < len(hands); i++ {
+		score += (len(hands) - i) * hands[i].bid
 	}
 
-	return scores[0], scores[1]
+	sort.Slice(hands, func(i, j int) bool {
+		if hands[i].typ2 == hands[j].typ2 {
+			return comp_cards(hands[i].cards, hands[j].cards, true)
+		} else {
+			return hands[i].typ2 > hands[j].typ2
+		}
+	})
+	score_wild := 0
+	for i := 0; i < len(hands); i++ {
+		score_wild += (len(hands) - i) * hands[i].bid
+	}
+
+	return score, score_wild
 }
 
 func main() {
