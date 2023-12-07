@@ -13,10 +13,15 @@ func Test(t *testing.T) {
 
 	hands := parse_data(data)
 
-	got_winnings := winnings(hands)
+	got_winnings, got_winnings_wildcard := winnings(hands)
 	want_winnings := 6440
+	want_winnings_wildcard := 5905
 
 	if got_winnings != want_winnings {
 		t.Errorf("got %d, wanted %d", got_winnings, want_winnings)
+	}
+
+	if got_winnings_wildcard != want_winnings_wildcard {
+		t.Errorf("got %d, wanted %d", got_winnings_wildcard, want_winnings_wildcard)
 	}
 }
