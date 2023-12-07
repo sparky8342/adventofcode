@@ -19,10 +19,11 @@ const (
 )
 
 type Hand struct {
-	cards string
-	typ   int
-	typ2  int
-	bid   int
+	cards  string
+	cards2 string
+	typ    int
+	typ2   int
+	bid    int
 }
 
 func load_data(filename string) []string {
@@ -77,7 +78,7 @@ func get_type(cards string) int {
 	return -1
 }
 
-func card_to_num(card byte, wild bool) int {
+func card_to_num(card byte) int {
 	switch card {
 	case 'A':
 		{
@@ -93,15 +94,15 @@ func card_to_num(card byte, wild bool) int {
 		}
 	case 'J':
 		{
-			if wild {
-				return 1
-			} else {
-				return 11
-			}
+			return 11
 		}
 	case 'T':
 		{
 			return 10
+		}
+	case 'j':
+		{
+			return 1
 		}
 	default:
 		{
@@ -110,7 +111,7 @@ func card_to_num(card byte, wild bool) int {
 	}
 }
 
-func convert_wildcards(cards string) string {
+func convert_wildcards(cards string) (string, string) {
 	card_counts := map[rune]int{}
 	var highest_card rune
 	highest_amount := 0
@@ -124,39 +125,46 @@ func convert_wildcards(cards string) string {
 	}
 
 	if _, exists := card_counts['J']; !exists {
-		return cards
+		return cards, cards
 	}
 
 	bytes := []byte(cards)
+	bytes2 := []byte(cards)
 	b := byte(highest_card)
 	for i := 0; i < 5; i++ {
 		if bytes[i] == 'J' {
 			bytes[i] = b
 		}
+		if bytes2[i] == 'J' {
+			bytes2[i] = 'j'
+		}
 	}
 
-	return string(bytes)
+	return string(bytes), string(bytes2)
 }
 
 func parse_data(data []string) []Hand {
 	hands := []Hand{}
 	for _, line := range data {
 		parts := strings.Fields(line)
+		cards := parts[0]
+		cards_converted, cards_with_joker := convert_wildcards(cards)
 		bid, _ := strconv.Atoi(parts[1])
 		hands = append(hands, Hand{
-			cards: parts[0],
-			typ:   get_type(parts[0]),
-			typ2:  get_type(convert_wildcards(parts[0])),
-			bid:   bid,
+			cards:  cards,
+			cards2: cards_with_joker,
+			typ:    get_type(cards),
+			typ2:   get_type(cards_converted),
+			bid:    bid,
 		})
 	}
 	return hands
 }
 
-func comp_cards(a string, b string, wild bool) bool {
+func comp_cards(a string, b string) bool {
 	for i := 0; i < 5; i++ {
-		card_a := card_to_num(a[i], wild)
-		card_b := card_to_num(b[i], wild)
+		card_a := card_to_num(a[i])
+		card_b := card_to_num(b[i])
 		if card_a != card_b {
 			return card_a > card_b
 		}
@@ -167,7 +175,7 @@ func comp_cards(a string, b string, wild bool) bool {
 func winnings(hands []Hand) (int, int) {
 	sort.Slice(hands, func(i, j int) bool {
 		if hands[i].typ == hands[j].typ {
-			return comp_cards(hands[i].cards, hands[j].cards, false)
+			return comp_cards(hands[i].cards, hands[j].cards)
 		} else {
 			return hands[i].typ > hands[j].typ
 		}
@@ -179,7 +187,7 @@ func winnings(hands []Hand) (int, int) {
 
 	sort.Slice(hands, func(i, j int) bool {
 		if hands[i].typ2 == hands[j].typ2 {
-			return comp_cards(hands[i].cards, hands[j].cards, true)
+			return comp_cards(hands[i].cards2, hands[j].cards2)
 		} else {
 			return hands[i].typ2 > hands[j].typ2
 		}
