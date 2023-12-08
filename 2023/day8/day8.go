@@ -102,12 +102,17 @@ func ghost_steps(instructions string, nodes map[string]Node) int {
 
 	for {
 		smallest := 0
+		largest := 0
 		for i := 1; i < len(steps); i++ {
 			if steps[i] < steps[smallest] {
 				smallest = i
+			} else if steps[i] > steps[largest] {
+				largest = i
 			}
 		}
-		steps[smallest] += cycles[smallest]
+		for steps[smallest] < steps[largest] {
+			steps[smallest] += cycles[smallest]
+		}
 		if all_same(steps) {
 			return steps[0]
 		}
