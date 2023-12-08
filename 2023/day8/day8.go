@@ -113,7 +113,7 @@ func ghost_steps(instructions string, nodes map[string]Node) int {
 
 		diff := steps[largest] - steps[smallest]
 		if diff%cycles[smallest] == 0 {
-			steps[smallest] += (diff / cycles[smallest]) * cycles[smallest]
+			steps[smallest] = steps[largest]
 		} else {
 			steps[smallest] += ((diff / cycles[smallest]) + 1) * cycles[smallest]
 		}
