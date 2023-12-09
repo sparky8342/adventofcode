@@ -9,10 +9,16 @@ func Test(t *testing.T) {
 		[]int{10, 13, 16, 21, 30, 45},
 	}
 
-	got_sum := calculate_sum(nums)
-	want_sum := 114
+	got_next_sum, got_previous_sum := calculate_sum(nums)
+	want_next_sum := 114
+	want_previous_sum := 2
 
-	if got_sum != want_sum {
-		t.Errorf("got %d, wanted %d", got_sum, want_sum)
+	if got_next_sum != want_next_sum {
+		t.Errorf("got %d, wanted %d", got_next_sum, want_next_sum)
 	}
+
+	if got_previous_sum != want_previous_sum {
+		t.Errorf("got %d, wanted %d", got_previous_sum, want_previous_sum)
+	}
+
 }

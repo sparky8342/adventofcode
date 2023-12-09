@@ -28,7 +28,7 @@ func load_data(filename string) [][]int {
 	return nums
 }
 
-func find_next_value(row []int) int {
+func find_differences(row []int) [][]int {
 	sequences := [][]int{row}
 
 	seq_no := 0
@@ -50,6 +50,10 @@ func find_next_value(row []int) int {
 		seq_no++
 	}
 
+	return sequences
+}
+
+func find_next_value(sequences [][]int) int {
 	sequences[len(sequences)-1] = append(sequences[len(sequences)-1], 0)
 
 	for i := len(sequences) - 2; i >= 0; i-- {
@@ -61,15 +65,32 @@ func find_next_value(row []int) int {
 	return sequences[0][len(sequences[0])-1]
 }
 
-func calculate_sum(nums [][]int) int {
-	sum := 0
-	for _, row := range nums {
-		sum += find_next_value(row)
+func find_previous_value(sequences [][]int) int {
+	sequences[len(sequences)-1] = append([]int{0}, sequences[len(sequences)-1]...)
+
+	for i := len(sequences) - 2; i >= 0; i-- {
+		first := sequences[i][0]
+		first_below := sequences[i+1][0]
+		sequences[i] = append([]int{first - first_below}, sequences[i]...)
 	}
-	return sum
+
+	return sequences[0][0]
+}
+
+func calculate_sum(nums [][]int) (int, int) {
+	sum := 0
+	sum2 := 0
+	for _, row := range nums {
+		sequences := find_differences(row)
+		sum += find_next_value(sequences)
+		sum2 += find_previous_value(sequences)
+	}
+	return sum, sum2
 }
 
 func main() {
 	nums := load_data("input.txt")
-	fmt.Println(calculate_sum(nums))
+	next_sum, previous_sum := calculate_sum(nums)
+	fmt.Println(next_sum)
+	fmt.Println(previous_sum)
 }
