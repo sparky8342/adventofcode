@@ -20,5 +20,4 @@ func Test(t *testing.T) {
 	if got_previous_sum != want_previous_sum {
 		t.Errorf("got %d, wanted %d", got_previous_sum, want_previous_sum)
 	}
-
 }
