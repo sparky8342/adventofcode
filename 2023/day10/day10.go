@@ -23,23 +23,18 @@ type Empty struct {
 
 var height, width int
 
-func get_data(filename string) [][]byte {
+func get_data(filename string) []string {
 	data, _ := ioutil.ReadFile(filename)
 	if data[len(data)-1] == '\n' {
 		data = data[:len(data)-1]
 	}
-	lines := strings.Split(string(data), "\n")
-	grid := [][]byte{}
-	for _, line := range lines {
-		grid = append(grid, []byte(line))
-	}
-	return grid
+	return strings.Split(string(data), "\n")
 }
 
-func find_start(grid [][]byte) Pos {
+func find_start(data []string) Pos {
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			if grid[y][x] == 'S' {
+			if data[y][x] == 'S' {
 				return Pos{x: x, y: y}
 			}
 		}
@@ -47,9 +42,9 @@ func find_start(grid [][]byte) Pos {
 	return Pos{x: -1, y: -1}
 }
 
-func connects(grid [][]byte, pos Pos) Pos {
+func connects(data []string, pos Pos) Pos {
 	north_pos := Pos{x: pos.x, y: pos.y - 1, dx: 0, dy: -1}
-	north := grid[pos.y-1][pos.x]
+	north := data[pos.y-1][pos.x]
 	if north == '|' || north == '7' || north == 'F' {
 		if north == '7' {
 			north_pos.dx = -1
@@ -62,7 +57,7 @@ func connects(grid [][]byte, pos Pos) Pos {
 	}
 
 	east_pos := Pos{x: pos.x + 1, y: pos.y, dx: 1, dy: 0}
-	east := grid[pos.y][pos.x+1]
+	east := data[pos.y][pos.x+1]
 	if east == '-' || east == 'J' || east == '7' {
 		if east == 'J' {
 			east_pos.dx = 0
@@ -75,7 +70,7 @@ func connects(grid [][]byte, pos Pos) Pos {
 	}
 
 	south_pos := Pos{x: pos.x, y: pos.y + 1, dx: 0, dy: 1}
-	south := grid[pos.y+1][pos.x]
+	south := data[pos.y+1][pos.x]
 	if south == '|' || south == 'L' || south == 'J' {
 		if south == 'L' {
 			south_pos.dx = 1
@@ -88,7 +83,7 @@ func connects(grid [][]byte, pos Pos) Pos {
 	}
 
 	west_pos := Pos{x: pos.x - 1, y: pos.y, dx: -1, dy: 0}
-	west := grid[pos.y][pos.x-1]
+	west := data[pos.y][pos.x-1]
 	if west == '-' || west == 'L' || west == 'F' {
 		if west == 'L' {
 			west_pos.dx = 0
@@ -103,11 +98,11 @@ func connects(grid [][]byte, pos Pos) Pos {
 	return Pos{}
 }
 
-func move(grid [][]byte, pos Pos) Pos {
+func move(data []string, pos Pos) Pos {
 	pos.x += pos.dx
 	pos.y += pos.dy
 
-	b := grid[pos.y][pos.x]
+	b := data[pos.y][pos.x]
 	if pos.dx == 1 {
 		// going east
 		if b == 'J' {
@@ -148,7 +143,7 @@ func move(grid [][]byte, pos Pos) Pos {
 	return pos
 }
 
-func is_inside(grid [][]byte, path map[Square]Empty, x int, y int) bool {
+func is_inside(data []string, path map[Square]Empty, x int, y int) bool {
 	if _, exists := path[Square{x: x, y: y}]; exists {
 		return false
 	}
@@ -157,7 +152,7 @@ func is_inside(grid [][]byte, path map[Square]Empty, x int, y int) bool {
 	crosses := 0
 	for lx >= 0 {
 		if _, exists := path[Square{x: lx, y: y}]; exists {
-			if grid[y][lx] == '|' || grid[y][lx] == 'J' || grid[y][lx] == 'L' {
+			if data[y][lx] == '|' || data[y][lx] == 'J' || data[y][lx] == 'L' {
 				crosses++
 			}
 		}
@@ -166,11 +161,11 @@ func is_inside(grid [][]byte, path map[Square]Empty, x int, y int) bool {
 	return crosses%2 == 1
 }
 
-func count_inside(grid [][]byte, path map[Square]Empty) int {
+func count_inside(data []string, path map[Square]Empty) int {
 	inside := 0
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			if is_inside(grid, path, x, y) {
+			if is_inside(data, path, x, y) {
 				inside++
 			}
 		}
@@ -178,38 +173,38 @@ func count_inside(grid [][]byte, path map[Square]Empty) int {
 	return inside
 }
 
-func path_info(grid [][]byte) (int, int) {
-	height = len(grid)
-	width = len(grid[0])
+func path_info(data []string) (int, int) {
+	height = len(data)
+	width = len(data[0])
 
 	path := map[Square]Empty{}
 
-	start := find_start(grid)
+	start := find_start(data)
 	path[Square{x: start.x, y: start.y}] = Empty{}
 
-	pos := connects(grid, start)
+	pos := connects(data, start)
 	path[Square{x: pos.x, y: pos.y}] = Empty{}
 
 	steps := 1
 	for !(pos.x == start.x && pos.y == start.y) {
-		pos = move(grid, pos)
+		pos = move(data, pos)
 		path[Square{x: pos.x, y: pos.y}] = Empty{}
 		steps++
 	}
 
-	inside := count_inside(grid, path)
+	inside := count_inside(data, path)
 	return steps / 2, inside
 }
 
-func pp(grid [][]byte) {
-	for _, row := range grid {
+func pp(data [][]byte) {
+	for _, row := range data {
 		fmt.Println(string(row))
 	}
 }
 
 func main() {
-	grid := get_data("input.txt")
-	distance, inside := path_info(grid)
+	data := get_data("input.txt")
+	distance, inside := path_info(data)
 	fmt.Println(distance)
 	fmt.Println(inside)
 }
