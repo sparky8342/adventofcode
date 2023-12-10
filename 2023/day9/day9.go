@@ -28,62 +28,37 @@ func load_data(filename string) [][]int {
 	return nums
 }
 
-func find_differences(row []int) [][]int {
-	sequences := [][]int{row}
-
-	seq_no := 0
-	for {
-		previous := sequences[seq_no]
-		all_zeroes := true
-		seq := []int{}
-		for i := 0; i < len(previous)-1; i++ {
-			diff := previous[i+1] - previous[i]
-			if diff != 0 {
-				all_zeroes = false
-			}
-			seq = append(seq, diff)
+func find_next_value(nums []int) int {
+	next := make([]int, len(nums)-1)
+	all_zero := true
+	for i := 0; i < len(nums)-1; i++ {
+		next[i] = nums[i+1] - nums[i]
+		if next[i] != 0 {
+			all_zero = false
 		}
-		sequences = append(sequences, seq)
-		if all_zeroes {
-			break
-		}
-		seq_no++
 	}
-
-	return sequences
+	next_value := 0
+	if !all_zero {
+		next_value = find_next_value(next)
+	}
+	return nums[len(nums)-1] + next_value
 }
 
-func find_next_value(sequences [][]int) int {
-	sequences[len(sequences)-1] = append(sequences[len(sequences)-1], 0)
-
-	for i := len(sequences) - 2; i >= 0; i-- {
-		last := sequences[i][len(sequences[i])-1]
-		last_below := sequences[i+1][len(sequences[i+1])-1]
-		sequences[i] = append(sequences[i], last+last_below)
+func reverse(nums []int) []int {
+	l := len(nums)
+	rev := make([]int, l)
+	for i := 0; i < l; i++ {
+		rev[i] = nums[l-i-1]
 	}
-
-	return sequences[0][len(sequences[0])-1]
-}
-
-func find_previous_value(sequences [][]int) int {
-	sequences[len(sequences)-1] = append([]int{0}, sequences[len(sequences)-1]...)
-
-	for i := len(sequences) - 2; i >= 0; i-- {
-		first := sequences[i][0]
-		first_below := sequences[i+1][0]
-		sequences[i] = append([]int{first - first_below}, sequences[i]...)
-	}
-
-	return sequences[0][0]
+	return rev
 }
 
 func calculate_sum(nums [][]int) (int, int) {
 	sum := 0
 	sum2 := 0
 	for _, row := range nums {
-		sequences := find_differences(row)
-		sum += find_next_value(sequences)
-		sum2 += find_previous_value(sequences)
+		sum += find_next_value(row)
+		sum2 += find_next_value(reverse(row))
 	}
 	return sum, sum2
 }
