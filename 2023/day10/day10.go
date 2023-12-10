@@ -42,9 +42,7 @@ func find_start(data []string) Pos {
 	return Pos{x: -1, y: -1}
 }
 
-func connects(data []string, pos Pos) []Pos {
-	positions := []Pos{}
-
+func connects(data []string, pos Pos) Pos {
 	north_pos := Pos{x: pos.x, y: pos.y - 1, dx: 0, dy: -1}
 	north := get_at(data, north_pos)
 	if north == '|' || north == '7' || north == 'F' {
@@ -55,7 +53,7 @@ func connects(data []string, pos Pos) []Pos {
 			north_pos.dx = 1
 			north_pos.dy = 0
 		}
-		positions = append(positions, north_pos)
+		return north_pos
 	}
 
 	east_pos := Pos{x: pos.x + 1, y: pos.y, dx: 1, dy: 0}
@@ -68,7 +66,7 @@ func connects(data []string, pos Pos) []Pos {
 			east_pos.dx = 0
 			east_pos.dy = 1
 		}
-		positions = append(positions, east_pos)
+		return east_pos
 	}
 
 	south_pos := Pos{x: pos.x, y: pos.y + 1, dx: 0, dy: 1}
@@ -81,7 +79,7 @@ func connects(data []string, pos Pos) []Pos {
 			south_pos.dx = -1
 			south_pos.dy = 0
 		}
-		positions = append(positions, south_pos)
+		return south_pos
 	}
 
 	west_pos := Pos{x: pos.x - 1, y: pos.y, dx: -1, dy: 0}
@@ -94,10 +92,10 @@ func connects(data []string, pos Pos) []Pos {
 			west_pos.dx = 0
 			west_pos.dy = 1
 		}
-		positions = append(positions, west_pos)
+		return west_pos
 	}
 
-	return positions
+	return Pos{}
 }
 
 func move(data []string, pos Pos) Pos {
@@ -151,12 +149,11 @@ func distance(data []string) int {
 
 	start := find_start(data)
 
-	positions := connects(data, start)
-	pos1 := positions[1]
+	pos := connects(data, start)
 
 	steps := 1
-	for !(pos1.x == start.x && pos1.y == start.y) {
-		pos1 = move(data, pos1)
+	for !(pos.x == start.x && pos.y == start.y) {
+		pos = move(data, pos)
 		steps++
 	}
 
