@@ -185,24 +185,14 @@ func path_info(grid [][]byte) (int, int) {
 	path := map[Square]Empty{}
 
 	start := find_start(grid)
-	corners := []Pos{}
-
 	path[Square{x: start.x, y: start.y}] = Empty{}
 
-	first_pos := connects(grid, start)
-	if grid[first_pos.y][first_pos.x] != '|' && grid[first_pos.y][first_pos.x] != '-' {
-		corners = append(corners, first_pos)
-	}
-	path[Square{x: first_pos.x, y: first_pos.y}] = Empty{}
+	pos := connects(grid, start)
+	path[Square{x: pos.x, y: pos.y}] = Empty{}
 
-	pos := first_pos
 	steps := 1
 	for !(pos.x == start.x && pos.y == start.y) {
 		pos = move(grid, pos)
-		if grid[pos.y][pos.x] != '|' && grid[pos.y][pos.x] != '-' {
-			corners = append(corners, pos)
-		}
-
 		path[Square{x: pos.x, y: pos.y}] = Empty{}
 		steps++
 	}
