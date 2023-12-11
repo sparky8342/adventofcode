@@ -143,34 +143,23 @@ func move(data []string, pos Pos) Pos {
 	return pos
 }
 
-func is_inside(data []string, path map[Square]Empty, x int, y int) bool {
-	if _, exists := path[Square{x: x, y: y}]; exists {
-		return false
-	}
-
-	lx := x - 1
-	crosses := 0
-	for lx >= 0 {
-		if _, exists := path[Square{x: lx, y: y}]; exists {
-			if data[y][lx] == '|' || data[y][lx] == 'J' || data[y][lx] == 'L' {
-				crosses++
-			}
-		}
-		lx--
-	}
-	return crosses%2 == 1
-}
-
 func count_inside(data []string, path map[Square]Empty) int {
-	inside := 0
+	squares_inside := 0
+	inside := false
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			if is_inside(data, path, x, y) {
-				inside++
+			if _, exists := path[Square{x: x, y: y}]; exists {
+				if data[y][x] == '|' || data[y][x] == 'J' || data[y][x] == 'L' {
+					inside = !inside
+				}
+			} else {
+				if inside {
+					squares_inside++
+				}
 			}
 		}
 	}
-	return inside
+	return squares_inside
 }
 
 func path_info(data []string) (int, int) {
