@@ -7,9 +7,11 @@ import (
 )
 
 type Universe struct {
-	grid   [][]byte
-	height int
-	width  int
+	galaxies      []Galaxy
+	height        int
+	width         int
+	empty_rows    map[int]Empty
+	empty_columns map[int]Empty
 }
 
 type Galaxy struct {
@@ -17,13 +19,7 @@ type Galaxy struct {
 	y int
 }
 
-func abs(n int) int {
-	if n < 0 {
-		return n * -1
-	} else {
-		return n
-	}
-}
+type Empty struct{}
 
 func load_data(filename string) []string {
 	data, _ := ioutil.ReadFile(filename)
@@ -35,88 +31,89 @@ func load_data(filename string) []string {
 
 func parse_data(data []string) Universe {
 	universe := Universe{
-		grid:   [][]byte{},
-		height: len(data),
-		width:  len(data[0]),
+		galaxies:      []Galaxy{},
+		height:        len(data),
+		width:         len(data[0]),
+		empty_rows:    map[int]Empty{},
+		empty_columns: map[int]Empty{},
 	}
 
-	for _, line := range data {
-		universe.grid = append(universe.grid, []byte(line))
+	for y := 0; y < universe.height; y++ {
+		for x := 0; x < universe.width; x++ {
+			if data[y][x] == '#' {
+				universe.galaxies = append(universe.galaxies, Galaxy{x: x, y: y})
+			}
+		}
+	}
+
+	for y := 0; y < universe.height; y++ {
+		empty_row := true
+		for x := 0; x < universe.width; x++ {
+			if data[y][x] == '#' {
+				empty_row = false
+				break
+			}
+		}
+		if empty_row {
+			universe.empty_rows[y] = Empty{}
+		}
+	}
+
+	for x := 0; x < universe.width; x++ {
+		empty_column := true
+		for y := 0; y < universe.height; y++ {
+			if data[y][x] == '#' {
+				empty_column = false
+				break
+			}
+		}
+		if empty_column {
+			universe.empty_columns[x] = Empty{}
+		}
 	}
 
 	return universe
 }
 
-func (universe *Universe) expand() {
-	// y direction
-	for y := universe.height - 1; y >= 0; y-- {
-		empty := true
-		for x := 0; x < universe.width; x++ {
-			if universe.grid[y][x] == '#' {
-				empty = false
-				break
-			}
-		}
-		if empty {
-			row := make([]byte, universe.width)
-			for i := 0; i < universe.width; i++ {
-				row[i] = '.'
-			}
-			universe.grid = append(universe.grid[0:y], append([][]byte{row}, universe.grid[y:]...)...)
-		}
-	}
-	universe.height = len(universe.grid)
-
-	// x direction
-	for x := universe.width - 1; x >= 0; x-- {
-		empty := true
-		for y := 0; y < universe.height; y++ {
-			if universe.grid[y][x] == '#' {
-				empty = false
-				break
-			}
-		}
-		if empty {
-
-			for y := 0; y < universe.height; y++ {
-				universe.grid[y] = append(universe.grid[y][0:x], append([]byte{'.'}, universe.grid[y][x:]...)...)
-			}
-		}
-	}
-	universe.width = len(universe.grid[0])
-}
-
-func (universe *Universe) path_sum() int {
-	galaxies := []Galaxy{}
-
-	for y := 0; y < universe.height; y++ {
-		for x := 0; x < universe.width; x++ {
-			if universe.grid[y][x] == '#' {
-				galaxies = append(galaxies, Galaxy{x: x, y: y})
-			}
-		}
-	}
-
+func (universe *Universe) path_sum(expand int) int {
 	sum := 0
-	for i := 0; i < len(galaxies); i++ {
-		for j := i + 1; j < len(galaxies); j++ {
-			sum += abs(galaxies[i].x-galaxies[j].x) + abs(galaxies[i].y-galaxies[j].y)
+	for i := 0; i < len(universe.galaxies); i++ {
+		for j := i + 1; j < len(universe.galaxies); j++ {
+
+			add_x := 0
+			x_start := universe.galaxies[i].x
+			x_end := universe.galaxies[j].x
+			if x_start > x_end {
+				x_start, x_end = x_end, x_start
+			}
+			for x := x_start + 1; x < x_end; x++ {
+				if _, exists := universe.empty_columns[x]; exists {
+					add_x += expand - 1
+				}
+			}
+
+			add_y := 0
+			y_start := universe.galaxies[i].y
+			y_end := universe.galaxies[j].y
+			if y_start > y_end {
+				y_start, y_end = y_end, y_start
+			}
+			for y := y_start + 1; y < y_end; y++ {
+				if _, exists := universe.empty_rows[y]; exists {
+					add_y += expand - 1
+				}
+			}
+
+			sum += x_end - x_start + add_x + y_end - y_start + add_y
 		}
 	}
 
 	return sum
 }
 
-func (universe *Universe) pp() {
-	for y := 0; y < universe.height; y++ {
-		fmt.Println(string(universe.grid[y]))
-	}
-	fmt.Println()
-}
-
 func main() {
 	data := load_data("input.txt")
 	universe := parse_data(data)
-	universe.expand()
-	fmt.Println(universe.path_sum())
+	fmt.Println(universe.path_sum(2))
+	fmt.Println(universe.path_sum(1000000))
 }
