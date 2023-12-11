@@ -152,10 +152,8 @@ func count_inside(data []string, path map[Square]Empty) int {
 				if data[y][x] == '|' || data[y][x] == 'J' || data[y][x] == 'L' {
 					inside = !inside
 				}
-			} else {
-				if inside {
-					squares_inside++
-				}
+			} else if inside {
+				squares_inside++
 			}
 		}
 	}
