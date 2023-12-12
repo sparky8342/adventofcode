@@ -12,10 +12,15 @@ func Test(t *testing.T) {
 		"?###???????? 3,2,1",
 	}
 
-	got_sum := total_sum(data)
+	got_sum, got_unfolded_sum := total_sum(data)
 	want_sum := 21
+	want_unfolded_sum := 525152
 
 	if got_sum != want_sum {
 		t.Errorf("got %d, wanted %d", got_sum, want_sum)
+	}
+
+	if got_unfolded_sum != want_unfolded_sum {
+		t.Errorf("got %d, wanted %d", got_unfolded_sum, want_unfolded_sum)
 	}
 }
