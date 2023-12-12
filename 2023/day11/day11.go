@@ -8,8 +8,6 @@ import (
 
 type Universe struct {
 	galaxies      []Galaxy
-	height        int
-	width         int
 	empty_rows    map[int]Empty
 	empty_columns map[int]Empty
 }
@@ -32,23 +30,24 @@ func load_data(filename string) []string {
 func parse_data(data []string) Universe {
 	universe := Universe{
 		galaxies:      []Galaxy{},
-		height:        len(data),
-		width:         len(data[0]),
 		empty_rows:    map[int]Empty{},
 		empty_columns: map[int]Empty{},
 	}
 
-	for y := 0; y < universe.height; y++ {
-		for x := 0; x < universe.width; x++ {
+	height := len(data)
+	width := len(data[0])
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			if data[y][x] == '#' {
 				universe.galaxies = append(universe.galaxies, Galaxy{x: x, y: y})
 			}
 		}
 	}
 
-	for y := 0; y < universe.height; y++ {
+	for y := 0; y < height; y++ {
 		empty_row := true
-		for x := 0; x < universe.width; x++ {
+		for x := 0; x < width; x++ {
 			if data[y][x] == '#' {
 				empty_row = false
 				break
@@ -59,9 +58,9 @@ func parse_data(data []string) Universe {
 		}
 	}
 
-	for x := 0; x < universe.width; x++ {
+	for x := 0; x < width; x++ {
 		empty_column := true
-		for y := 0; y < universe.height; y++ {
+		for y := 0; y < height; y++ {
 			if data[y][x] == '#' {
 				empty_column = false
 				break
