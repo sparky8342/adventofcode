@@ -7,6 +7,18 @@ import (
 	"strings"
 )
 
+type CacheKey struct {
+	seq_i   int
+	size_i  int
+	current int
+}
+
+var cache map[CacheKey]int
+
+func init() {
+	cache = map[CacheKey]int{}
+}
+
 func load_data(filename string) []string {
 	data, _ := ioutil.ReadFile(filename)
 	if data[len(data)-1] == '\n' {
@@ -15,87 +27,62 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func is_valid(sequence []byte, sizes []int) bool {
-	found := []int{}
-
-	current := 0
-	all_scanned := true
-	for _, b := range sequence {
-		if b == '?' {
-			all_scanned = false
-			break
-		} else if b == '#' {
-			current++
-		} else if b == '.' && current > 0 {
-			found = append(found, current)
-			current = 0
-		}
-	}
-	if current > 0 {
-		found = append(found, current)
+// thanks to jonathan paulson for this algorithm
+func combinations(sequence []byte, sizes []int, seq_i int, size_i int, current int) int {
+	key := CacheKey{seq_i: seq_i, size_i: size_i, current: current}
+	if value, exists := cache[key]; exists {
+		return value
 	}
 
-	if len(found) > len(sizes) {
-		return false
+	if seq_i == len(sequence) {
+		if size_i == len(sizes) && current == 0 {
+			return 1
+		} else if size_i == len(sizes)-1 && sizes[size_i] == current {
+			return 1
+		} else {
+			return 0
+		}
 	}
 
-	if all_scanned {
-		if len(found) != len(sizes) {
-			return false
-		}
-		for i := 0; i < len(found); i++ {
-			if found[i] != sizes[i] {
-				return false
-			}
-		}
-		return true
-	} else {
-		for i, n := range found {
-			if n > sizes[i] {
-				return false
+	ans := 0
+	for _, c := range []byte{'.', '#'} {
+		if sequence[seq_i] == c || sequence[seq_i] == '?' {
+			if c == '.' && current == 0 {
+				ans += combinations(sequence, sizes, seq_i+1, size_i, 0)
+			} else if c == '.' && current > 0 && size_i < len(sizes) && sizes[size_i] == current {
+				ans += combinations(sequence, sizes, seq_i+1, size_i+1, 0)
+			} else if c == '#' {
+				ans += combinations(sequence, sizes, seq_i+1, size_i, current+1)
 			}
 		}
 	}
 
-	return true
+	cache[key] = ans
+	return ans
 }
 
-func dfs(sequence []byte, sizes []int, valid *int) {
-	if !is_valid(sequence, sizes) {
-		return
+func unfold(sequence []byte, sizes []int) ([]byte, []int) {
+	unfolded_sequence := sequence
+	for i := 0; i < 4; i++ {
+		unfolded_sequence = append(unfolded_sequence, '?')
+		unfolded_sequence = append(unfolded_sequence, sequence...)
 	}
-
-	wildcard := -1
-	for i := 0; i < len(sequence); i++ {
-		if sequence[i] == '?' {
-			wildcard = i
-			break
-		}
+	unfolded_sizes := []int{}
+	for i := 0; i < 5; i++ {
+		unfolded_sizes = append(unfolded_sizes, sizes...)
 	}
-	if wildcard == -1 {
-		*valid++
-		return
-	}
-
-	next := make([]byte, len(sequence))
-	copy(next, sequence)
-	next[wildcard] = '.'
-	dfs(next, sizes, valid)
-
-	next = make([]byte, len(sequence))
-	copy(next, sequence)
-	next[wildcard] = '#'
-	dfs(next, sizes, valid)
+	return unfolded_sequence, unfolded_sizes
 }
 
 func get_sum(sequence []byte, sizes []int) int {
-	valid := 0
-	dfs(sequence, sizes, &valid)
-	return valid
+	cache = map[CacheKey]int{}
+	return combinations(sequence, sizes, 0, 0, 0)
 }
 
-func total_sum(data []string) int {
+func total_sum(data []string) (int, int) {
 	sum := 0
+	unfolded_sum := 0
+
 	for _, line := range data {
 		parts := strings.Split(line, " ")
 		sequence := []byte(parts[0])
@@ -107,12 +94,17 @@ func total_sum(data []string) int {
 		}
 
 		sum += get_sum(sequence, sizes)
+
+		unfolded_sequence, unfolded_sizes := unfold(sequence, sizes)
+		unfolded_sum += get_sum(unfolded_sequence, unfolded_sizes)
 	}
-	return sum
+
+	return sum, unfolded_sum
 }
 
 func main() {
 	data := load_data("input.txt")
-	total_sum := total_sum(data)
+	total_sum, total_unfolded_sum := total_sum(data)
 	fmt.Println(total_sum)
+	fmt.Println(total_unfolded_sum)
 }
