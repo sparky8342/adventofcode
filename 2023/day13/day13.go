@@ -19,17 +19,21 @@ func get_notes(data string) int {
 
 	total := 0
 	for _, pattern_str := range patterns {
-		pattern := strings.Split(pattern_str, "\n")
+		lines := strings.Split(pattern_str, "\n")
+		pattern := [][]byte{}
+		for _, line := range lines {
+			pattern = append(pattern, []byte(line))
+		}
 		total += process_pattern(pattern)
 	}
 	return total
 }
 
-func is_horizontal_mirror(pattern []string, x int, x2 int) bool {
+func is_horizontal_mirror(pattern [][]byte, x int, x2 int) bool {
 	x--
 	x2++
 	for x >= 0 && x2 < len(pattern) {
-		if pattern[x] != pattern[x2] {
+		if string(pattern[x]) != string(pattern[x2]) {
 			return false
 		}
 		x--
@@ -38,7 +42,7 @@ func is_horizontal_mirror(pattern []string, x int, x2 int) bool {
 	return true
 }
 
-func is_vertical_mirror(pattern []string, y int, y2 int) bool {
+func is_vertical_mirror(pattern [][]byte, y int, y2 int) bool {
 	y--
 	y2++
 	for y >= 0 && y2 < len(pattern[0]) {
@@ -57,13 +61,13 @@ func is_vertical_mirror(pattern []string, y int, y2 int) bool {
 	return true
 }
 
-func process_pattern(pattern []string) int {
+func process_pattern(pattern [][]byte) int {
 	height := len(pattern)
 	width := len(pattern[0])
 
 	// rows
 	for i := 0; i < height-1; i++ {
-		if pattern[i] == pattern[i+1] {
+		if string(pattern[i]) == string(pattern[i+1]) {
 			if is_horizontal_mirror(pattern, i, i+1) {
 				return (i + 1) * 100
 			}
