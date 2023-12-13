@@ -68,48 +68,36 @@ func is_valid(sequence []byte, sizes []int) bool {
 	return true
 }
 
-func backtrack(sequence []byte, sizes []int) int {
-	valid := 0
+func dfs(sequence []byte, wildcards []int, wildcard_index int, sizes []int) int {
+	if !is_valid(sequence, sizes) {
+		return 0
+	}
 
+	if wildcard_index == len(wildcards) {
+		return 1
+	}
+
+	sequence[wildcards[wildcard_index]] = '#'
+	valid := dfs(sequence, wildcards, wildcard_index+1, sizes)
+
+	sequence[wildcards[wildcard_index]] = '.'
+	valid += dfs(sequence, wildcards, wildcard_index+1, sizes)
+
+	sequence[wildcards[wildcard_index]] = '?'
+
+	return valid
+}
+
+func get_sum(sequence []byte, sizes []int) int {
 	wildcards := []int{}
 	for i, b := range sequence {
 		if b == '?' {
 			wildcards = append(wildcards, i)
 		}
 	}
-
-	pos := 0
-	for pos >= 0 {
-		if pos == len(wildcards) {
-			valid++
-			pos--
-		}
-
-		if sequence[wildcards[pos]] == '?' {
-			sequence[wildcards[pos]] = '#'
-			if is_valid(sequence, sizes) {
-				pos++
-				continue
-			}
-		}
-
-		if sequence[wildcards[pos]] == '#' {
-			sequence[wildcards[pos]] = '.'
-			if is_valid(sequence, sizes) {
-				pos++
-				continue
-			}
-		}
-
-		sequence[wildcards[pos]] = '?'
-		pos--
-	}
-
-	return valid
-}
-
-func get_sum(sequence []byte, sizes []int) int {
-	return backtrack(sequence, sizes)
+	sum := dfs(sequence, wildcards, 0, sizes)
+	fmt.Println(string(sequence), sum)
+	return sum
 }
 
 func unfold(sequence []byte, sizes []int) ([]byte, []int) {
@@ -128,7 +116,6 @@ func unfold(sequence []byte, sizes []int) ([]byte, []int) {
 func total_sum(data []string) (int, int) {
 	sum := 0
 	unfolded_sum := 0
-	done := 0
 
 	var wg sync.WaitGroup
 
@@ -157,9 +144,6 @@ func total_sum(data []string) (int, int) {
 				unfolded_sequence, unfolded_sizes := unfold(sequence, sizes)
 				unfolded_sum += get_sum(unfolded_sequence, unfolded_sizes)
 			}
-
-			done++
-			fmt.Println(done)
 		}()
 	}
 
