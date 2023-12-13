@@ -7,10 +7,9 @@ import (
 )
 
 type Pos struct {
-	x  int
-	y  int
-	dx int
-	dy int
+	x         int
+	y         int
+	direction int
 }
 
 type Square struct {
@@ -20,6 +19,13 @@ type Square struct {
 
 type Empty struct {
 }
+
+const (
+	NORTH = 1
+	EAST  = 2
+	SOUTH = 3
+	WEST  = 4
+)
 
 var height, width int
 
@@ -43,54 +49,54 @@ func find_start(data []string) Pos {
 }
 
 func connects(data []string, pos Pos) Pos {
-	north_pos := Pos{x: pos.x, y: pos.y - 1, dx: 0, dy: -1}
 	north := data[pos.y-1][pos.x]
 	if north == '|' || north == '7' || north == 'F' {
+		north_pos := Pos{x: pos.x, y: pos.y - 1}
 		if north == '7' {
-			north_pos.dx = -1
-			north_pos.dy = 0
+			north_pos.direction = WEST
 		} else if north == 'F' {
-			north_pos.dx = 1
-			north_pos.dy = 0
+			north_pos.direction = EAST
+		} else {
+			north_pos.direction = NORTH
 		}
 		return north_pos
 	}
 
-	east_pos := Pos{x: pos.x + 1, y: pos.y, dx: 1, dy: 0}
 	east := data[pos.y][pos.x+1]
 	if east == '-' || east == 'J' || east == '7' {
+		east_pos := Pos{x: pos.x + 1, y: pos.y}
 		if east == 'J' {
-			east_pos.dx = 0
-			east_pos.dy = -1
+			east_pos.direction = NORTH
 		} else if east == '7' {
-			east_pos.dx = 0
-			east_pos.dy = 1
+			east_pos.direction = SOUTH
+		} else {
+			east_pos.direction = EAST
 		}
 		return east_pos
 	}
 
-	south_pos := Pos{x: pos.x, y: pos.y + 1, dx: 0, dy: 1}
 	south := data[pos.y+1][pos.x]
 	if south == '|' || south == 'L' || south == 'J' {
+		south_pos := Pos{x: pos.x, y: pos.y + 1}
 		if south == 'L' {
-			south_pos.dx = 1
-			south_pos.dy = 0
+			south_pos.direction = EAST
 		} else if south == 'J' {
-			south_pos.dx = -1
-			south_pos.dy = 0
+			south_pos.direction = WEST
+		} else {
+			south_pos.direction = SOUTH
 		}
 		return south_pos
 	}
 
-	west_pos := Pos{x: pos.x - 1, y: pos.y, dx: -1, dy: 0}
 	west := data[pos.y][pos.x-1]
 	if west == '-' || west == 'L' || west == 'F' {
+		west_pos := Pos{x: pos.x - 1, y: pos.y}
 		if west == 'L' {
-			west_pos.dx = 0
-			west_pos.dy = -1
+			west_pos.direction = NORTH
 		} else if west == 'F' {
-			west_pos.dx = 0
-			west_pos.dy = 1
+			west_pos.direction = SOUTH
+		} else {
+			west_pos.direction = WEST
 		}
 		return west_pos
 	}
@@ -99,47 +105,52 @@ func connects(data []string, pos Pos) Pos {
 }
 
 func move(data []string, pos Pos) Pos {
-	pos.x += pos.dx
-	pos.y += pos.dy
+	switch pos.direction {
+	case NORTH:
+		{
+			pos.y--
+			b := data[pos.y][pos.x]
+			if b == 'F' {
+				pos.direction = EAST
+			} else if b == '7' {
+				pos.direction = WEST
+			}
 
-	b := data[pos.y][pos.x]
-	if pos.dx == 1 {
-		// going east
-		if b == 'J' {
-			pos.dx = 0
-			pos.dy = -1
-		} else if b == '7' {
-			pos.dx = 0
-			pos.dy = 1
 		}
-	} else if pos.dx == -1 {
-		// going west
-		if b == 'L' {
-			pos.dx = 0
-			pos.dy = -1
-		} else if b == 'F' {
-			pos.dx = 0
-			pos.dy = 1
+	case EAST:
+		{
+			pos.x++
+			b := data[pos.y][pos.x]
+			if b == 'J' {
+				pos.direction = NORTH
+			} else if b == '7' {
+				pos.direction = SOUTH
+			}
 		}
-	} else if pos.dy == 1 {
-		// going south
-		if b == 'L' {
-			pos.dx = 1
-			pos.dy = 0
-		} else if b == 'J' {
-			pos.dx = -1
-			pos.dy = 0
+	case SOUTH:
+		{
+			pos.y++
+			b := data[pos.y][pos.x]
+			if b == 'L' {
+				pos.direction = EAST
+			} else if b == 'J' {
+				pos.direction = WEST
+			}
+
 		}
-	} else if pos.dy == -1 {
-		// going north
-		if b == 'F' {
-			pos.dx = 1
-			pos.dy = 0
-		} else if b == '7' {
-			pos.dx = -1
-			pos.dy = 0
+	case WEST:
+		{
+			pos.x--
+			b := data[pos.y][pos.x]
+			if b == 'L' {
+				pos.direction = NORTH
+			} else if b == 'F' {
+				pos.direction = SOUTH
+			}
+
 		}
 	}
+
 	return pos
 }
 
