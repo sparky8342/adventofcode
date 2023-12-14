@@ -107,47 +107,36 @@ func connects(data []string, pos Pos) Pos {
 func move(data []string, pos Pos) Pos {
 	switch pos.direction {
 	case NORTH:
-		{
-			pos.y--
-			b := data[pos.y][pos.x]
-			if b == 'F' {
-				pos.direction = EAST
-			} else if b == '7' {
-				pos.direction = WEST
-			}
-
+		pos.y--
+		b := data[pos.y][pos.x]
+		if b == 'F' {
+			pos.direction = EAST
+		} else if b == '7' {
+			pos.direction = WEST
 		}
 	case EAST:
-		{
-			pos.x++
-			b := data[pos.y][pos.x]
-			if b == 'J' {
-				pos.direction = NORTH
-			} else if b == '7' {
-				pos.direction = SOUTH
-			}
+		pos.x++
+		b := data[pos.y][pos.x]
+		if b == 'J' {
+			pos.direction = NORTH
+		} else if b == '7' {
+			pos.direction = SOUTH
 		}
 	case SOUTH:
-		{
-			pos.y++
-			b := data[pos.y][pos.x]
-			if b == 'L' {
-				pos.direction = EAST
-			} else if b == 'J' {
-				pos.direction = WEST
-			}
-
+		pos.y++
+		b := data[pos.y][pos.x]
+		if b == 'L' {
+			pos.direction = EAST
+		} else if b == 'J' {
+			pos.direction = WEST
 		}
 	case WEST:
-		{
-			pos.x--
-			b := data[pos.y][pos.x]
-			if b == 'L' {
-				pos.direction = NORTH
-			} else if b == 'F' {
-				pos.direction = SOUTH
-			}
-
+		pos.x--
+		b := data[pos.y][pos.x]
+		if b == 'L' {
+			pos.direction = NORTH
+		} else if b == 'F' {
+			pos.direction = SOUTH
 		}
 	}
 
