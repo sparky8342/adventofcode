@@ -42,37 +42,27 @@ func get_type(cards string) int {
 
 	switch len(distinct_cards) {
 	case 1:
-		{
-			return FIVE_OF_A_KIND
-		}
+		return FIVE_OF_A_KIND
 	case 2:
-		{
-			for _, amount := range distinct_cards {
-				if amount == 1 || amount == 4 {
-					return FOUR_OF_A_KIND
-				} else {
-					return FULL_HOUSE
-				}
+		for _, amount := range distinct_cards {
+			if amount == 1 || amount == 4 {
+				return FOUR_OF_A_KIND
+			} else {
+				return FULL_HOUSE
 			}
 		}
 	case 3:
-		{
-			for _, amount := range distinct_cards {
-				if amount == 3 {
-					return THREE_OF_A_KIND
-				} else if amount == 2 {
-					return TWO_PAIR
-				}
+		for _, amount := range distinct_cards {
+			if amount == 3 {
+				return THREE_OF_A_KIND
+			} else if amount == 2 {
+				return TWO_PAIR
 			}
 		}
 	case 4:
-		{
-			return ONE_PAIR
-		}
+		return ONE_PAIR
 	case 5:
-		{
-			return HIGH_CARD
-		}
+		return HIGH_CARD
 	}
 
 	return -1
