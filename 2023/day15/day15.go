@@ -42,9 +42,9 @@ func hash_sum(data string) int {
 func (box_line *BoxLine) set(label string, focal_length int) {
 	box_id := hash(label)
 
-	for j, lens := range box_line.boxes[box_id] {
+	for i, lens := range box_line.boxes[box_id] {
 		if lens.label == label {
-			box_line.boxes[box_id][j].focal_length = focal_length
+			box_line.boxes[box_id][i].focal_length = focal_length
 			return
 		}
 	}
