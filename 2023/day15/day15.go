@@ -42,17 +42,14 @@ func hash_sum(data string) int {
 func (box_line *BoxLine) set(label string, focal_length int) {
 	box_id := hash(label)
 
-	found := false
 	for j, lens := range box_line.boxes[box_id] {
 		if lens.label == label {
 			box_line.boxes[box_id][j].focal_length = focal_length
-			found = true
 			return
 		}
 	}
-	if !found {
-		box_line.boxes[box_id] = append(box_line.boxes[box_id], Lens{label: label, focal_length: focal_length})
-	}
+
+	box_line.boxes[box_id] = append(box_line.boxes[box_id], Lens{label: label, focal_length: focal_length})
 }
 
 func (box_line *BoxLine) del(label string) {
