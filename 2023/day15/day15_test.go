@@ -11,4 +11,11 @@ func Test(t *testing.T) {
 	if got_hash_sum != want_hash_sum {
 		t.Errorf("got %d, wanted %d", got_hash_sum, want_hash_sum)
 	}
+
+	got_power := operations(data)
+	want_power := 145
+
+	if got_power != want_power {
+		t.Errorf("got %d, wanted %d", got_power, want_power)
+	}
 }
