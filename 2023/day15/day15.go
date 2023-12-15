@@ -47,7 +47,7 @@ func (box_line *BoxLine) set(label string, focal_length int) {
 		if lens.label == label {
 			box_line.boxes[box_id][j].focal_length = focal_length
 			found = true
-			break
+			return
 		}
 	}
 	if !found {
@@ -61,7 +61,7 @@ func (box_line *BoxLine) del(label string) {
 	for i, lens := range box_line.boxes[box_id] {
 		if lens.label == label {
 			box_line.boxes[box_id] = append(box_line.boxes[box_id][:i], box_line.boxes[box_id][i+1:]...)
-			break
+			return
 		}
 	}
 }
