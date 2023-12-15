@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+type BoxLine struct {
+	boxes [256][]Lens
+}
+
 type Lens struct {
 	label        string
 	focal_length int
@@ -35,50 +39,61 @@ func hash_sum(data string) int {
 	return sum
 }
 
+func (box_line *BoxLine) set(label string, focal_length int) {
+	box_id := hash(label)
+
+	found := false
+	for j, lens := range box_line.boxes[box_id] {
+		if lens.label == label {
+			box_line.boxes[box_id][j].focal_length = focal_length
+			found = true
+			break
+		}
+	}
+	if !found {
+		box_line.boxes[box_id] = append(box_line.boxes[box_id], Lens{label: label, focal_length: focal_length})
+	}
+}
+
+func (box_line *BoxLine) del(label string) {
+	box_id := hash(label)
+
+	for i, lens := range box_line.boxes[box_id] {
+		if lens.label == label {
+			box_line.boxes[box_id] = append(box_line.boxes[box_id][:i], box_line.boxes[box_id][i+1:]...)
+			break
+		}
+	}
+}
+
+func (box_line *BoxLine) power() int {
+	power := 0
+	for i := 0; i < 256; i++ {
+		for j := 0; j < len(box_line.boxes[i]); j++ {
+			power += (i + 1) * (j + 1) * box_line.boxes[i][j].focal_length
+		}
+	}
+	return power
+}
+
 func operations(data string) int {
-	boxes := make([][]Lens, 256)
+	box_line := BoxLine{boxes: [256][]Lens{}}
 
 	for _, str := range strings.Split(data, ",") {
 		for i, ru := range str {
 			if ru == '=' {
 				label := str[0:i]
 				focal_length := int(str[i+1] - '0')
-				box_id := hash(label)
-
-				found := false
-				for j, lens := range boxes[box_id] {
-					if lens.label == label {
-						boxes[box_id][j].focal_length = focal_length
-						found = true
-						break
-					}
-				}
-				if !found {
-					boxes[box_id] = append(boxes[box_id], Lens{label: label, focal_length: focal_length})
-				}
-
+				box_line.set(label, focal_length)
+				break
 			} else if ru == '-' {
 				label := str[0:i]
-				box_id := hash(label)
-
-				for j, lens := range boxes[box_id] {
-					if lens.label == label {
-						boxes[box_id] = append(boxes[box_id][:j], boxes[box_id][j+1:]...)
-						break
-					}
-				}
+				box_line.del(label)
 			}
 		}
 	}
 
-	power := 0
-	for i := 0; i < 256; i++ {
-		for j := 0; j < len(boxes[i]); j++ {
-			power += (i + 1) * (j + 1) * boxes[i][j].focal_length
-		}
-	}
-
-	return power
+	return box_line.power()
 }
 
 func main() {
