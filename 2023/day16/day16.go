@@ -24,6 +24,8 @@ const (
 	WEST  = 4
 )
 
+var height, width int
+
 func load_data(filename string) []string {
 	data, _ := ioutil.ReadFile(filename)
 	if data[len(data)-1] == '\n' {
@@ -33,6 +35,9 @@ func load_data(filename string) []string {
 }
 
 func parse_data(data []string) [][]byte {
+	height = len(data)
+	width = len(data[0])
+
 	grid := [][]byte{}
 	for _, line := range data {
 		grid = append(grid, []byte(line))
@@ -40,11 +45,42 @@ func parse_data(data []string) [][]byte {
 	return grid
 }
 
-func energize(grid [][]byte) int {
-	height := len(grid)
-	width := len(grid[0])
+func energize_top_left(grid [][]byte) int {
+	return energize(grid, Beam{x: -1, y: 0, direction: EAST})
+}
 
-	queue := []Beam{Beam{x: -1, y: 0, direction: EAST}}
+func max_energy(grid [][]byte) int {
+	max := 0
+
+	for y := 0; y < height; y++ {
+		energy := energize(grid, Beam{x: -1, y: y, direction: EAST})
+		if energy > max {
+			max = energy
+		}
+
+		energy = energize(grid, Beam{x: width, y: y, direction: WEST})
+		if energy > max {
+			max = energy
+		}
+	}
+
+	for x := 0; x < width; x++ {
+		energy := energize(grid, Beam{x: x, y: -1, direction: SOUTH})
+		if energy > max {
+			max = energy
+		}
+
+		energy = energize(grid, Beam{x: x, y: height, direction: NORTH})
+		if energy > max {
+			max = energy
+		}
+	}
+
+	return max
+}
+
+func energize(grid [][]byte, start Beam) int {
+	queue := []Beam{start}
 	beams_seen := map[Beam]struct{}{}
 	energized := map[Pos]struct{}{}
 
@@ -56,7 +92,8 @@ func energize(grid [][]byte) int {
 			if _, ok := beams_seen[beam]; ok {
 				break
 			}
-			beams_seen[Beam{x: beam.x, y: beam.y, direction: beam.direction}] = struct{}{}
+			beams_seen[beam] = struct{}{}
+
 			// move
 			switch beam.direction {
 			case NORTH:
@@ -128,7 +165,7 @@ func pp(grid [][]byte) {
 func main() {
 	data := load_data("input.txt")
 	grid := parse_data(data)
-	count := energize(grid)
+	count := energize_top_left(grid)
 	fmt.Println(count)
-
+	fmt.Println(max_energy(grid))
 }
