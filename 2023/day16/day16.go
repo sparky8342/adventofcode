@@ -34,43 +34,37 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func parse_data(data []string) [][]byte {
+func parse_data(data []string) {
 	height = len(data)
 	width = len(data[0])
-
-	grid := [][]byte{}
-	for _, line := range data {
-		grid = append(grid, []byte(line))
-	}
-	return grid
 }
 
-func energize_top_left(grid [][]byte) int {
-	return energize(grid, Beam{x: -1, y: 0, direction: EAST})
+func energize_top_left(data []string) int {
+	return energize(data, Beam{x: -1, y: 0, direction: EAST})
 }
 
-func max_energy(grid [][]byte) int {
+func max_energy(data []string) int {
 	max := 0
 
 	for y := 0; y < height; y++ {
-		energy := energize(grid, Beam{x: -1, y: y, direction: EAST})
+		energy := energize(data, Beam{x: -1, y: y, direction: EAST})
 		if energy > max {
 			max = energy
 		}
 
-		energy = energize(grid, Beam{x: width, y: y, direction: WEST})
+		energy = energize(data, Beam{x: width, y: y, direction: WEST})
 		if energy > max {
 			max = energy
 		}
 	}
 
 	for x := 0; x < width; x++ {
-		energy := energize(grid, Beam{x: x, y: -1, direction: SOUTH})
+		energy := energize(data, Beam{x: x, y: -1, direction: SOUTH})
 		if energy > max {
 			max = energy
 		}
 
-		energy = energize(grid, Beam{x: x, y: height, direction: NORTH})
+		energy = energize(data, Beam{x: x, y: height, direction: NORTH})
 		if energy > max {
 			max = energy
 		}
@@ -79,7 +73,7 @@ func max_energy(grid [][]byte) int {
 	return max
 }
 
-func energize(grid [][]byte, start Beam) int {
+func energize(data []string, start Beam) int {
 	queue := []Beam{start}
 	beams_seen := map[Beam]struct{}{}
 	energized := map[Pos]struct{}{}
@@ -113,7 +107,7 @@ func energize(grid [][]byte, start Beam) int {
 			energized[Pos{x: beam.x, y: beam.y}] = struct{}{}
 
 			// turn/split
-			switch grid[beam.y][beam.x] {
+			switch data[beam.y][beam.x] {
 			case '/':
 				switch beam.direction {
 				case NORTH:
@@ -155,8 +149,8 @@ func energize(grid [][]byte, start Beam) int {
 	return len(energized)
 }
 
-func pp(grid [][]byte) {
-	for _, line := range grid {
+func pp(data [][]byte) {
+	for _, line := range data {
 		fmt.Println(string(line))
 	}
 	fmt.Println()
@@ -164,8 +158,8 @@ func pp(grid [][]byte) {
 
 func main() {
 	data := load_data("input.txt")
-	grid := parse_data(data)
-	count := energize_top_left(grid)
+	parse_data(data)
+	count := energize_top_left(data)
 	fmt.Println(count)
-	fmt.Println(max_energy(grid))
+	fmt.Println(max_energy(data))
 }
