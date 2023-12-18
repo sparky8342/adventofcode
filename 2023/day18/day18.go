@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math/big"
 	"strconv"
 	"strings"
 )
@@ -20,101 +21,124 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func get_size(data []string) int {
+func shoelace(vertices []Pos) *big.Int {
+	l := len(vertices)
+
+	area := big.NewInt(int64(0))
+
+	j := l - 1
+	for i := 0; i < l; i++ {
+		i_x := big.NewInt(int64(vertices[i].x))
+		i_y := big.NewInt(int64(vertices[i].y))
+		j_x := big.NewInt(int64(vertices[j].x))
+		j_y := big.NewInt(int64(vertices[j].y))
+
+		var sum_a = new(big.Int)
+		sum_a.Add(j_x, i_x)
+
+		var sum_b = new(big.Int)
+		sum_b.Sub(j_y, i_y)
+
+		var sum_c = new(big.Int)
+		sum_c.Mul(sum_a, sum_b)
+
+		area.Add(area, sum_c)
+
+		j = i
+	}
+
+	area.Div(area, big.NewInt(int64(2)))
+	area.Abs(area)
+	return area
+}
+
+func get_size(data []string, use_colours bool) *big.Int {
 	x, y := 0, 0
 
-	holes := map[Pos]struct{}{}
-	holes[Pos{x: 0, y: 0}] = struct{}{}
+	vertices := []Pos{Pos{x: 0, y: 0}}
+	top_left := 0
 
-	x_min := 0
-	x_max := 0
-	y_min := 0
-	y_max := 0
+	// find all the vertices and work out the top left
+	for i := 0; i < len(data)-1; i++ {
+		line := data[i]
 
-	for _, line := range data {
+		var n int
+		var direction byte
+
 		parts := strings.Split(line, " ")
-		n, _ := strconv.Atoi(parts[1])
-		switch parts[0][0] {
+
+		if use_colours {
+			num, _ := strconv.ParseInt(parts[2][2:7], 16, 64)
+			n = int(num)
+			switch parts[2][7] {
+			case '0':
+				direction = 'R'
+			case '1':
+				direction = 'D'
+			case '2':
+				direction = 'L'
+			case '3':
+				direction = 'U'
+			}
+		} else {
+			direction = parts[0][0]
+			n, _ = strconv.Atoi(parts[1])
+		}
+
+		switch direction {
 		case 'U':
-			next_y := y - n
-			for ; y > next_y; y-- {
-				holes[Pos{x: x, y: y}] = struct{}{}
-			}
+			y = y - n
 		case 'R':
-			next_x := x + n
-			for ; x < next_x; x++ {
-				holes[Pos{x: x, y: y}] = struct{}{}
-			}
+			x = x + n
 		case 'D':
-			next_y := y + n
-			for ; y < next_y; y++ {
-				holes[Pos{x: x, y: y}] = struct{}{}
-			}
+			y = y + n
 		case 'L':
-			next_x := x - n
-			for ; x > next_x; x-- {
-				holes[Pos{x: x, y: y}] = struct{}{}
-			}
+			x = x - n
 		}
 
-		if x < x_min {
-			x_min = x
-		} else if x > x_max {
-			x_max = x
-		}
-		if y < y_min {
-			y_min = y
-		} else if y > y_max {
-			y_max = y
+		vertices = append(vertices, Pos{x: x, y: y})
+		if direction == 'U' && y < vertices[top_left].y {
+			top_left = len(vertices) - 1
 		}
 	}
 
-	// fill
-	start_y := y_min + 1
-	start_x := 0
-	for x := x_min; x <= x_max; x++ {
-		if _, exists := holes[Pos{x: x, y: start_y}]; exists {
-			start_x = x + 1
-			break
+	// find the vertices actually around the path
+	vertices_around := []Pos{vertices[top_left]}
+
+	for i := top_left + 1; i != top_left; i = (i + 1) % len(vertices) {
+		current := vertices[i]
+		prev_id := i - 1
+		if prev_id < 0 {
+			prev_id = len(vertices) - 1
+		}
+		prev := vertices[prev_id]
+		next := vertices[(i+1)%len(vertices)]
+
+		if prev.x < current.x && current.y < next.y {
+			vertices_around = append(vertices_around, Pos{x: current.x + 1, y: current.y})
+		} else if prev.y < current.y && current.x > next.x {
+			vertices_around = append(vertices_around, Pos{x: current.x + 1, y: current.y + 1})
+		} else if prev.x > current.x && current.y < next.y {
+			vertices_around = append(vertices_around, Pos{x: current.x + 1, y: current.y + 1})
+		} else if prev.y < current.y && current.x < next.x {
+			vertices_around = append(vertices_around, Pos{x: current.x + 1, y: current.y})
+		} else if prev.x > current.x && current.y > next.y {
+			vertices_around = append(vertices_around, Pos{x: current.x, y: current.y + 1})
+		} else if prev.y > current.y && current.x > next.x {
+			vertices_around = append(vertices_around, Pos{x: current.x, y: current.y + 1})
+		} else if prev.y > current.y && current.x < next.x {
+			vertices_around = append(vertices_around, Pos{x: current.x, y: current.y})
+		} else if prev.x < current.x && current.y > next.y {
+			vertices_around = append(vertices_around, Pos{x: current.x, y: current.y})
 		}
 	}
 
-	queue := []Pos{Pos{x: start_x, y: start_y}}
-
-	for len(queue) > 0 {
-		pos := queue[0]
-		queue = queue[1:]
-
-		if _, exists := holes[pos]; exists {
-			continue
-		}
-
-		holes[pos] = struct{}{}
-
-		queue = append(queue, Pos{x: pos.x + 1, y: pos.y})
-		queue = append(queue, Pos{x: pos.x - 1, y: pos.y})
-		queue = append(queue, Pos{x: pos.x, y: pos.y + 1})
-		queue = append(queue, Pos{x: pos.x, y: pos.y - 1})
-	}
-
-	/*
-		for y := y_min; y <= y_max; y++ {
-			for x := x_min; x <= x_max; x++ {
-				if _, exists := holes[Pos{x : x, y : y}]; exists {
-					fmt.Print("#")
-				} else {
-					fmt.Print(" ")
-				}
-			}
-			fmt.Println()
-		}
-		fmt.Println()
-	*/
-
-	return len(holes)
+	// shoelace formula for area of a polygon given it's vertices (in order)
+	return shoelace(vertices_around)
 }
 
 func main() {
 	data := load_data("input.txt")
-	fmt.Println(get_size(data))
+	fmt.Println(get_size(data, false))
+	fmt.Println(get_size(data, true))
 }
