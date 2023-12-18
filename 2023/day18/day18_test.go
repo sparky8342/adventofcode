@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"math/big"
+	"testing"
+)
 
 func Test(t *testing.T) {
 	data := []string{
@@ -20,10 +23,18 @@ func Test(t *testing.T) {
 		"U 2 (#7a21e3)",
 	}
 
-	got_size := get_size(data)
-	want_size := 62
+	got_size := get_size(data, false)
+	want_size := big.NewInt(int64(62))
 
-	if got_size != want_size {
-		t.Errorf("got %d, wanted %d", got_size, want_size)
+	if got_size.Cmp(want_size) != 0 {
+		t.Errorf("got %f, wanted %f", got_size, want_size)
 	}
+
+	got_size = get_size(data, true)
+	want_size = big.NewInt(int64(952408144115))
+
+	if got_size.Cmp(want_size) != 0 {
+		t.Errorf("got %f, wanted %f", got_size, want_size)
+	}
+
 }
