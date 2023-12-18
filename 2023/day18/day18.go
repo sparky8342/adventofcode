@@ -56,9 +56,8 @@ func get_size(data []string, use_colours bool) *big.Int {
 	x, y := 0, 0
 
 	vertices := []Pos{Pos{x: 0, y: 0}}
-	top_left := 0
 
-	// find all the vertices and work out the top left
+	// find all the vertices
 	for i := 0; i < len(data)-1; i++ {
 		line := data[i]
 
@@ -97,22 +96,17 @@ func get_size(data []string, use_colours bool) *big.Int {
 		}
 
 		vertices = append(vertices, Pos{x: x, y: y})
-		if direction == 'U' && y < vertices[top_left].y {
-			top_left = len(vertices) - 1
-		}
 	}
 
 	// find the vertices actually around the path
-	vertices_around := []Pos{vertices[top_left]}
+	vertices_around := []Pos{}
 
-	for i := top_left + 1; i != top_left; i = (i + 1) % len(vertices) {
+	vertices = append(vertices, vertices[0])
+	vertices = append(vertices, vertices[1])
+	for i := 1; i < len(vertices)-1; i++ {
 		current := vertices[i]
-		prev_id := i - 1
-		if prev_id < 0 {
-			prev_id = len(vertices) - 1
-		}
-		prev := vertices[prev_id]
-		next := vertices[(i+1)%len(vertices)]
+		prev := vertices[i-1]
+		next := vertices[i+1]
 
 		if prev.x < current.x && current.y < next.y {
 			vertices_around = append(vertices_around, Pos{x: current.x + 1, y: current.y})
