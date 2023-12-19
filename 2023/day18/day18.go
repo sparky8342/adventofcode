@@ -108,23 +108,30 @@ func get_size(data []string, use_colours bool) *big.Int {
 		prev := vertices[i-1]
 		next := vertices[i+1]
 
-		if prev.x < current.x && current.y < next.y {
-			vertices_around = append(vertices_around, Pos{x: current.x + 1, y: current.y})
-		} else if prev.y < current.y && current.x > next.x {
-			vertices_around = append(vertices_around, Pos{x: current.x + 1, y: current.y + 1})
-		} else if prev.x > current.x && current.y < next.y {
-			vertices_around = append(vertices_around, Pos{x: current.x + 1, y: current.y + 1})
-		} else if prev.y < current.y && current.x < next.x {
-			vertices_around = append(vertices_around, Pos{x: current.x + 1, y: current.y})
-		} else if prev.x > current.x && current.y > next.y {
-			vertices_around = append(vertices_around, Pos{x: current.x, y: current.y + 1})
-		} else if prev.y > current.y && current.x > next.x {
-			vertices_around = append(vertices_around, Pos{x: current.x, y: current.y + 1})
-		} else if prev.y > current.y && current.x < next.x {
-			vertices_around = append(vertices_around, Pos{x: current.x, y: current.y})
-		} else if prev.x < current.x && current.y > next.y {
-			vertices_around = append(vertices_around, Pos{x: current.x, y: current.y})
+		dx, dy := 0, 0
+		if prev.x < current.x {
+			if current.y < next.y {
+				dx = 1
+			}
+		} else if prev.x > current.x {
+			if current.y < next.y {
+				dx, dy = 1, 1
+			} else {
+				dy = 1
+			}
+		} else if prev.y < current.y {
+			if current.x < next.x {
+				dx = 1
+			} else {
+				dx, dy = 1, 1
+			}
+		} else if prev.y > current.y {
+			if current.x > next.x {
+				dy = 1
+			}
 		}
+
+		vertices_around = append(vertices_around, Pos{x: current.x + dx, y: current.y + dy})
 	}
 
 	// shoelace formula for area of a polygon given it's vertices (in order)
