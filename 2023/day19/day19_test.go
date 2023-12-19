@@ -28,4 +28,11 @@ func Test(t *testing.T) {
 	if got_sum != want_sum {
 		t.Errorf("got %d, wanted %d", got_sum, want_sum)
 	}
+
+	got_paths := find_paths(workflows)
+	want_paths := 167409079868000
+
+	if got_paths != want_paths {
+		t.Errorf("got %d, wanted %d", got_paths, want_paths)
+	}
 }
