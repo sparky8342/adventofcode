@@ -12,7 +12,7 @@ func Test(t *testing.T) {
 	}
 
 	modules := parse_data(data)
-	got_answer := press_button(modules, 1000)
+	got_answer := press_button(modules, 1000, false)
 	want_answer := 32000000
 
 	if got_answer != want_answer {
@@ -28,7 +28,7 @@ func Test(t *testing.T) {
 	}
 
 	modules = parse_data(data)
-	got_answer = press_button(modules, 1000)
+	got_answer = press_button(modules, 1000, false)
 	want_answer = 11687500
 
 	if got_answer != want_answer {
