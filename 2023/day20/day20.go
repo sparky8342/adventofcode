@@ -18,6 +18,7 @@ type Module struct {
 	on           bool
 	destinations []string
 	inputs       map[string]bool
+	presses      int
 }
 
 type Pulse struct {
@@ -63,19 +64,30 @@ func parse_data(data []string) map[string]Module {
 		for _, dest := range module.destinations {
 			dest_module := modules[dest]
 			if dest_module.typ == CONJUNCTION {
-				modules[dest].inputs[name] = false
+				dest_module.inputs[name] = false
 			}
+			modules[dest] = dest_module
 		}
 	}
 
 	return modules
 }
 
-func press_button(modules map[string]Module, amount int) int {
+func press_button(modules map[string]Module, amount int, find_rx bool) int {
 	low_sent := 0
 	high_sent := 0
 
-	for i := 0; i < amount; i++ {
+	// specific solution for my input
+	// when these 4 modules output a true
+	// xn outputs a false to rx
+	key_modules := map[string]int{}
+	if find_rx {
+		key_modules = map[string]int{"hn": 0, "mp": 0, "xf": 0, "fz": 0}
+	}
+
+	presses := 0
+	for {
+		presses++
 		low_sent += 1 // button
 		queue := []Pulse{Pulse{destination: "broadcaster", value: false}}
 
@@ -94,12 +106,17 @@ func press_button(modules map[string]Module, amount int) int {
 			case FLIP_FLOP:
 				if pulse.value == false {
 					module.on = !module.on
-					modules[module.name] = module
 					send := module.on
 
 					for _, dest := range module.destinations {
 						queue = append(queue, Pulse{source: module.name, destination: dest, value: send})
+						if val, exists := key_modules[dest]; exists && val == 0 && send == false {
+							key_modules[dest] = presses
+						}
 					}
+
+					modules[module.name] = module
+
 					if send == false {
 						low_sent += len(module.destinations)
 					} else {
@@ -123,7 +140,14 @@ func press_button(modules map[string]Module, amount int) int {
 
 				for _, dest := range module.destinations {
 					queue = append(queue, Pulse{source: module.name, destination: dest, value: send})
+					if val, exists := key_modules[dest]; exists && val == 0 && send == false {
+						key_modules[dest] = presses
+					}
+
 				}
+
+				modules[module.name] = module
+
 				if send == false {
 					low_sent += len(module.destinations)
 				} else {
@@ -131,13 +155,41 @@ func press_button(modules map[string]Module, amount int) int {
 				}
 			}
 		}
+		if !find_rx && presses == amount {
+			break
+		}
+
+		if key_modules["hn"] > 0 && key_modules["mp"] > 0 && key_modules["xf"] > 0 && key_modules["fz"] > 0 {
+			return lcm(key_modules["hn"], key_modules["mp"], key_modules["xf"], key_modules["fz"])
+		}
 	}
 
 	return low_sent * high_sent
 }
 
+func gcd(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
+}
+
+func lcm(a, b int, integers ...int) int {
+	result := a * b / gcd(a, b)
+
+	for i := 0; i < len(integers); i++ {
+		result = lcm(result, integers[i])
+	}
+
+	return result
+}
+
 func main() {
 	data := load_data("input.txt")
 	modules := parse_data(data)
-	fmt.Println(press_button(modules, 1000))
+	fmt.Println(press_button(modules, 1000, false))
+	modules = parse_data(data)
+	fmt.Println(press_button(modules, 1, true))
 }
