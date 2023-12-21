@@ -11,8 +11,8 @@ func Test(t *testing.T) {
 		"&inv -> a",
 	}
 
-	modules := parse_data(data)
-	got_answer := press_button(modules, 1000, false)
+	broadcaster := parse_data(data)
+	got_answer := press_button(broadcaster, 1000, false)
 	want_answer := 32000000
 
 	if got_answer != want_answer {
@@ -27,8 +27,8 @@ func Test(t *testing.T) {
 		"&con -> output",
 	}
 
-	modules = parse_data(data)
-	got_answer = press_button(modules, 1000, false)
+	broadcaster = parse_data(data)
+	got_answer = press_button(broadcaster, 1000, false)
 	want_answer = 11687500
 
 	if got_answer != want_answer {
