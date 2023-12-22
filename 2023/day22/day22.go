@@ -101,10 +101,11 @@ func any_below(brick Brick, positions map[Pos]int) bool {
 	return false
 }
 
-func move_down(bricks []Brick, positions map[Pos]int) {
+func move_down(bricks []Brick, positions map[Pos]int) int {
+	bricks_moved := map[int]struct{}{}
 	moves := true
-	for moves {
 
+	for moves {
 		moves = false
 
 		for i := 0; i < len(bricks); i++ {
@@ -120,10 +121,13 @@ func move_down(bricks []Brick, positions map[Pos]int) {
 				}
 				bricks[i].lowest_z--
 				moves = true
+				bricks_moved[bricks[i].id] = struct{}{}
 			}
 		}
 
 	}
+
+	return len(bricks_moved)
 }
 
 func amount_below(brick Brick, positions map[Pos]int) int {
@@ -208,9 +212,33 @@ func free_bricks(bricks []Brick, positions map[Pos]int) int {
 	return free
 }
 
+func remove_brick(bricks []Brick, positions map[Pos]int, index int) {
+	brick := bricks[index]
+
+	for _, cube := range brick.cubes {
+		delete(positions, cube)
+	}
+	bricks = append(bricks[0:index], bricks[index:]...)
+}
+
+func sum_of_falling(data []string) int {
+	sum := 0
+
+	for i := 0; i < len(data); i++ {
+		bricks, positions := parse_data(data)
+		move_down(bricks, positions)
+
+		remove_brick(bricks, positions, i)
+		sum += move_down(bricks, positions)
+	}
+
+	return sum
+}
+
 func main() {
 	data := load_data("input.txt")
 	bricks, positions := parse_data(data)
 	move_down(bricks, positions)
 	fmt.Println(free_bricks(bricks, positions))
+	fmt.Println(sum_of_falling(data))
 }

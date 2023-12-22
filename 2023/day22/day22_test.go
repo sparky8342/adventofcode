@@ -22,4 +22,11 @@ func Test(t *testing.T) {
 	if got_bricks != want_bricks {
 		t.Errorf("got %d, wanted %d", got_bricks, want_bricks)
 	}
+
+	got_sum := sum_of_falling(data)
+	want_sum := 7
+
+	if got_sum != want_sum {
+		t.Errorf("got %d, wanted %d", got_sum, want_sum)
+	}
 }
