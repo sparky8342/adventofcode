@@ -126,13 +126,18 @@ func move_down(bricks []Brick, positions map[Pos]int) {
 	}
 }
 
-func below(brick Brick, positions map[Pos]int) []int {
+func amount_below(brick Brick, positions map[Pos]int) int {
+	if brick.lowest_z == 1 {
+		return 0
+	}
+
 	if brick.vertical {
 		pos := Pos{x: brick.base.x, y: brick.base.y, z: brick.base.z - 1}
-		if id, exists := positions[pos]; exists {
-			return []int{id}
+		_, exists := positions[pos]
+		if exists {
+			return 1
 		} else {
-			return []int{}
+			return 0
 		}
 	}
 
@@ -144,11 +149,7 @@ func below(brick Brick, positions map[Pos]int) []int {
 		}
 	}
 
-	b := []int{}
-	for id := range ids {
-		b = append(b, id)
-	}
-	return b
+	return len(ids)
 }
 
 func above(brick Brick, positions map[Pos]int) []int {
@@ -183,15 +184,13 @@ func can_remove(bricks []Brick, brick_id int, positions map[Pos]int) bool {
 		if id, exists := positions[pos]; !exists {
 			return true
 		} else {
-			below_ids := below(bricks[id], positions)
-			return len(below_ids) > 1
+			return amount_below(bricks[id], positions) > 1
 		}
 	}
 
 	bricks_above := above(brick, positions)
 	for _, id := range bricks_above {
-		below := below(bricks[id], positions)
-		if len(below) == 1 {
+		if amount_below(bricks[id], positions) == 1 {
 			return false
 		}
 	}
