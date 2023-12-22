@@ -30,6 +30,10 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
+// TODO links bricks together with ones above and below
+// this will remove the need to actually move any
+// and make the rest of the code simpler
+
 func parse_data(data []string) ([]Brick, map[Pos]int) {
 	bricks := []Brick{}
 	positions := map[Pos]int{}
