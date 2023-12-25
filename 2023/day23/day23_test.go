@@ -29,13 +29,10 @@ func Test(t *testing.T) {
 		"#####################.#",
 	}
 
-	//got_path := 
-	find_path(data)
-	/*
+	got_path := find_path(data)
 	want_path := 94
 
 	if got_path != want_path {
 		t.Errorf("got %d, wanted %d", got_path, want_path)
 	}
-	*/
 }
