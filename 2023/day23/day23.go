@@ -27,6 +27,7 @@ type Node struct {
 type Edge struct {
 	distance int
 	node     *Node
+	blocked  bool
 }
 
 type Dir struct {
@@ -57,6 +58,8 @@ func load_data(filename string) []string {
 }
 
 func find_nodes(data []string) *Node {
+	//TODO find all the nodes and connections in one pass
+
 	// find nodes (points where the path branches)
 	start_pos := Pos{x: 1, y: 0}
 	start_node := &Node{pos: start_pos}
@@ -111,6 +114,7 @@ func find_nodes(data []string) *Node {
 
 			if n, exists := nodes_map[pos]; exists && !(pos.x == node.pos.x && pos.y == node.pos.y) {
 				node.edges = append(node.edges, &Edge{distance: -qe.steps, node: n})
+				n.edges = append(n.edges, &Edge{distance: -qe.steps, node: node, blocked: true})
 				continue
 			}
 
@@ -154,6 +158,9 @@ func djikstra(start *Node) int {
 		}
 
 		for _, edge := range node.edges {
+			if edge.blocked {
+				continue
+			}
 			next_node := edge.node
 			dist := node.dist + edge.distance
 			if dist < next_node.dist {
@@ -173,11 +180,38 @@ func djikstra(start *Node) int {
 	return -1
 }
 
-func find_path(data []string) int {
+func dfs(node *Node, visited map[*Node]struct{}, distance int, max_distance *int) {
+	if node.end {
+		if distance < *max_distance {
+			*max_distance = distance
+		}
+		return
+	}
+
+	for _, edge := range node.edges {
+		next := edge.node
+		if _, exists := visited[next]; !exists {
+			visited[next] = struct{}{}
+			dfs(edge.node, visited, distance+edge.distance, max_distance)
+			delete(visited, next)
+		}
+	}
+}
+
+func find_path(data []string) (int, int) {
 	height = len(data)
 	width = len(data[0])
 	start_node := find_nodes(data)
-	return -djikstra(start_node)
+
+	// TODO dfs for part 2 wasn't too slow,
+	// try the same for part 1 to simplify the code
+	longest := -djikstra(start_node)
+
+	visited := map[*Node]struct{}{}
+	max_distance := 0
+	dfs(start_node, visited, 0, &max_distance)
+
+	return longest, -max_distance
 }
 
 func main() {
