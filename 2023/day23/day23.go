@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"sort"
 	"strings"
 )
 
@@ -113,8 +112,8 @@ func find_nodes(data []string) *Node {
 			pos := qe.pos
 
 			if n, exists := nodes_map[pos]; exists && !(pos.x == node.pos.x && pos.y == node.pos.y) {
-				node.edges = append(node.edges, &Edge{distance: -qe.steps, node: n})
-				n.edges = append(n.edges, &Edge{distance: -qe.steps, node: node, blocked: true})
+				node.edges = append(node.edges, &Edge{distance: qe.steps, node: n})
+				n.edges = append(n.edges, &Edge{distance: qe.steps, node: node, blocked: true})
 				continue
 			}
 
@@ -146,53 +145,22 @@ func pp(node *Node) {
 	}
 }
 
-func djikstra(start *Node) int {
-	queue := []*Node{start}
-
-	for len(queue) > 0 {
-		node := queue[0]
-		queue = queue[1:]
-
-		if node.end {
-			return node.dist
-		}
-
-		for _, edge := range node.edges {
-			if edge.blocked {
-				continue
-			}
-			next_node := edge.node
-			dist := node.dist + edge.distance
-			if dist < next_node.dist {
-				next_node.dist = dist
-			}
-
-			queue = append(queue, next_node)
-
-			// heap is better here
-			sort.Slice(queue, func(i, j int) bool {
-				return queue[i].dist > queue[j].dist
-			})
-
-		}
-	}
-
-	return -1
-}
-
-func dfs(node *Node, visited map[*Node]struct{}, distance int, max_distance *int) {
+func dfs(node *Node, visited map[*Node]struct{}, distance int, max_distance *int, ignore_blocked bool) {
 	if node.end {
-		if distance < *max_distance {
+		if distance > *max_distance {
 			*max_distance = distance
 		}
 		return
 	}
 
 	for _, edge := range node.edges {
+		if ignore_blocked && edge.blocked {
+			continue
+		}
 		next := edge.node
 		if _, exists := visited[next]; !exists {
 			visited[next] = struct{}{}
-			dfs(edge.node, visited, distance+edge.distance, max_distance)
+			dfs(edge.node, visited, distance+edge.distance, max_distance, ignore_blocked)
 			delete(visited, next)
 		}
 	}
@@ -203,15 +171,14 @@ func find_path(data []string) (int, int) {
 	width = len(data[0])
 	start_node := find_nodes(data)
 
-	// TODO dfs for part 2 wasn't too slow,
-	// try the same for part 1 to simplify the code
-	longest := -djikstra(start_node)
-
 	visited := map[*Node]struct{}{}
-	max_distance := 0
-	dfs(start_node, visited, 0, &max_distance)
+	longest := 0
+	dfs(start_node, visited, 0, &longest, true)
 
-	return longest, -max_distance
+	longest_any := 0
+	dfs(start_node, visited, 0, &longest_any, false)
+
+	return longest, longest_any
 }
 
 func main() {
