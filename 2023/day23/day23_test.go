@@ -29,10 +29,15 @@ func Test(t *testing.T) {
 		"#####################.#",
 	}
 
-	got_path := find_path(data)
+	got_path, got_any_path := find_path(data)
 	want_path := 94
+	want_any_path := 154
 
 	if got_path != want_path {
 		t.Errorf("got %d, wanted %d", got_path, want_path)
+	}
+
+	if got_any_path != want_any_path {
+		t.Errorf("got %d, wanted %d", got_any_path, want_any_path)
 	}
 }
