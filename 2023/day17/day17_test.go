@@ -19,8 +19,15 @@ func Test(t *testing.T) {
 		"4322674655533",
 	}
 
-	got_heat_loss := find_path(data)
+	got_heat_loss := find_path(data, false)
 	want_heat_loss := 102
+
+	if got_heat_loss != want_heat_loss {
+		t.Errorf("got %d, wanted %d", got_heat_loss, want_heat_loss)
+	}
+
+	got_heat_loss = find_path(data, true)
+	want_heat_loss = 94
 
 	if got_heat_loss != want_heat_loss {
 		t.Errorf("got %d, wanted %d", got_heat_loss, want_heat_loss)

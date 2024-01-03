@@ -1,13 +1,38 @@
 package main
 
 import (
+	"container/heap"
 	"fmt"
 	"io/ioutil"
-	"sort"
 	"strings"
 )
 
-var height, width int
+type PriorityQueue []*QueueEntry
+
+func (pq PriorityQueue) Len() int { return len(pq) }
+
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].distance < pq[j].distance
+}
+
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PriorityQueue) Push(x interface{}) {
+	item := x.(*QueueEntry)
+	*pq = append(*pq, item)
+}
+
+func (pq *PriorityQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	old[n-1] = nil // avoid memory leak
+	*pq = old[0 : n-1]
+	return item
+}
+
 var dirs [4]Dir
 
 type Pos struct {
@@ -51,20 +76,23 @@ func load_data(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func find_path(data []string) int {
-	height = len(data)
-	width = len(data[0])
+func find_path(data []string, ultra bool) int {
+	height := len(data)
+	width := len(data[0])
 
-	start_pos := Pos{x: 0, y: 0}
-	start_state := State{pos: start_pos}
-	queue := []QueueEntry{QueueEntry{state: start_state}}
+	min, max := 0, 3
+	if ultra {
+		min, max = 4, 10
+	}
+
+	queue := make(PriorityQueue, 1)
+	queue[0] = &QueueEntry{state: State{pos: Pos{x: 0, y: 0}}}
+	heap.Init(&queue)
 
 	visited := map[State]struct{}{}
 
-	for len(queue) > 0 {
-		qe := queue[0]
-		queue = queue[1:]
-
+	for queue.Len() > 0 {
+		qe := heap.Pop(&queue).(*QueueEntry)
 		state := qe.state
 
 		if _, exists := visited[state]; exists {
@@ -88,34 +116,33 @@ func find_path(data []string) int {
 
 			switch dir.name {
 			case 'N':
-				if state.north == 3 || state.south > 0 {
+				if (state.east > 0 && state.east < min) || (state.west > 0 && state.west < min) || state.north == max || state.south > 0 {
 					continue
 				}
 				new_state.north = state.north + 1
 			case 'E':
-				if state.east == 3 || state.west > 0 {
+				if (state.north > 0 && state.north < min) || (state.south > 0 && state.south < min) || state.east == max || state.west > 0 {
 					continue
 				}
 				new_state.east = state.east + 1
 			case 'S':
-				if state.south == 3 || state.north > 0 {
+				if (state.east > 0 && state.east < min) || (state.west > 0 && state.west < min) || state.south == max || state.north > 0 {
 					continue
 				}
 				new_state.south = state.south + 1
 			case 'W':
-				if state.west == 3 || state.east > 0 {
+				if (state.north > 0 && state.north < min) || (state.south > 0 && state.south < min) || state.west == max || state.east > 0 {
 					continue
 				}
 				new_state.west = state.west + 1
 			}
 
-			queue = append(queue, QueueEntry{state: new_state, distance: qe.distance + int(data[y][x]-'0')})
-		}
+			if _, exists := visited[new_state]; exists {
+				continue
+			}
 
-		// TODO use heap
-		sort.Slice(queue, func(i, j int) bool {
-			return queue[i].distance < queue[j].distance
-		})
+			heap.Push(&queue, &QueueEntry{state: new_state, distance: qe.distance + int(data[y][x]-'0')})
+		}
 	}
 
 	return -1
@@ -123,5 +150,6 @@ func find_path(data []string) int {
 
 func main() {
 	data := load_data("input.txt")
-	fmt.Println(find_path(data))
+	fmt.Println(find_path(data, false))
+	fmt.Println(find_path(data, true))
 }
