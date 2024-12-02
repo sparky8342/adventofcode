@@ -83,3 +83,34 @@ func GetIntColumns() [][]int {
 
 	return ints
 }
+
+func GetIntRows() [][]int {
+	data, err := ioutil.ReadFile(get_filename())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+
+	if data[len(data)-1] == '\n' {
+		data = data[:len(data)-1]
+	}
+
+	lines := strings.Split(string(data), "\n")
+
+	ints := make([][]int, len(lines))
+	for i, line := range lines {
+		strs := strings.Fields(line)
+		row := make([]int, len(strs))
+		for j, n_str := range strs {
+			n, err := strconv.Atoi(n_str)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			row[j] = n
+		}
+		ints[i] = row
+	}
+
+	return ints
+}
