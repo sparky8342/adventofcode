@@ -39,13 +39,9 @@ func count_safe_with_tolerance(nums [][]int) int {
 	for _, report := range nums {
 		this_safe := false
 		for i := 0; i < len(report); i++ {
-			check_report := []int{}
-			for j := 0; j < len(report); j++ {
-				if i != j {
-					check_report = append(check_report, report[j])
-				}
-			}
-			if is_safe(check_report) {
+			check_report := make([]int, len(report))
+			copy(check_report, report)
+			if is_safe(append(check_report[0:i], check_report[i+1:]...)) {
 				this_safe = true
 				break
 			}
