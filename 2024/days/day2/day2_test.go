@@ -2,16 +2,16 @@ package day2
 
 import "testing"
 
-func Test1(t *testing.T) {
-	nums := [][]int{
-		[]int{7, 6, 4, 2, 1},
-		[]int{1, 2, 7, 8, 9},
-		[]int{9, 7, 6, 2, 1},
-		[]int{1, 3, 2, 4, 5},
-		[]int{8, 6, 4, 4, 1},
-		[]int{1, 3, 6, 7, 9},
-	}
+var nums = [][]int{
+	[]int{7, 6, 4, 2, 1},
+	[]int{1, 2, 7, 8, 9},
+	[]int{9, 7, 6, 2, 1},
+	[]int{1, 3, 2, 4, 5},
+	[]int{8, 6, 4, 4, 1},
+	[]int{1, 3, 6, 7, 9},
+}
 
+func Test1(t *testing.T) {
 	got := count_safe(nums)
 	want := 2
 
@@ -21,15 +21,6 @@ func Test1(t *testing.T) {
 }
 
 func Test2(t *testing.T) {
-	nums := [][]int{
-		[]int{7, 6, 4, 2, 1},
-		[]int{1, 2, 7, 8, 9},
-		[]int{9, 7, 6, 2, 1},
-		[]int{1, 3, 2, 4, 5},
-		[]int{8, 6, 4, 4, 1},
-		[]int{1, 3, 6, 7, 9},
-	}
-
 	got := count_safe_with_tolerance(nums)
 	want := 4
 
