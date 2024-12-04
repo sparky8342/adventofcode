@@ -5,10 +5,11 @@ import (
 	"loader"
 )
 
-var dirs [][]int
+func count_xmas(grid []string) int {
+	height := len(grid)
+	width := len(grid[0])
 
-func init() {
-	dirs = [][]int{
+	dirs := [][]int{
 		[]int{0, -1},
 		[]int{1, -1},
 		[]int{1, 0},
@@ -18,13 +19,9 @@ func init() {
 		[]int{-1, 0},
 		[]int{-1, -1},
 	}
-}
-
-func count_xmas(grid []string) int {
-	height := len(grid)
-	width := len(grid[0])
 
 	count := 0
+
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			if grid[y][x] == 'X' {
@@ -51,12 +48,32 @@ func count_xmas(grid []string) int {
 	return count
 }
 
+func count_x_mas(grid []string) int {
+	height := len(grid)
+	width := len(grid[0])
+
+	count := 0
+
+	for y := 1; y < height-1; y++ {
+		for x := 1; x < width-1; x++ {
+			if grid[y][x] == 'A' {
+				letters := string([]byte{grid[y-1][x-1], grid[y-1][x+1], grid[y+1][x+1], grid[y+1][x-1]})
+				if letters == "MMSS" || letters == "SMMS" || letters == "SSMM" || letters == "MSSM" {
+					count++
+				}
+			}
+		}
+	}
+
+	return count
+}
+
 func Run() {
 	loader.Day = 4
 	grid := loader.GetStrings()
 
 	part1 := count_xmas(grid)
-	part2 := -1
+	part2 := count_x_mas(grid)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }
