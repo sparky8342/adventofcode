@@ -23,3 +23,25 @@ func Test1(t *testing.T) {
 		t.Errorf("got %d, wanted %d", got, want)
 	}
 }
+
+func Test2(t *testing.T) {
+	grid := []string{
+		"MMMSXXMASM",
+		"MSAMXMSMSA",
+		"AMXSXMAAMM",
+		"MSAMASMSMX",
+		"XMASAMXAMM",
+		"XXAMMXXAMA",
+		"SMSMSASXSS",
+		"SAXAMASAAA",
+		"MAMMMXMMMM",
+		"MXMXAXMASX",
+	}
+
+	got := count_x_mas(grid)
+	want := 9
+
+	if want != got {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
