@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"loader"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -20,16 +21,10 @@ func valid_order(rules map[[2]int]struct{}, nums []int) bool {
 }
 
 func sort_update(rules map[[2]int]struct{}, nums []int) {
-	done := false
-	for !done {
-		done = true
-		for i := 0; i < len(nums)-1; i++ {
-			if _, ok := rules[[2]int{nums[i], nums[i+1]}]; !ok {
-				nums[i], nums[i+1] = nums[i+1], nums[i]
-				done = false
-			}
-		}
-	}
+	sort.Slice(nums, func(i, j int) bool {
+		_, ok := rules[[2]int{nums[i], nums[j]}]
+		return ok
+	})
 }
 
 func valid_updates(data [][]string) (int, int) {
