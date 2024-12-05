@@ -4,28 +4,11 @@ import (
 	"fmt"
 	"loader"
 	"os"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
 )
-
-func valid_order(rules map[[2]int]struct{}, nums []int) bool {
-	for i := 0; i < len(nums); i++ {
-		for j := i + 1; j < len(nums); j++ {
-			if _, ok := rules[[2]int{nums[i], nums[j]}]; !ok {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-func sort_update(rules map[[2]int]struct{}, nums []int) {
-	sort.Slice(nums, func(i, j int) bool {
-		_, ok := rules[[2]int{nums[i], nums[j]}]
-		return ok
-	})
-}
 
 func valid_updates(data [][]string) (int, int) {
 	rules := map[[2]int]struct{}{}
@@ -58,11 +41,17 @@ func valid_updates(data [][]string) (int, int) {
 			row = append(row, n)
 		}
 
-		if valid_order(rules, row) {
+		cpy := make([]int, len(row))
+		copy(cpy, row)
+		sort.Slice(cpy, func(i, j int) bool {
+			_, ok := rules[[2]int{cpy[i], cpy[j]}]
+			return ok
+		})
+
+		if reflect.DeepEqual(cpy, row) {
 			valid_sum += row[len(row)/2]
 		} else {
-			sort_update(rules, row)
-			corrected_sum += row[len(row)/2]
+			corrected_sum += cpy[len(cpy)/2]
 		}
 	}
 
