@@ -26,6 +26,23 @@ func GetStrings() []string {
 	return strings.Split(string(data), "\n")
 }
 
+func GetStringGroups() [][]string {
+	data, err := ioutil.ReadFile(get_filename())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+	if data[len(data)-1] == '\n' {
+		data = data[:len(data)-1]
+	}
+	group_strs := strings.Split(string(data), "\n\n")
+	groups := make([][]string, len(group_strs))
+	for i, group_str := range group_strs {
+		groups[i] = strings.Split(group_str, "\n")
+	}
+	return groups
+}
+
 func GetInts() []int {
 	data, err := ioutil.ReadFile(get_filename())
 	if err != nil {
