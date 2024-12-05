@@ -37,10 +37,15 @@ var data = [][]string{
 }
 
 func Test1(t *testing.T) {
-	got := valid_updates(data)
-	want := 143
+	got_valid, got_corrected := valid_updates(data)
+	want_valid := 143
 
-	if want != got {
-		t.Errorf("got %d, wanted %d", got, want)
+	if want_valid != got_valid {
+		t.Errorf("got %d, wanted %d", got_valid, want_valid)
+	}
+
+	want_corrected := 123
+	if want_corrected != got_corrected {
+		t.Errorf("got %d, wanted %d", got_corrected, want_corrected)
 	}
 }

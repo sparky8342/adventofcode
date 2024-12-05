@@ -8,7 +8,31 @@ import (
 	"strings"
 )
 
-func valid_updates(data [][]string) int {
+func valid_order(rules map[[2]int]struct{}, nums []int) bool {
+	for i := 0; i < len(nums); i++ {
+		for j := i + 1; j < len(nums); j++ {
+			if _, ok := rules[[2]int{nums[i], nums[j]}]; !ok {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func sort_update(rules map[[2]int]struct{}, nums []int) {
+	done := false
+	for !done {
+		done = true
+		for i := 0; i < len(nums)-1; i++ {
+			if _, ok := rules[[2]int{nums[i], nums[i+1]}]; !ok {
+				nums[i], nums[i+1] = nums[i+1], nums[i]
+				done = false
+			}
+		}
+	}
+}
+
+func valid_updates(data [][]string) (int, int) {
 	rules := map[[2]int]struct{}{}
 	for _, line := range data[0] {
 		parts := strings.Split(line, "|")
@@ -25,9 +49,9 @@ func valid_updates(data [][]string) int {
 		rules[[2]int{n1, n2}] = struct{}{}
 	}
 
-	sum := 0
+	valid_sum := 0
+	corrected_sum := 0
 
-outer:
 	for _, line := range data[1] {
 		row := []int{}
 		for _, str := range strings.Split(line, ",") {
@@ -39,26 +63,21 @@ outer:
 			row = append(row, n)
 		}
 
-		for i := 0; i < len(row); i++ {
-			for j := i + 1; j < len(row); j++ {
-				if _, ok := rules[[2]int{row[i], row[j]}]; !ok {
-					continue outer
-				}
-			}
+		if valid_order(rules, row) {
+			valid_sum += row[len(row)/2]
+		} else {
+			sort_update(rules, row)
+			corrected_sum += row[len(row)/2]
 		}
-
-		sum += row[len(row)/2]
 	}
 
-	return sum
+	return valid_sum, corrected_sum
 }
 
 func Run() {
 	loader.Day = 5
 	data := loader.GetStringGroups()
-	part1 := valid_updates(data)
-
-	part2 := -1
+	part1, part2 := valid_updates(data)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }
