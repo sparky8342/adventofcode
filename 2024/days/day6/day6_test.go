@@ -15,10 +15,11 @@ var data = []string{
 	"......#...",
 }
 
-var grid, start_x, start_y = parse_data(data)
+var grid, guard = parse_data(data)
 
 func Test1(t *testing.T) {
-	_, got := walk(grid, start_x, start_y)
+	_, visited := walk(grid, guard)
+	got := len(visited)
 	want := 41
 
 	if want != got {
@@ -27,7 +28,8 @@ func Test1(t *testing.T) {
 }
 
 func Test2(t *testing.T) {
-	got := obstructions(grid, start_x, start_y)
+	_, visited := walk(grid, guard)
+	got := obstructions(grid, guard, visited)
 	want := 6
 
 	if want != got {
