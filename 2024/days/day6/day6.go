@@ -5,9 +5,20 @@ import (
 	"loader"
 )
 
-func find_start(grid []string) (int, int) {
-	height := len(grid)
-	width := len(grid[0])
+var height, width int
+
+func parse_data(data []string) ([][]byte, int, int) {
+	height = len(data)
+	width = len(data[0])
+	grid := [][]byte{}
+	for _, line := range data {
+		grid = append(grid, []byte(line))
+	}
+	x, y := find_start(grid)
+	return grid, x, y
+}
+
+func find_start(grid [][]byte) (int, int) {
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			if grid[y][x] == '^' {
@@ -18,15 +29,11 @@ func find_start(grid []string) (int, int) {
 	return -1, -1
 }
 
-func walk(grid []string) int {
-	height := len(grid)
-	width := len(grid[0])
-
-	x, y := find_start(grid)
+func walk(grid [][]byte, x int, y int) (bool, int) {
 	dir := 'U'
 
-	visited := map[[2]int]struct{}{}
-	visited[[2]int{x, y}] = struct{}{}
+	visited := map[[2]int]int{}
+	visited[[2]int{x, y}] = 1
 
 	for {
 		next_x := x
@@ -44,7 +51,7 @@ func walk(grid []string) int {
 		}
 
 		if next_x < 0 || next_x == width || next_y < 0 || next_y == height {
-			break
+			return false, len(visited)
 		}
 
 		if grid[next_y][next_x] == '#' {
@@ -62,18 +69,39 @@ func walk(grid []string) int {
 		}
 
 		x, y = next_x, next_y
-		visited[[2]int{x, y}] = struct{}{}
+		visited[[2]int{x, y}]++
+		if visited[[2]int{x, y}] == 5 {
+			return true, 0
+		}
 	}
 
-	return len(visited)
+	return false, 0
+}
+
+func obstructions(grid [][]byte, start_x int, start_y int) int {
+	count := 0
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			if grid[y][x] == '.' {
+				grid[y][x] = '#'
+				loop, _ := walk(grid, start_x, start_y)
+				if loop {
+					count++
+				}
+				grid[y][x] = '.'
+			}
+		}
+	}
+	return count
 }
 
 func Run() {
 	loader.Day = 6
-	grid := loader.GetStrings()
+	data := loader.GetStrings()
+	grid, start_x, start_y := parse_data(data)
 
-	part1 := walk(grid)
-	part2 := -1
+	_, part1 := walk(grid, start_x, start_y)
+	part2 := obstructions(grid, start_x, start_y)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }
