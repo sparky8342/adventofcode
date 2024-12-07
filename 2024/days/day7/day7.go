@@ -26,22 +26,22 @@ func parse_data(data []string) [][]int {
 	return equations
 }
 
-func get_sequences(n int) [][]byte {
-	sequences := [][]byte{
-		[]byte{},
+func get_sequences(n int) [][][]byte {
+	sequences := make([][][]byte, n)
+	sequences[1] = [][]byte{
+		[]byte{'+'},
+		[]byte{'*'},
 	}
 
-	for i := 0; i < n; i++ {
-		new_sequences := [][]byte{}
-		for _, seq := range sequences {
+	for i := 2; i < n; i++ {
+		for _, seq := range sequences[i-1] {
 			for _, symbol := range []byte{'+', '*'} {
 				cpy := make([]byte, len(seq))
 				copy(cpy, seq)
 				cpy = append(cpy, symbol)
-				new_sequences = append(new_sequences, cpy)
+				sequences[i] = append(sequences[i], cpy)
 			}
 		}
-		sequences = new_sequences
 	}
 
 	return sequences
@@ -50,11 +50,18 @@ func get_sequences(n int) [][]byte {
 func total_calibration(equations [][]int) int {
 	total := 0
 
+	max := 0
+	for _, equation := range equations {
+		if len(equation) > max {
+			max = len(equation)
+		}
+	}
+	sequences := get_sequences(max + 1)
+
 	for _, equation := range equations {
 		target := equation[0]
-		sequences := get_sequences(len(equation) - 2)
 
-		for _, seq := range sequences {
+		for _, seq := range sequences[len(equation)-2] {
 			n := equation[1]
 			for i := 2; i < len(equation); i++ {
 				if seq[i-2] == '+' {
