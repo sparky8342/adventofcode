@@ -17,9 +17,17 @@ var data = []string{
 var equations = parse_data(data)
 
 func Test1(t *testing.T) {
-
-	got := total_calibration(equations)
+	got := total_calibration(equations, false)
 	want := 3749
+
+	if want != got {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
+
+func Test2(t *testing.T) {
+	got := total_calibration(equations, true)
+	want := 11387
 
 	if want != got {
 		t.Errorf("got %d, wanted %d", got, want)
