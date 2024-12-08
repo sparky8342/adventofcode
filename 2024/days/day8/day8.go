@@ -10,7 +10,7 @@ type Pos struct {
 	y int
 }
 
-func antinodes(grid []string) int {
+func antinodes(grid []string, spread bool) int {
 	height := len(grid)
 	width := len(grid[0])
 
@@ -30,19 +30,32 @@ func antinodes(grid []string) int {
 	for _, positions := range antennas {
 		for i := 0; i < len(positions); i++ {
 			for j := i + 1; j < len(positions); j++ {
-				antinode := Pos{
-					x: positions[j].x + (positions[j].x - positions[i].x),
-					y: positions[j].y + (positions[j].y - positions[i].y),
+				if spread {
+					antinodes[positions[i]] = struct{}{}
+					antinodes[positions[j]] = struct{}{}
 				}
-				if antinode.x >= 0 && antinode.x < width && antinode.y >= 0 && antinode.y < height {
+
+				dx := positions[j].x - positions[i].x
+				dy := positions[j].y - positions[i].y
+
+				antinode := Pos{x: positions[j].x + dx, y: positions[j].y + dy}
+				for antinode.x >= 0 && antinode.x < width && antinode.y >= 0 && antinode.y < height {
 					antinodes[antinode] = struct{}{}
+					antinode.x += dx
+					antinode.y += dy
+					if !spread {
+						break
+					}
 				}
-				antinode = Pos{
-					x: positions[i].x - (positions[j].x - positions[i].x),
-					y: positions[i].y - (positions[j].y - positions[i].y),
-				}
-				if antinode.x >= 0 && antinode.x < width && antinode.y >= 0 && antinode.y < height {
+
+				antinode = Pos{x: positions[i].x - dx, y: positions[i].y - dy}
+				for antinode.x >= 0 && antinode.x < width && antinode.y >= 0 && antinode.y < height {
 					antinodes[antinode] = struct{}{}
+					antinode.x -= dx
+					antinode.y -= dy
+					if !spread {
+						break
+					}
 				}
 			}
 		}
@@ -54,8 +67,9 @@ func antinodes(grid []string) int {
 func Run() {
 	loader.Day = 8
 	grid := loader.GetStrings()
-	part1 := antinodes(grid)
 
-	part2 := -1
+	part1 := antinodes(grid, false)
+	part2 := antinodes(grid, true)
+
 	fmt.Printf("%d %d\n", part1, part2)
 }
