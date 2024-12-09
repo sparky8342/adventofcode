@@ -12,3 +12,12 @@ func Test1(t *testing.T) {
 		t.Errorf("got %d, wanted %d", got, want)
 	}
 }
+
+func Test2(t *testing.T) {
+	got := defrag_files(data)
+	want := 2858
+
+	if want != got {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
