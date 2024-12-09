@@ -5,6 +5,11 @@ import (
 	"loader"
 )
 
+type Entry struct {
+	amount int
+	value  int
+}
+
 func defrag(data []byte) int {
 	disk := []int{}
 	file := true
@@ -50,14 +55,14 @@ func defrag(data []byte) int {
 }
 
 func defrag_files(data []byte) int {
-	disk := [][]int{}
+	disk := []Entry{}
 	file := true
 	for i, b := range data {
 		amount := int(b - '0')
 		if file {
-			disk = append(disk, []int{amount, i / 2})
+			disk = append(disk, Entry{amount: amount, value: i / 2})
 		} else if amount > 0 {
-			disk = append(disk, []int{amount, -1})
+			disk = append(disk, Entry{amount: amount, value: -1})
 		}
 		file = !file
 	}
@@ -65,12 +70,12 @@ func defrag_files(data []byte) int {
 	p2 := len(disk) - 1
 
 	for p2 > 0 {
-		for disk[p2][1] == -1 {
+		for disk[p2].value == -1 {
 			p2--
 		}
 
 		p1 := 0
-		for p1 < p2 && (disk[p1][1] != -1 || disk[p1][0] < disk[p2][0]) {
+		for p1 < p2 && (disk[p1].value != -1 || disk[p1].amount < disk[p2].amount) {
 			p1++
 		}
 		if p1 == p2 {
@@ -78,27 +83,27 @@ func defrag_files(data []byte) int {
 			continue
 		}
 
-		if disk[p1][0] == disk[p2][0] {
-			disk[p1][1] = disk[p2][1]
-			disk[p2][1] = -1
-		} else if disk[p1][0] > disk[p2][0] {
-			diff := disk[p1][0] - disk[p2][0]
-			disk[p1][0] = disk[p2][0]
-			disk[p1][1] = disk[p2][1]
-			disk[p2][1] = -1
+		if disk[p1].amount == disk[p2].amount {
+			disk[p1].value = disk[p2].value
+			disk[p2].value = -1
+		} else if disk[p1].amount > disk[p2].amount {
+			diff := disk[p1].amount - disk[p2].amount
+			disk[p1].amount = disk[p2].amount
+			disk[p1].value = disk[p2].value
+			disk[p2].value = -1
 			disk = append(disk[:p1+2], disk[p1+1:]...)
-			disk[p1+1] = []int{diff, -1}
+			disk[p1+1] = Entry{amount: diff, value: -1}
 		}
 	}
 
 	checksum := 0
 	pos := 0
 	for _, entry := range disk {
-		if entry[1] == -1 {
-			pos += entry[0]
+		if entry.value == -1 {
+			pos += entry.amount
 		} else {
-			for i := 0; i < entry[0]; i++ {
-				checksum += pos * entry[1]
+			for i := 0; i < entry.amount; i++ {
+				checksum += pos * entry.value
 				pos++
 			}
 		}
