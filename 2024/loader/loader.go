@@ -131,3 +131,17 @@ func GetIntRows() [][]int {
 
 	return ints
 }
+
+func GetOneLine() []byte {
+	data, err := ioutil.ReadFile(get_filename())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+
+	if data[len(data)-1] == '\n' {
+		data = data[:len(data)-1]
+	}
+
+	return data
+}
