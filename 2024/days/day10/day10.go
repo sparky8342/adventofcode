@@ -18,10 +18,11 @@ type Pos struct {
 	y int
 }
 
-func bfs(grid []string, pos Pos) int {
+func bfs(grid []string, pos Pos) (int, int) {
 	queue := []Pos{pos}
 
 	found := map[Pos]struct{}{}
+	rating := 0
 
 	for len(queue) > 0 {
 		pos := queue[0]
@@ -29,6 +30,7 @@ func bfs(grid []string, pos Pos) int {
 
 		if grid[pos.y][pos.x] == '9' {
 			found[pos] = struct{}{}
+			rating++
 			continue
 		}
 
@@ -44,30 +46,33 @@ func bfs(grid []string, pos Pos) int {
 		}
 	}
 
-	return len(found)
+	return len(found), rating
 }
 
-func score(grid []string) int {
+func score(grid []string) (int, int) {
 	size = len(grid)
 
 	score := 0
+	rating := 0
+
 	for y := 0; y < size; y++ {
 		for x := 0; x < size; x++ {
 			if grid[y][x] == '0' {
-				score += bfs(grid, Pos{x: x, y: y})
+				s, r := bfs(grid, Pos{x: x, y: y})
+				score += s
+				rating += r
 			}
 		}
 	}
 
-	return score
+	return score, rating
 }
 
 func Run() {
 	loader.Day = 10
 	grid := loader.GetStrings()
 
-	part1 := score(grid)
-	part2 := -1
+	part1, part2 := score(grid)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }
