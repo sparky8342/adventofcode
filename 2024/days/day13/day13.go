@@ -3,6 +3,7 @@ package day13
 import (
 	"fmt"
 	"loader"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -12,6 +13,17 @@ type Pos struct {
 	x int
 	y int
 }
+
+type Machine struct {
+	a_x    int
+	a_y    int
+	b_x    int
+	b_y    int
+	goal_x int
+	goal_y int
+}
+
+var cache map[[2]int]int
 
 func parse_line(line string) (int, int) {
 	r := regexp.MustCompile(".*?(\\d+).*?(\\d+)")
@@ -29,13 +41,20 @@ func parse_line(line string) (int, int) {
 	return n1, n2
 }
 
-func parse_data(data [][]string) [][]int {
-	machines := [][]int{}
+func parse_data(data [][]string) []Machine {
+	machines := []Machine{}
 	for _, group := range data {
-		machine := make([]int, 6)
-		machine[0], machine[1] = parse_line(group[0])
-		machine[2], machine[3] = parse_line(group[1])
-		machine[4], machine[5] = parse_line(group[2])
+		a_x, a_y := parse_line(group[0])
+		b_x, b_y := parse_line(group[1])
+		goal_x, goal_y := parse_line(group[2])
+		machine := Machine{
+			a_x:    a_x,
+			a_y:    a_y,
+			b_x:    b_x,
+			b_y:    b_y,
+			goal_x: goal_x,
+			goal_y: goal_y,
+		}
 		machines = append(machines, machine)
 	}
 	return machines
@@ -49,50 +68,41 @@ func min(a, b int) int {
 	}
 }
 
-func min_cost(machine []int) int {
-	goal_x := machine[4]
-	goal_y := machine[5]
-
-	a := []int{machine[0], machine[1]}
-	b := []int{machine[2], machine[3]}
-
-	dp := map[Pos]int{}
-
-	dp[Pos{x: a[0], y: a[1]}] = 3
-	dp[Pos{x: b[0], y: b[1]}] = 1
-
-	for y := 0; y <= goal_y; y++ {
-		for x := 0; x <= goal_x; x++ {
-			pos := Pos{x: x, y: y}
-			if _, ok := dp[pos]; ok {
-				next_pos := Pos{x: pos.x + a[0], y: pos.y + a[1]}
-				if next_pos.x <= goal_x && next_pos.y <= goal_y {
-					if _, ok := dp[next_pos]; !ok {
-						dp[next_pos] = dp[pos] + 3
-					} else {
-						dp[next_pos] = min(dp[next_pos], dp[pos]+3)
-					}
-				}
-				next_pos = Pos{x: pos.x + b[0], y: pos.y + b[1]}
-				if next_pos.x <= goal_x && next_pos.y <= goal_y {
-					if _, ok := dp[next_pos]; !ok {
-						dp[next_pos] = dp[pos] + 1
-					} else {
-						dp[next_pos] = min(dp[next_pos], dp[pos]+1)
-					}
-				}
-
-			}
-		}
+func dfs(machine Machine, x int, y int, cost int) int {
+	if val, ok := cache[[2]int{x, y}]; ok {
+		return val
 	}
 
-	return dp[Pos{x: machine[4], y: machine[5]}]
+	if x == machine.goal_x && y == machine.goal_y {
+		return cost
+	} else if x > machine.goal_x || y > machine.goal_y {
+		return math.MaxInt32
+	}
+
+	c := dfs(machine, x+machine.a_x, y+machine.a_y, cost+3)
+	c2 := dfs(machine, x+machine.b_x, y+machine.b_y, cost+1)
+	if c2 < c {
+		c = c2
+	}
+
+	cache[[2]int{x, y}] = c
+	return c
 }
 
-func tokens(machines [][]int) int {
+func cost(machine Machine) int {
+	cache = map[[2]int]int{}
+	c := dfs(machine, 0, 0, 0)
+	if c == math.MaxInt32 {
+		return 0
+	} else {
+		return c
+	}
+}
+
+func tokens(machines []Machine) int {
 	total := 0
 	for _, machine := range machines {
-		total += min_cost(machine)
+		total += cost(machine)
 	}
 	return total
 }
