@@ -26,7 +26,7 @@ var machines = parse_data([][]string{
 })
 
 func Test1(t *testing.T) {
-	got := tokens(machines)
+	got := tokens(machines, 0)
 	want := 480
 
 	if want != got {
