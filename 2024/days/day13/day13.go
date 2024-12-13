@@ -3,16 +3,10 @@ package day13
 import (
 	"fmt"
 	"loader"
-	"math"
 	"os"
 	"regexp"
 	"strconv"
 )
-
-type Pos struct {
-	x int
-	y int
-}
 
 type Machine struct {
 	a_x    int
@@ -23,7 +17,24 @@ type Machine struct {
 	goal_y int
 }
 
-var cache map[[2]int]int
+func gcd(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
+}
+
+func lcm(a, b int, integers ...int) int {
+	result := a * b / gcd(a, b)
+
+	for i := 0; i < len(integers); i++ {
+		result = lcm(result, integers[i])
+	}
+
+	return result
+}
 
 func parse_line(line string) (int, int) {
 	r := regexp.MustCompile(".*?(\\d+).*?(\\d+)")
@@ -60,49 +71,54 @@ func parse_data(data [][]string) []Machine {
 	return machines
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
+func calc(machine Machine) int {
+	// solve simultaneous equations
+	// e.g.
+	// ap * 94 + bp * 22 = 8400
+	// ap * 34 + bp * 67 = 5400
+
+	// multiply both to get the same ap value
+	l := lcm(machine.a_x, machine.a_y)
+	mult1 := l / machine.a_x
+	mult2 := l / machine.a_y
+
+	bp1 := machine.b_x * mult1
+	bp2 := machine.b_y * mult2
+
+	gx := machine.goal_x * mult1
+	gy := machine.goal_y * mult2
+
+	// subtract the equations, giving us a bp value and goal value
+	var bp, g int
+	if bp1 > bp2 {
+		bp = bp1 - bp2
+		g = gx - gy
 	} else {
-		return b
-	}
-}
-
-func dfs(machine Machine, x int, y int, cost int) int {
-	if val, ok := cache[[2]int{x, y}]; ok {
-		return val
+		bp = bp2 - bp1
+		g = gy - gx
 	}
 
-	if x == machine.goal_x && y == machine.goal_y {
-		return cost
-	} else if x > machine.goal_x || y > machine.goal_y {
-		return math.MaxInt32
-	}
+	// divide to get the value of b
+	b := g / bp
 
-	c := dfs(machine, x+machine.a_x, y+machine.a_y, cost+3)
-	c2 := dfs(machine, x+machine.b_x, y+machine.b_y, cost+1)
-	if c2 < c {
-		c = c2
-	}
+	// replace to get the value of a
+	a := (machine.goal_x - b*machine.b_x) / machine.a_x
 
-	cache[[2]int{x, y}] = c
-	return c
-}
-
-func cost(machine Machine) int {
-	cache = map[[2]int]int{}
-	c := dfs(machine, 0, 0, 0)
-	if c == math.MaxInt32 {
+	// check a and b work for the goals
+	if a*machine.a_x+b*machine.b_x == machine.goal_x &&
+		a*machine.a_y+b*machine.b_y == machine.goal_y {
+		return a*3 + b
+	} else {
 		return 0
-	} else {
-		return c
 	}
 }
 
-func tokens(machines []Machine) int {
+func tokens(machines []Machine, add int) int {
 	total := 0
 	for _, machine := range machines {
-		total += cost(machine)
+		machine.goal_x += add
+		machine.goal_y += add
+		total += calc(machine)
 	}
 	return total
 }
@@ -112,8 +128,8 @@ func Run() {
 	data := loader.GetStringGroups()
 	machines := parse_data(data)
 
-	part1 := tokens(machines)
-	part2 := -1
+	part1 := tokens(machines, 0)
+	part2 := tokens(machines, 10000000000000)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }
