@@ -52,16 +52,18 @@ func parse_data(data []string) []Robot {
 
 func move(robots []Robot, width int, height int, steps int) int {
 	quads := make([]int, 4)
+	middle_x := width / 2
+	middle_y := height / 2
 	for _, robot := range robots {
 		robot.x = mod((robot.x + robot.vx*steps), width)
 		robot.y = mod((robot.y + robot.vy*steps), height)
-		if robot.x < width/2 && robot.y < height/2 {
+		if robot.x < middle_x && robot.y < middle_y {
 			quads[0]++
-		} else if robot.x > width/2 && robot.y < height/2 {
+		} else if robot.x > middle_x && robot.y < middle_y {
 			quads[1]++
-		} else if robot.x < width/2 && robot.y > height/2 {
+		} else if robot.x < middle_x && robot.y > middle_y {
 			quads[2]++
-		} else if robot.x > width/2 && robot.y > height/2 {
+		} else if robot.x > middle_x && robot.y > middle_y {
 			quads[3]++
 		}
 	}
