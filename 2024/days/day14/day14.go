@@ -70,13 +70,59 @@ func move(robots []Robot, width int, height int, steps int) int {
 	return quads[0] * quads[1] * quads[2] * quads[3]
 }
 
+func step_and_draw(robots []Robot, width int, height int) int {
+	grid := make([][]byte, height)
+	for i := 0; i < height; i++ {
+		grid[i] = make([]byte, width)
+		for j := 0; j < width; j++ {
+			grid[i][j] = ' '
+		}
+	}
+
+	steps := 0
+	for {
+		for i := 0; i < len(robots); i++ {
+			robots[i].x = mod(robots[i].x+robots[i].vx, width)
+			robots[i].y = mod(robots[i].y+robots[i].vy, height)
+			grid[robots[i].y][robots[i].x] = '*'
+		}
+		steps++
+
+		max := 0
+		for y := 0; y < height; y++ {
+			seq := 0
+			for x := 0; x < width; x++ {
+				if grid[y][x] == '*' {
+					seq++
+				} else {
+					if seq > max {
+						max = seq
+					}
+					seq = 0
+				}
+			}
+		}
+
+		if max >= 10 {
+			for _, row := range grid {
+				fmt.Println(string(row))
+			}
+			return steps
+		}
+
+		for _, robot := range robots {
+			grid[robot.y][robot.x] = ' '
+		}
+	}
+}
+
 func Run() {
 	loader.Day = 14
 	data := loader.GetStrings()
 	robots := parse_data(data)
 
 	part1 := move(robots, 101, 103, 100)
-	part2 := -1
+	part2 := step_and_draw(robots, 101, 103)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }
