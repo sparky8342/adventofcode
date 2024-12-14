@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"utils"
 )
 
 type Machine struct {
@@ -15,25 +16,6 @@ type Machine struct {
 	b_y    int
 	goal_x int
 	goal_y int
-}
-
-func gcd(a, b int) int {
-	for b != 0 {
-		t := b
-		b = a % b
-		a = t
-	}
-	return a
-}
-
-func lcm(a, b int, integers ...int) int {
-	result := a * b / gcd(a, b)
-
-	for i := 0; i < len(integers); i++ {
-		result = lcm(result, integers[i])
-	}
-
-	return result
 }
 
 func parse_line(line string) (int, int) {
@@ -78,7 +60,7 @@ func calc(machine Machine) int {
 	// ap * 34 + bp * 67 = 5400
 
 	// multiply both to get the same ap value
-	l := lcm(machine.a_x, machine.a_y)
+	l := utils.Lcm(machine.a_x, machine.a_y)
 	mult1 := l / machine.a_x
 	mult2 := l / machine.a_y
 
