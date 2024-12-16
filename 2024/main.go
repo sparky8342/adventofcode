@@ -8,6 +8,7 @@ import (
 	"days/day13"
 	"days/day14"
 	"days/day15"
+	"days/day16"
 	"days/day2"
 	"days/day3"
 	"days/day4"
@@ -59,6 +60,8 @@ func main() {
 			day14.Run()
 		case 15:
 			day15.Run()
+		case 16:
+			day16.Run()
 		}
 	} else {
 		fmt.Println("Day 1")
@@ -91,5 +94,7 @@ func main() {
 		day14.Run()
 		fmt.Println("Day 15")
 		day15.Run()
+		fmt.Println("Day 16")
+		day16.Run()
 	}
 }
