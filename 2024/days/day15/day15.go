@@ -11,7 +11,7 @@ type Pos struct {
 	y int
 }
 
-var size int
+var height, width int
 
 func expand_grid(data []string) (map[Pos]byte, Pos) {
 	blocks := map[Pos]byte{}
@@ -20,11 +20,11 @@ func expand_grid(data []string) (map[Pos]byte, Pos) {
 		for j, ru := range line {
 			switch ru {
 			case '#':
-				blocks[Pos{x: j * 2, y: i}] = 'W'
-				blocks[Pos{x: j*2 + 1, y: i}] = 'W'
+				blocks[Pos{x: j * 2, y: i}] = '#'
+				blocks[Pos{x: j*2 + 1, y: i}] = '#'
 			case 'O':
-				blocks[Pos{x: j * 2, y: i}] = 'L'
-				blocks[Pos{x: j*2 + 1, y: i}] = 'R'
+				blocks[Pos{x: j * 2, y: i}] = '['
+				blocks[Pos{x: j*2 + 1, y: i}] = ']'
 			case '@':
 				robot.x = j * 2
 				robot.y = i
@@ -35,8 +35,8 @@ func expand_grid(data []string) (map[Pos]byte, Pos) {
 }
 
 func find_robot(grid [][]byte) Pos {
-	for y := 0; y < size; y++ {
-		for x := 0; x < size; x++ {
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			if grid[y][x] == '@' {
 				return Pos{x: x, y: y}
 			}
@@ -60,8 +60,9 @@ func next_space(x int, y int, command rune) (int, int) {
 }
 
 func move_robot(data [][]string) int {
-	size = len(data[0])
-	grid := make([][]byte, size)
+	height = len(data[0])
+	width = len(data[0][0])
+	grid := make([][]byte, height)
 	for i, line := range data[0] {
 		grid[i] = []byte(line)
 	}
@@ -94,8 +95,8 @@ func move_robot(data [][]string) int {
 	}
 
 	gps := 0
-	for y := 0; y < size; y++ {
-		for x := 0; x < size; x++ {
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			if grid[y][x] == 'O' {
 				gps += y*100 + x
 			}
@@ -117,9 +118,9 @@ func can_move(pos Pos, blocks map[Pos]byte, dir rune) bool {
 		val, ok := blocks[next]
 		if !ok {
 			return true
-		} else if val == 'W' {
+		} else if val == '#' {
 			return false
-		} else if val == 'L' || val == 'R' {
+		} else if val == '[' || val == ']' {
 			return can_move(next, blocks, dir)
 		}
 	} else if dir == '^' || dir == 'v' {
@@ -134,13 +135,13 @@ func can_move(pos Pos, blocks map[Pos]byte, dir rune) bool {
 		val, ok := blocks[next]
 		if !ok {
 			return true
-		} else if val == 'W' {
+		} else if val == '#' {
 			return false
-		} else if val == 'L' || val == 'R' {
+		} else if val == '[' || val == ']' {
 			other := Pos{x: next.x, y: next.y}
-			if val == 'L' {
+			if val == '[' {
 				other.x++
-			} else if val == 'R' {
+			} else if val == ']' {
 				other.x--
 			}
 			return can_move(next, blocks, dir) && can_move(other, blocks, dir)
@@ -178,9 +179,9 @@ func move(pos Pos, blocks map[Pos]byte, dir rune) {
 		val, ok := blocks[next]
 		if ok {
 			other := Pos{x: next.x, y: next.y}
-			if val == 'L' {
+			if val == '[' {
 				other.x++
-			} else if val == 'R' {
+			} else if val == ']' {
 				other.x--
 			}
 			move(next, blocks, dir)
@@ -193,21 +194,15 @@ func move(pos Pos, blocks map[Pos]byte, dir rune) {
 }
 
 func print_blocks(blocks map[Pos]byte, robot Pos) {
-	for y := 0; y < size; y++ {
-		for x := 0; x < size; x++ {
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			if x == robot.x && y == robot.y {
 				fmt.Print("@")
 				continue
 			}
 			pos := Pos{x: x, y: y}
 			if val, ok := blocks[pos]; ok {
-				if val == 'W' {
-					fmt.Print("#")
-				} else if val == 'L' {
-					fmt.Print("[")
-				} else if val == 'R' {
-					fmt.Print("]")
-				}
+				fmt.Print(string(val))
 			} else {
 				fmt.Print(".")
 			}
@@ -217,7 +212,8 @@ func print_blocks(blocks map[Pos]byte, robot Pos) {
 }
 
 func move_robot_double_blocks(data [][]string) int {
-	size = len(data[0]) * 2
+	height = len(data[0])
+	width = len(data[0][0]) * 2
 	blocks, robot := expand_grid(data[0])
 	commands := strings.Join(data[1], "")
 
@@ -229,10 +225,10 @@ func move_robot_double_blocks(data [][]string) int {
 	}
 
 	gps := 0
-	for y := 0; y < size; y++ {
-		for x := 0; x < size; x++ {
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			pos := Pos{x: x, y: y}
-			if val, ok := blocks[pos]; ok && val == 'L' {
+			if val, ok := blocks[pos]; ok && val == '[' {
 				gps += y*100 + x
 			}
 		}
