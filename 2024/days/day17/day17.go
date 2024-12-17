@@ -103,13 +103,48 @@ func (c *Computer) run_program() string {
 	return strings.Join(out, ",")
 }
 
+func (c *Computer) reset() {
+	c.a = 0
+	c.b = 0
+	c.c = 0
+	c.pc = 0
+	c.output = []int{}
+}
+
+func find_quine(computer Computer) int {
+	nums := []int{0}
+	pos := len(computer.program) - 1
+
+	for pos >= 0 {
+		digit := computer.program[pos]
+
+		next_nums := []int{}
+		for _, n := range nums {
+			for i := 0; i < 8; i++ {
+				computer.reset()
+				a := n*8 + i
+				computer.a = a
+				_ = computer.run_program()
+				if computer.output[0] == digit {
+					next_nums = append(next_nums, a)
+				}
+			}
+		}
+
+		pos--
+		nums = next_nums
+	}
+
+	return nums[0]
+}
+
 func Run() {
 	loader.Day = 17
 	data := loader.GetStrings()
 	computer := parse_data(data)
 
 	part1 := computer.run_program()
-	part2 := ""
+	part2 := find_quine(computer)
 
-	fmt.Printf("%s %s\n", part1, part2)
+	fmt.Printf("%s %d\n", part1, part2)
 }

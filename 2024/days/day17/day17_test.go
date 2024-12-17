@@ -128,3 +128,22 @@ func Test6(t *testing.T) {
 		t.Errorf("got %s, wanted %s", got, want)
 	}
 }
+
+func Test7(t *testing.T) {
+	data := []string{
+		"Register A: 2024",
+		"Register B: 0",
+		"Register C: 0",
+		"",
+		"Program: 0,3,5,4,3,0",
+	}
+
+	computer := parse_data(data)
+
+	got := find_quine(computer)
+	want := 117440
+
+	if want != got {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
