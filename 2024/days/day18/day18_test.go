@@ -40,3 +40,14 @@ func Test1(t *testing.T) {
 		t.Errorf("got %d, wanted %d", got, want)
 	}
 }
+
+func Test2(t *testing.T) {
+	blocks := parse_data(data, 12)
+
+	got := find_blocked_path(data, 7, blocks, 12)
+	want := "6,1"
+
+	if want != got {
+		t.Errorf("got %s, wanted %s", got, want)
+	}
+}

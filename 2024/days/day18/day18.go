@@ -28,6 +28,15 @@ func parse_data(data []string, amount int) map[Pos]struct{} {
 	return blocks
 }
 
+func parse_line(data []string, line int) Pos {
+	var x, y int
+	_, err := fmt.Sscanf(data[line], "%d,%d", &x, &y)
+	if err != nil {
+		panic(err)
+	}
+	return Pos{x: x, y: y}
+}
+
 func find_path(size int, blocks map[Pos]struct{}) int {
 	dirs := [][]int{
 		[]int{0, -1},
@@ -73,14 +82,25 @@ func find_path(size int, blocks map[Pos]struct{}) int {
 	return -1
 }
 
+func find_blocked_path(data []string, size int, blocks map[Pos]struct{}, block_no int) string {
+	for i := block_no; i < len(data); i++ {
+		block := parse_line(data, i)
+		blocks[block] = struct{}{}
+		l := find_path(size, blocks)
+		if l == -1 {
+			return data[i]
+		}
+	}
+	return ""
+}
+
 func Run() {
 	loader.Day = 18
 	data := loader.GetStrings()
-
 	blocks := parse_data(data, 1024)
+
 	part1 := find_path(71, blocks)
+	part2 := find_blocked_path(data, 71, blocks, 1024)
 
-	part2 := -1
-
-	fmt.Printf("%d %d\n", part1, part2)
+	fmt.Printf("%d %s\n", part1, part2)
 }
