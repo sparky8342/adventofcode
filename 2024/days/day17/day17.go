@@ -39,14 +39,6 @@ func parse_data(data []string) Computer {
 	return computer
 }
 
-func pow2(n int) int {
-	p := 1
-	for i := 0; i < n; i++ {
-		p = p * 2
-	}
-	return p
-}
-
 func (c *Computer) combo_operand(op int) int {
 	if op >= 0 && op <= 3 {
 		return op
@@ -73,7 +65,7 @@ func (c *Computer) run_program() string {
 
 		switch ins {
 		case 0:
-			c.a = c.a / pow2(operand)
+			c.a = c.a / (1 << operand)
 		case 1:
 			c.b ^= operand
 		case 2:
@@ -88,9 +80,9 @@ func (c *Computer) run_program() string {
 		case 5:
 			c.output = append(c.output, operand%8)
 		case 6:
-			c.b = c.a / pow2(operand)
+			c.b = c.a / (1 << operand)
 		case 7:
-			c.c = c.a / pow2(operand)
+			c.c = c.a / (1 << operand)
 		}
 
 		c.pc += 2
