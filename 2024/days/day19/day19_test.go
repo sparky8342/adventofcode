@@ -16,10 +16,16 @@ var data = []string{
 }
 
 func Test1(t *testing.T) {
-	got := possible_patterns(data)
-	want := 6
+	got_possible, got_ways := possible_patterns(data)
+	want_possible := 6
 
-	if want != got {
-		t.Errorf("got %d, wanted %d", got, want)
+	if want_possible != got_possible {
+		t.Errorf("got %d, wanted %d", got_possible, want_possible)
+	}
+
+	want_ways := 16
+
+	if want_ways!= got_ways {
+		t.Errorf("got %d, wanted %d", got_ways, want_ways)
 	}
 }

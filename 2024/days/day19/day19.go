@@ -6,43 +6,54 @@ import (
 	"strings"
 )
 
-func possible(pattern string, towels map[string]struct{}) bool {
+var cache map[string]int
+
+func init() {
+	cache = map[string]int{}
+}
+
+func possible(pattern string, towels map[string]struct{}) int {
 	if pattern == "" {
-		return true
+		return 1
 	}
+	if amount, ok := cache[pattern]; ok {
+		return amount
+	}
+	ways := 0
 	for i := 1; i <= len(pattern); i++ {
 		part := pattern[0:i]
 		if _, ok := towels[part]; ok {
-			if possible(pattern[i:], towels) {
-				return true
-			}
+			ways += possible(pattern[i:], towels)
 		}
 	}
-	return false
+	cache[pattern] = ways
+	return ways
 }
 
-func possible_patterns(data []string) int {
+func possible_patterns(data []string) (int, int) {
 	towels := map[string]struct{}{}
 	for _, str := range strings.Split(data[0], ", ") {
 		towels[str] = struct{}{}
 	}
 
 	total := 0
+	ways := 0
 	for i := 2; i < len(data); i++ {
-		if possible(data[i], towels) {
+		w := possible(data[i], towels)
+		if w > 0 {
 			total++
+			ways += w
 		}
 	}
 
-	return total
+	return total, ways
 }
 
 func Run() {
 	loader.Day = 19
 	data := loader.GetStrings()
 
-	part1 := possible_patterns(data)
-	part2 := -1
+	part1, part2 := possible_patterns(data)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }
