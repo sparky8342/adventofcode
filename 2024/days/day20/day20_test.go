@@ -21,8 +21,17 @@ var grid = []string{
 }
 
 func Test1(t *testing.T) {
-	got := find_cheats(grid, 1)
+	got := find_cheats(grid, 1, 2)
 	want := 44
+
+	if got != want {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
+
+func Test2(t *testing.T) {
+	got := find_cheats(grid, 50, 20)
+	want := 285
 
 	if got != want {
 		t.Errorf("got %d, wanted %d", got, want)
