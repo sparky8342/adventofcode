@@ -3,6 +3,7 @@ package day20
 import (
 	"fmt"
 	"loader"
+	"utils"
 )
 
 type Pos struct {
@@ -11,15 +12,8 @@ type Pos struct {
 }
 
 type State struct {
-	pos   Pos
-	time  int
-	cheat Pos
-}
-
-type Entry struct {
-	x     int
-	y     int
-	cheat Pos
+	pos  Pos
+	time int
 }
 
 var dirs = [][]int{
@@ -31,7 +25,7 @@ var dirs = [][]int{
 
 var size int
 
-func find_cheats(data []string, min_save int) int {
+func find_cheats(data []string, min_save int, cheat_dist int) int {
 	size = len(data)
 
 	grid := make([][]byte, size)
@@ -50,19 +44,25 @@ func find_cheats(data []string, min_save int) int {
 		}
 	}
 
-	times := bfs(grid, start, end, -1)
-	var normal_time int
-	for k := range times {
-		normal_time = k
-	}
+	distances := bfs(grid, start, end)
 
 	savings := 0
-	for i := 0; i <= normal_time; i++ {
-		times := bfs(grid, start, end, i)
-		for k, v := range times {
-			saved := normal_time - k
-			if saved >= min_save {
-				savings += v
+	for space, distance := range distances {
+		for dy := -cheat_dist; dy <= cheat_dist; dy++ {
+			for dx := -cheat_dist; dx <= cheat_dist; dx++ {
+				if dx == 0 && dy == 0 {
+					continue
+				}
+				dist := utils.Abs(dx) + utils.Abs(dy)
+				if dist > cheat_dist {
+					continue
+				}
+				next_pos := Pos{x: space.x + dx, y: space.y + dy}
+				if val, ok := distances[next_pos]; ok {
+					if val-(distance+dist) >= min_save {
+						savings++
+					}
+				}
 			}
 		}
 	}
@@ -70,61 +70,48 @@ func find_cheats(data []string, min_save int) int {
 	return savings
 }
 
-func bfs(grid [][]byte, start Pos, end Pos, cheat_time int) map[int]int {
+func bfs(grid [][]byte, start Pos, end Pos) map[Pos]int {
 	start_state := State{pos: start}
-	visited := map[Entry]struct{}{}
-	visited[Entry{x: start.x, y: start.y, cheat: Pos{x: -1, y: -1}}] = struct{}{}
+	visited := map[Pos]struct{}{}
+	visited[start] = struct{}{}
 
 	queue := []State{start_state}
 
-	times := map[int]int{}
+	distances := map[Pos]int{}
 
 	for len(queue) > 0 {
 		state := queue[0]
 		queue = queue[1:]
 
+		distances[state.pos] = state.time
+
 		if state.pos == end {
-			times[state.time]++
+			break
 		}
 
 		for _, dir := range dirs {
-			cheat := state.cheat
-
 			pos := Pos{x: state.pos.x + dir[0], y: state.pos.y + dir[1]}
-			if pos == start {
-				continue
-			}
-
-			if pos.x < 0 || pos.x == size || pos.y < 0 || pos.y == size {
-				continue
-			}
 			if grid[pos.y][pos.x] == '#' {
-				if state.time == cheat_time {
-					cheat = pos
-				} else {
-					continue
-				}
-			}
-
-			entry := Entry{x: pos.x, y: pos.y, cheat: cheat}
-			if _, ok := visited[entry]; ok {
 				continue
 			}
-			visited[entry] = struct{}{}
+			if _, ok := visited[pos]; ok {
+				continue
+			}
+			visited[pos] = struct{}{}
 
-			queue = append(queue, State{pos: pos, time: state.time + 1, cheat: cheat})
+			queue = append(queue, State{pos: pos, time: state.time + 1})
 		}
 	}
 
-	return times
+	return distances
 }
 
 func Run() {
 	loader.Day = 20
 	data := loader.GetStrings()
 
-	part1 := find_cheats(data, 100)
-	part2 := -1
+	part1 := find_cheats(data, 100, 2)
+	part2 := find_cheats(data, 100, 20)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }
