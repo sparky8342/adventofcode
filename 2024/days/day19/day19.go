@@ -21,8 +21,7 @@ func possible(pattern string, towels map[string]struct{}) int {
 	}
 	ways := 0
 	for i := 1; i <= len(pattern); i++ {
-		part := pattern[0:i]
-		if _, ok := towels[part]; ok {
+		if _, ok := towels[pattern[0:i]]; ok {
 			ways += possible(pattern[i:], towels)
 		}
 	}
