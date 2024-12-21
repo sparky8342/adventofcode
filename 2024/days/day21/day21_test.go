@@ -11,7 +11,7 @@ var data = []string{
 }
 
 func Test1(t *testing.T) {
-	got := find_sequences(data)
+	got := find_sequences(data, 2)
 	want := 126384
 
 	if want != got {
