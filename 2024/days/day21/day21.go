@@ -3,9 +3,22 @@ package day21
 import (
 	"fmt"
 	"loader"
+	"math"
+	"strings"
 )
 
+type CacheEntry struct {
+	sequence   string
+	iterations int
+}
+
+var cache map[CacheEntry]int
+
 var buttons = []byte{'^', 'v', '<', '>'}
+
+func init() {
+	cache = map[CacheEntry]int{}
+}
 
 func keypad_button(pos byte, button byte) byte {
 	switch pos {
@@ -207,7 +220,7 @@ func keypad_moves(from byte, to byte, seq []byte, visited map[byte]struct{}) [][
 	return sequences
 }
 
-func find_sequence(code string) int {
+func find_sequence(code string, robots int) int {
 	code = "A" + code
 
 	sequences := [][]byte{[]byte{}}
@@ -229,16 +242,61 @@ func find_sequence(code string) int {
 		sequences = new_sequences
 	}
 
-	shortest := 999
+	shortest := math.MaxInt64
 
+outer:
 	for _, sequence := range sequences {
-		seq := find_direction_sequence(find_direction_sequence(sequence))
-		if len(seq) < shortest {
-			shortest = len(seq)
+		l := sequence_length(sequence, robots)
+
+		if l > shortest {
+			continue outer
+		}
+		if l < shortest {
+			shortest = l
 		}
 	}
 
 	return shortest
+}
+
+func sequence_length(sequence []byte, iterations int) int {
+	if iterations == 0 {
+		return len(sequence)
+	}
+
+	entry := CacheEntry{sequence: string(sequence), iterations: iterations}
+	if val, ok := cache[entry]; ok {
+		return val
+	}
+
+	l := 0
+
+	for _, part := range strings.SplitAfter(string(sequence), "A") {
+		if part == "A" {
+			l++
+			continue
+		}
+		if len(part) == 0 {
+			continue
+		}
+
+		var button byte = 'A'
+		dir_sequence := []byte{}
+		for _, ru := range part {
+			b := byte(ru)
+			if button != b {
+				moves := direction_keypad(button, b)
+				dir_sequence = append(dir_sequence, moves...)
+			}
+			dir_sequence = append(dir_sequence, 'A')
+			button = b
+		}
+
+		l += sequence_length(dir_sequence, iterations-1)
+	}
+
+	cache[entry] = l
+	return l
 }
 
 func find_direction_sequence(sequence []byte) []byte {
@@ -258,10 +316,10 @@ func find_direction_sequence(sequence []byte) []byte {
 	return dir_sequence
 }
 
-func find_sequences(data []string) int {
+func find_sequences(data []string, robots int) int {
 	complexity := 0
 	for _, line := range data {
-		l := find_sequence(line)
+		l := find_sequence(line, robots)
 		n := int(line[0]-'0')*100 + int(line[1]-'0')*10 + int(line[2]-'0')
 		complexity += l * n
 	}
@@ -272,8 +330,8 @@ func Run() {
 	loader.Day = 21
 	data := loader.GetStrings()
 
-	part1 := find_sequences(data)
-	part2 := -1
+	part1 := find_sequences(data, 2)
+	part2 := find_sequences(data, 25)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }
