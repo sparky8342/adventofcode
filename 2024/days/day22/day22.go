@@ -6,15 +6,9 @@ import (
 )
 
 func next(n int) int {
-	a := n * 64
-	n = n ^ a
-	n = n % 16777216
-	a = n / 32
-	n = n ^ a
-	n = n % 16777216
-	a = n * 2048
-	n = n ^ a
-	n = n % 16777216
+	n = n ^ (n*64)%16777216
+	n = n ^ (n/32)%16777216
+	n = n ^ (n*2048)%16777216
 	return n
 }
 
