@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"loader"
 	"math"
+	"sort"
 	"strings"
 )
 
@@ -241,6 +242,11 @@ func find_sequence(code string, robots int) int {
 		}
 		sequences = new_sequences
 	}
+
+	sort.Slice(sequences, func(i, j int) bool {
+		return len(sequences[i]) < len(sequences[j])
+	})
+	sequences = sequences[:100]
 
 	shortest := math.MaxInt64
 
