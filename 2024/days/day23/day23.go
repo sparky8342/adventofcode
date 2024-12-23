@@ -64,22 +64,25 @@ func find_three(nodes map[string]*Node) int {
 	return len(paths)
 }
 
-func add_to_group(group map[string]*Node) bool {
-	for _, node := range group {
-		for _, linked_node := range node.nodes {
-			linked := 0
-			for _, linked_linked_node := range linked_node.nodes {
-				if _, ok := group[linked_linked_node.name]; ok {
-					linked++
+func expand_group(group map[string]*Node) {
+outer:
+	for {
+		for _, node := range group {
+			for _, linked_node := range node.nodes {
+				linked := 0
+				for _, linked_linked_node := range linked_node.nodes {
+					if _, ok := group[linked_linked_node.name]; ok {
+						linked++
+					}
+				}
+				if linked == len(group) {
+					group[linked_node.name] = linked_node
+					continue outer
 				}
 			}
-			if linked == len(group) {
-				group[linked_node.name] = linked_node
-				return true
-			}
 		}
+		break
 	}
-	return false
 }
 
 func find_largest_group(nodes map[string]*Node) string {
@@ -89,9 +92,7 @@ func find_largest_group(nodes map[string]*Node) string {
 	for node_name, node := range nodes {
 		group := map[string]*Node{}
 		group[node_name] = node
-
-		for add_to_group(group) {
-		}
+		expand_group(group)
 		if len(group) > max {
 			max = len(group)
 			best_group = group
