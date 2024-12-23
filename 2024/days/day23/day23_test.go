@@ -47,3 +47,12 @@ func Test1(t *testing.T) {
 		t.Errorf("got %d, wanted %d", got, want)
 	}
 }
+
+func Test2(t *testing.T) {
+	got := find_largest_group(nodes)
+	want := "co,de,ka,ta"
+
+	if want != got {
+		t.Errorf("got %s, wanted %s", got, want)
+	}
+}
