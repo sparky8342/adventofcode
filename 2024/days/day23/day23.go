@@ -89,13 +89,24 @@ func find_largest_group(nodes map[string]*Node) string {
 	max := 0
 	var best_group map[string]*Node
 
+	seen := map[string]struct{}{}
+
 	for node_name, node := range nodes {
+		if _, ok := seen[node_name]; ok {
+			continue
+		}
+
 		group := map[string]*Node{}
 		group[node_name] = node
 		expand_group(group)
 		if len(group) > max {
 			max = len(group)
 			best_group = group
+		}
+
+		seen[node_name] = struct{}{}
+		for name := range group {
+			seen[name] = struct{}{}
 		}
 	}
 
