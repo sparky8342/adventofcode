@@ -33,22 +33,20 @@ func change_sequence(n int) map[[4]int]int {
 	sequences := map[[4]int]int{}
 	last_digit := 0
 
-	sequence := []int{}
+	sequence := [4]int{}
 
 	for i := 0; i < ITERATIONS; i++ {
 		n = next(n)
 		digit := n % 10
 		change := digit - last_digit
-		sequence = append(sequence, change)
+		for j := 0; j < 3; j++ {
+			sequence[j] = sequence[j+1]
+		}
+		sequence[3] = change
 
-		if len(sequence) == 5 {
-			sequence = sequence[1:]
-			seq := [4]int{}
-			for j := 0; j < 4; j++ {
-				seq[j] = sequence[j]
-			}
-			if _, ok := sequences[seq]; !ok {
-				sequences[seq] = digit
+		if i > 3 {
+			if _, ok := sequences[sequence]; !ok {
+				sequences[sequence] = digit
 			}
 		}
 
