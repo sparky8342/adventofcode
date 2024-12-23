@@ -104,7 +104,6 @@ func find_largest_group(nodes map[string]*Node) string {
 			best_group = group
 		}
 
-		seen[node_name] = struct{}{}
 		for name := range group {
 			seen[name] = struct{}{}
 		}
