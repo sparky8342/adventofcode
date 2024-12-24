@@ -3,6 +3,8 @@ package day24
 import (
 	"fmt"
 	"loader"
+	"os"
+	"strconv"
 	"strings"
 )
 
@@ -77,13 +79,46 @@ func process(wires map[string]int, gates []Gate) int {
 	return n
 }
 
+func create_dot_file(gates []Gate) {
+	// create dot file for graphviz
+	dot := []string{"digraph {"}
+	for i, gate := range gates {
+		name := gate.typ + "_" + strconv.Itoa(i)
+		dot = append(dot, gate.inputs[0]+" -> "+name)
+		dot = append(dot, gate.inputs[1]+" -> "+name)
+		dot = append(dot, name+" -> "+gate.output)
+	}
+	dot = append(dot, "}")
+
+	err := os.WriteFile("days/day24/graph.dot", []byte(strings.Join(dot, "\n")), 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	// create svg with:
+	// dot -Tsvg graph.dot > graph.svg
+
+	// from inspection of the graph, the wire swaps are:
+	// (line numbers of the 2 gates, output wires)
+
+	// 78 214  dsd z37
+	// 82 124  djg z12
+	// 49 158  sbg z19
+	// 90 138  hjm mcq
+
+	// answer is
+	// djg,dsd,hjm,mcq,sbg,z12,z19,z37
+}
+
 func Run() {
 	loader.Day = 24
 	data := loader.GetStringGroups()
 	wires, gates := parse_data(data)
 
 	part1 := process(wires, gates)
-	part2 := -1
 
-	fmt.Printf("%d %d\n", part1, part2)
+	//create_dot_file(gates)
+	part2 := "djg,dsd,hjm,mcq,sbg,z12,z19,z37"
+
+	fmt.Printf("%d %s\n", part1, part2)
 }
