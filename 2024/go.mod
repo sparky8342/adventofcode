@@ -53,3 +53,5 @@ require days/day23 v1.0.0
 replace days/day23 v1.0.0 => ./days/day23
 require days/day24 v1.0.0
 replace days/day24 v1.0.0 => ./days/day24
+require days/day25 v1.0.0
+replace days/day25 v1.0.0 => ./days/day25
