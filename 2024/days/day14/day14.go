@@ -3,7 +3,6 @@ package day14
 import (
 	"fmt"
 	"loader"
-	"os"
 	"regexp"
 	"strconv"
 )
@@ -33,8 +32,7 @@ func parse_data(data []string) []Robot {
 		for j := 1; j <= 4; j++ {
 			n, err := strconv.Atoi(matches[j])
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %v", err)
-				os.Exit(1)
+				panic(err)
 			}
 			nums[j-1] = n
 		}

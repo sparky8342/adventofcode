@@ -3,7 +3,6 @@ package day5
 import (
 	"fmt"
 	"loader"
-	"os"
 	"reflect"
 	"sort"
 	"strconv"
@@ -16,13 +15,11 @@ func valid_updates(data [][]string) (int, int) {
 		parts := strings.Split(line, "|")
 		n1, err := strconv.Atoi(parts[0])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
+			panic(err)
 		}
 		n2, err := strconv.Atoi(parts[1])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
+			panic(err)
 		}
 		rules[[2]int{n1, n2}] = struct{}{}
 	}
@@ -35,8 +32,7 @@ func valid_updates(data [][]string) (int, int) {
 		for _, str := range strings.Split(line, ",") {
 			n, err := strconv.Atoi(str)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %v\n", err)
-				os.Exit(1)
+				panic(err)
 			}
 			row = append(row, n)
 		}
