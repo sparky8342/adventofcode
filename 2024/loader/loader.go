@@ -3,7 +3,6 @@ package loader
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -17,8 +16,7 @@ func get_filename() string {
 func GetStrings() []string {
 	data, err := ioutil.ReadFile(get_filename())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
 	if data[len(data)-1] == '\n' {
 		data = data[:len(data)-1]
@@ -29,8 +27,7 @@ func GetStrings() []string {
 func GetStringGroups() [][]string {
 	data, err := ioutil.ReadFile(get_filename())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
 	if data[len(data)-1] == '\n' {
 		data = data[:len(data)-1]
@@ -46,8 +43,7 @@ func GetStringGroups() [][]string {
 func GetInts() []int {
 	data, err := ioutil.ReadFile(get_filename())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
 
 	if data[len(data)-1] == '\n' {
@@ -60,8 +56,7 @@ func GetInts() []int {
 	for i, line := range lines {
 		n, err := strconv.Atoi(line)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
+			panic(err)
 		}
 		ints[i] = n
 	}
@@ -72,8 +67,7 @@ func GetInts() []int {
 func GetIntColumns() [][]int {
 	data, err := ioutil.ReadFile(get_filename())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
 
 	if data[len(data)-1] == '\n' {
@@ -91,8 +85,7 @@ func GetIntColumns() [][]int {
 		for j, n_str := range strings.Fields(line) {
 			n, err := strconv.Atoi(n_str)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %v\n", err)
-				os.Exit(1)
+				panic(err)
 			}
 			ints[j][i] = n
 		}
@@ -104,8 +97,7 @@ func GetIntColumns() [][]int {
 func GetIntRows() [][]int {
 	data, err := ioutil.ReadFile(get_filename())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
 
 	if data[len(data)-1] == '\n' {
@@ -121,8 +113,7 @@ func GetIntRows() [][]int {
 		for j, n_str := range strs {
 			n, err := strconv.Atoi(n_str)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %v\n", err)
-				os.Exit(1)
+				panic(err)
 			}
 			row[j] = n
 		}
@@ -135,8 +126,7 @@ func GetIntRows() [][]int {
 func GetIntLine() []int {
 	data, err := ioutil.ReadFile(get_filename())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
 
 	if data[len(data)-1] == '\n' {
@@ -147,8 +137,7 @@ func GetIntLine() []int {
 	for _, n_str := range strings.Split(string(data), " ") {
 		n, err := strconv.Atoi(n_str)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
+			panic(err)
 		}
 		ints = append(ints, n)
 	}
@@ -159,8 +148,7 @@ func GetIntLine() []int {
 func GetOneLine() []byte {
 	data, err := ioutil.ReadFile(get_filename())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
 
 	if data[len(data)-1] == '\n' {

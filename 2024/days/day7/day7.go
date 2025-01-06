@@ -3,7 +3,6 @@ package day7
 import (
 	"fmt"
 	"loader"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -17,8 +16,7 @@ func parse_data(data []string) [][]int {
 		for j, n_str := range strs {
 			n, err := strconv.Atoi(n_str)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %vn", err)
-				os.Exit(1)
+				panic(err)
 			}
 			equations[i][j] = n
 		}

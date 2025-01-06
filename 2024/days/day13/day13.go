@@ -3,7 +3,6 @@ package day13
 import (
 	"fmt"
 	"loader"
-	"os"
 	"regexp"
 	"strconv"
 	"utils"
@@ -23,13 +22,11 @@ func parse_line(line string) (int, int) {
 	matches := r.FindStringSubmatch(line)
 	n1, err := strconv.Atoi(matches[1])
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
 	n2, err := strconv.Atoi(matches[2])
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		panic(err)
 	}
 	return n1, n2
 }
