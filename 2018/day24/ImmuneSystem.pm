@@ -2,20 +2,26 @@ package ImmuneSystem;
 use strict;
 use warnings;
 
+use Storable qw(dclone);
+
 use Group;
 
 use parent "Exporter";
-our @EXPORT_OK = qw(battle);
+our @EXPORT_OK = qw(parse_data battle find_winning_boost);
 
 sub battle {
-	my @data = @_;
-	my ($immune, $infection) = parse_data(@data);
+	my ($immune, $infection) = @_;
+
+	$immune = dclone($immune);
+	$infection = dclone($infection);
 
 	while (@$immune && @$infection) {
 		target_selection($immune, $infection);
 
 		my @all = (@$immune, @$infection);
 		@all = sort { $b->{initiative} <=> $a->{initiative} } @all;
+
+		my $damage_done = 0;
 
 		foreach my $group (@all) {
 			if ($group->{units} <= 0 || !defined($group->{target})) {
@@ -32,20 +38,32 @@ sub battle {
 			my $damage = $group->damage($target);
 
 			my $units_lost = int($damage / $target->{hit_points});
-			$target->{units} -= $units_lost;
+			if ($units_lost) {
+				$target->{units} -= $units_lost;
+				$damage_done = 1;
+			}
 		}
 
 		@$immune = grep { $_->{units} > 0 } @$immune;
 		@$infection = grep { $_->{units} > 0 } @$infection;
 
+		if (!$damage_done) {
+			return 'draw', 0;
+		}
 	}
 
 	my $total = 0;
 	foreach my $group (@$immune, @$infection) {
 		$total += $group->{units};
 	}
+	my $winner;
+	if (@$immune) {
+		$winner = 'immune';
+	} else {
+		$winner = 'infection';
+	}
 
-	return $total;
+	return $winner, $total;
 }
 
 sub target_selection {
@@ -86,12 +104,14 @@ sub pick_target {
 
 		my $power = $group->damage($targets->[$j]);
 
-		push @damage, [$power, $j];
+		if ($power > 0) {
+			push @damage, [$power, $targets->[$j]->effective_power(), $targets->[$j]->{initiative}, $j];
+		}
 	}
 
-	@damage = sort { $b->[0] <=> $a->[0] } @damage;
 	if (@damage) {
-		return $damage[0][1];
+		@damage = sort { $b->[0] <=> $a->[0] || $b->[1] <=> $a->[1] || $b->[2] <=> $a->[2] } @damage;
+		return $damage[0][3];
 	} else {
 		return undef;
 	}
@@ -102,6 +122,26 @@ sub init_group {
 	foreach my $group (@$groups) {
 		$group->{target} = undef;
 		$group->{targetted} = 0;
+	}
+}
+
+sub boost {
+	my ($groups, $amount) = @_;
+	foreach my $group (@$groups) {
+		$group->{attack} += $amount;
+	}
+}
+
+sub find_winning_boost {
+	my ($immune, $infection) = @_;
+
+	while (1) {
+		boost($immune, 1);
+
+		my ($winner, $winning_units) = battle($immune, $infection);
+		if ($winner eq 'immune') {
+			return $winning_units;
+		}
 	}
 }
 
@@ -123,7 +163,6 @@ sub parse_data {
 			next;
 		}
 
-		print "$line\n";
 		$line =~ /^(\d+) units each with (\d+) hit points(.*?)with an attack that does (\d+) (\w+) damage at initiative (\d+)$/;
 
 		my $modifiers = $3;

@@ -1,12 +1,16 @@
 use strict;
 use warnings;
-use Test::More tests => 1;
-use ImmuneSystem qw(battle);
+use Test::More tests => 2;
+use ImmuneSystem qw(parse_data battle find_winning_boost);
 
 my @data = <DATA>;
-my $winning_units = battle(@data);
+my ($immune, $infection) = parse_data(@data);
 
+my ($winner, $winning_units) = battle($immune, $infection);
 is($winning_units, 5216);
+
+$winning_units = find_winning_boost($immune, $infection);
+is($winning_units, 51);
 
 __DATA__
 Immune System:
