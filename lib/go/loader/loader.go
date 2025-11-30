@@ -2,7 +2,7 @@ package loader
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -14,7 +14,7 @@ func get_filename() string {
 }
 
 func GetStrings() []string {
-	data, err := ioutil.ReadFile(get_filename())
+	data, err := os.ReadFile(get_filename())
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +25,7 @@ func GetStrings() []string {
 }
 
 func GetStringGroups() [][]string {
-	data, err := ioutil.ReadFile(get_filename())
+	data, err := os.ReadFile(get_filename())
 	if err != nil {
 		panic(err)
 	}
@@ -41,7 +41,7 @@ func GetStringGroups() [][]string {
 }
 
 func GetInts() []int {
-	data, err := ioutil.ReadFile(get_filename())
+	data, err := os.ReadFile(get_filename())
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +65,7 @@ func GetInts() []int {
 }
 
 func GetIntColumns() [][]int {
-	data, err := ioutil.ReadFile(get_filename())
+	data, err := os.ReadFile(get_filename())
 	if err != nil {
 		panic(err)
 	}
@@ -95,7 +95,7 @@ func GetIntColumns() [][]int {
 }
 
 func GetIntRows() [][]int {
-	data, err := ioutil.ReadFile(get_filename())
+	data, err := os.ReadFile(get_filename())
 	if err != nil {
 		panic(err)
 	}
@@ -124,7 +124,7 @@ func GetIntRows() [][]int {
 }
 
 func GetIntLine() []int {
-	data, err := ioutil.ReadFile(get_filename())
+	data, err := os.ReadFile(get_filename())
 	if err != nil {
 		panic(err)
 	}
@@ -146,7 +146,7 @@ func GetIntLine() []int {
 }
 
 func GetOneLine() []byte {
-	data, err := ioutil.ReadFile(get_filename())
+	data, err := os.ReadFile(get_filename())
 	if err != nil {
 		panic(err)
 	}
