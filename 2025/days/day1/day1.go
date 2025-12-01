@@ -12,6 +12,8 @@ func turn_dial(data []string) (int, int) {
 	zeroes_at_end := 0
 
 	for _, row := range data {
+		dir := row[0]
+
 		n, err := strconv.Atoi(row[1:])
 		if err != nil {
 			panic(err)
@@ -20,7 +22,8 @@ func turn_dial(data []string) (int, int) {
 		zeroes += n / 100
 		n %= 100
 
-		if row[0] == 'L' {
+		switch dir {
+		case 'L':
 			if dial == 0 {
 				dial = (dial - n) + 100
 			} else {
@@ -32,13 +35,14 @@ func turn_dial(data []string) (int, int) {
 					zeroes++
 				}
 			}
-		} else if row[0] == 'R' {
+		case 'R':
 			dial += n
 			if dial > 99 {
 				dial -= 100
 				zeroes++
 			}
 		}
+
 		if dial == 0 {
 			zeroes_at_end++
 		}
