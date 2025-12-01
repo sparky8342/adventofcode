@@ -16,8 +16,17 @@ var data = []string{
 }
 
 func Test1(t *testing.T) {
-	got := turn_dial(data)
+	got, _ := turn_dial(data)
 	want := 3
+
+	if want != got {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
+
+func Test2(t *testing.T) {
+	_, got := turn_dial(data)
+	want := 6
 
 	if want != got {
 		t.Errorf("got %d, wanted %d", got, want)
