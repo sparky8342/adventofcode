@@ -157,3 +157,16 @@ func GetOneLine() []byte {
 
 	return data
 }
+
+func GetOneString() string {
+	data, err := os.ReadFile(get_filename())
+	if err != nil {
+		panic(err)
+	}
+
+	if data[len(data)-1] == '\n' {
+		data = data[:len(data)-1]
+	}
+
+	return string(data)
+}
