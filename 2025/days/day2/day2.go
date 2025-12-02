@@ -27,14 +27,15 @@ func parse_data(data string) []pair {
 	return ranges
 }
 
-func invalid(n int) bool {
+func repeats2(n int) bool {
 	str := strconv.Itoa(n)
 	l := len(str)
-	half := l / 2
 
-	if l%2 == 1 {
+	if l%2 != 0 {
 		return false
 	}
+
+	half := l / 2
 	for i := 0; i < half; i++ {
 		if str[i] != str[i+half] {
 			return false
@@ -44,12 +45,43 @@ func invalid(n int) bool {
 	return true
 }
 
-func total_invalid(ranges []pair) int {
+func repeats_any(n int) bool {
+	str := strconv.Itoa(n)
+	l := len(str)
+
+outer:
+	for repeat_length := 1; repeat_length <= l/2; repeat_length++ {
+		if l%repeat_length != 0 {
+			continue
+		}
+
+		pattern := str[0:repeat_length]
+
+		for i := repeat_length; i <= l-repeat_length; i += repeat_length {
+			if pattern != str[i:i+repeat_length] {
+				continue outer
+			}
+		}
+
+		return true
+	}
+
+	return false
+}
+
+func total_invalid(ranges []pair, mode int) int {
 	total := 0
 	for _, r := range ranges {
 		for i := r[0]; i <= r[1]; i++ {
-			if invalid(i) {
-				total += i
+			switch mode {
+			case 1:
+				if repeats2(i) {
+					total += i
+				}
+			case 2:
+				if repeats_any(i) {
+					total += i
+				}
 			}
 		}
 	}
@@ -60,7 +92,9 @@ func Run() {
 	loader.Day = 2
 	data := loader.GetOneString()
 	ranges := parse_data(data)
-	part1 := total_invalid(ranges)
+	part1 := total_invalid(ranges, 1)
 
-	fmt.Printf("%d %d\n", part1, 0)
+	part2 := total_invalid(ranges, 2)
+
+	fmt.Printf("%d %d\n", part1, part2)
 }
