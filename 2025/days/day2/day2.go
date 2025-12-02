@@ -30,19 +30,11 @@ func parse_data(data string) []pair {
 func repeats2(n int) bool {
 	str := strconv.Itoa(n)
 	l := len(str)
-
 	if l%2 != 0 {
 		return false
 	}
-
 	half := l / 2
-	for i := 0; i < half; i++ {
-		if str[i] != str[i+half] {
-			return false
-		}
-	}
-
-	return true
+	return str[0:half] == str[half:]
 }
 
 func repeats_any(n int) bool {
