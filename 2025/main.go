@@ -3,6 +3,7 @@ package main
 import (
 	"days/day1"
 	"days/day2"
+	"days/day3"
 	"fmt"
 	"os"
 	"strconv"
@@ -19,11 +20,15 @@ func main() {
 			day1.Run()
 		case 2:
 			day2.Run()
+		case 3:
+			day3.Run()
 		}
 	} else {
 		fmt.Println("Day 1")
 		day1.Run()
 		fmt.Println("Day 2")
 		day2.Run()
+		fmt.Println("Day 3")
+		day3.Run()
 	}
 }

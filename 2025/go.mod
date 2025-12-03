@@ -9,3 +9,5 @@ require days/day1 v1.0.0
 replace days/day1 v1.0.0 => ./days/day1
 require days/day2 v1.0.0
 replace days/day2 v1.0.0 => ./days/day2
+require days/day3 v1.0.0
+replace days/day3 v1.0.0 => ./days/day3
