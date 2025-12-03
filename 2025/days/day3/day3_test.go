@@ -10,8 +10,17 @@ var banks = []string{
 }
 
 func Test1(t *testing.T) {
-	got := total_joltage(banks)
+	got := total_joltage(banks, 2)
 	want := 357
+
+	if want != got {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
+
+func Test2(t *testing.T) {
+	got := total_joltage(banks, 12)
+	want := 3121910778619
 
 	if want != got {
 		t.Errorf("got %d, wanted %d", got, want)
