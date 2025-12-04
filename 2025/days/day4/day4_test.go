@@ -2,7 +2,7 @@ package day4
 
 import "testing"
 
-var grid = []string{
+var data = []string{
 	"..@@.@@@@.",
 	"@@@.@.@.@@",
 	"@@@@@.@.@@",
@@ -16,6 +16,8 @@ var grid = []string{
 }
 
 func Test1(t *testing.T) {
+	grid := parse_data(data)
+
 	got := rolls_reachable(grid)
 	want := 13
 
@@ -25,6 +27,8 @@ func Test1(t *testing.T) {
 }
 
 func Test2(t *testing.T) {
+	grid := parse_data(data)
+
 	got := remove_rolls(grid)
 	want := 43
 

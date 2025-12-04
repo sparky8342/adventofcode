@@ -11,6 +11,18 @@ func in_bounds(x int, y int) bool {
 	return x >= 0 && x < width && y >= 0 && y < height
 }
 
+func parse_data(data []string) [][]byte {
+	height = len(data)
+	width = len(data[0])
+
+	grid := make([][]byte, height)
+	for i := range grid {
+		grid[i] = []byte(data[i])
+	}
+
+	return grid
+}
+
 func neighbours(grid [][]byte, x int, y int) int {
 	count := 0
 	for dy := -1; dy <= 1; dy++ {
@@ -27,15 +39,7 @@ func neighbours(grid [][]byte, x int, y int) int {
 	return count
 }
 
-func rolls_reachable(grid_str []string) int {
-	height = len(grid_str)
-	width = len(grid_str[0])
-
-	grid := make([][]byte, height)
-	for i := range grid {
-		grid[i] = []byte(grid_str[i])
-	}
-
+func rolls_reachable(grid [][]byte) int {
 	reachable := 0
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
@@ -44,19 +48,10 @@ func rolls_reachable(grid_str []string) int {
 			}
 		}
 	}
-
 	return reachable
 }
 
-func remove_rolls(grid_str []string) int {
-	height = len(grid_str)
-	width = len(grid_str[0])
-
-	grid := make([][]byte, height)
-	for i := range grid {
-		grid[i] = []byte(grid_str[i])
-	}
-
+func remove_rolls(grid [][]byte) int {
 	removed := 0
 
 	for {
@@ -85,7 +80,8 @@ func remove_rolls(grid_str []string) int {
 
 func Run() {
 	loader.Day = 4
-	grid := loader.GetStrings()
+	data := loader.GetStrings()
+	grid := parse_data(data)
 	part1 := rolls_reachable(grid)
 	part2 := remove_rolls(grid)
 
