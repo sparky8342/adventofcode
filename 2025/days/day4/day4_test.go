@@ -23,3 +23,12 @@ func Test1(t *testing.T) {
 		t.Errorf("got %d, wanted %d", got, want)
 	}
 }
+
+func Test2(t *testing.T) {
+	got := remove_rolls(grid)
+	want := 43
+
+	if want != got {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
