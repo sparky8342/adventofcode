@@ -73,7 +73,8 @@ func fresh_ids(ranges []Range) int {
 		}
 	})
 
-	combined := []Range{}
+	fresh := 0
+
 	current := ranges[0]
 	for i := 1; i < len(ranges); i++ {
 		this_range := ranges[i]
@@ -84,16 +85,11 @@ func fresh_ids(ranges []Range) int {
 				current.end = this_range.end
 			}
 		} else {
-			combined = append(combined, current)
+			fresh += current.end - current.start + 1
 			current = this_range
 		}
 	}
-	combined = append(combined, current)
-
-	fresh := 0
-	for _, r := range combined {
-		fresh += r.end - r.start + 1
-	}
+	fresh += current.end - current.start + 1
 
 	return fresh
 }
