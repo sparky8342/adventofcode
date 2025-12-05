@@ -17,7 +17,9 @@ var data = []string{
 }
 
 func Test1(t *testing.T) {
-	got := count_fresh(data)
+	ranges, ingredients := parse_data(data)
+
+	got := count_fresh(ranges, ingredients)
 	want := 3
 
 	if want != got {
