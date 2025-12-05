@@ -8,12 +8,15 @@ import (
 	"strings"
 )
 
-type pair [2]int
+type Range struct {
+	start int
+	end   int
+}
 
-func parse_data(data []string) ([]pair, []int) {
-	ranges := []pair{}
-
+func parse_data(data []string) ([]Range, []int) {
 	var i int
+
+	ranges := []Range{}
 	for i = 0; i < len(data); i++ {
 		if data[i] == "" {
 			break
@@ -27,11 +30,10 @@ func parse_data(data []string) ([]pair, []int) {
 		if err != nil {
 			panic(err)
 		}
-		ranges = append(ranges, pair{n1, n2})
+		ranges = append(ranges, Range{start: n1, end: n2})
 	}
 
 	ingredients := []int{}
-
 	for i = i + 1; i < len(data); i++ {
 		n, err := strconv.Atoi(data[i])
 		if err != nil {
@@ -43,16 +45,16 @@ func parse_data(data []string) ([]pair, []int) {
 	return ranges, ingredients
 }
 
-func in_ranges(ranges []pair, n int) bool {
+func in_ranges(ranges []Range, n int) bool {
 	for _, r := range ranges {
-		if n >= r[0] && n <= r[1] {
+		if n >= r.start && n <= r.end {
 			return true
 		}
 	}
 	return false
 }
 
-func count_fresh(ranges []pair, ingredients []int) int {
+func count_fresh(ranges []Range, ingredients []int) int {
 	fresh := 0
 	for _, n := range ingredients {
 		if in_ranges(ranges, n) {
@@ -62,34 +64,35 @@ func count_fresh(ranges []pair, ingredients []int) int {
 	return fresh
 }
 
-func fresh_ids(ranges []pair) int {
+func fresh_ids(ranges []Range) int {
 	sort.Slice(ranges, func(i, j int) bool {
-		if ranges[i][0] == ranges[j][0] {
-			return ranges[i][1] < ranges[j][1]
+		if ranges[i].start == ranges[j].start {
+			return ranges[i].end < ranges[j].end
 		} else {
-			return ranges[i][0] < ranges[j][0]
+			return ranges[i].start < ranges[j].start
 		}
 	})
 
-	combined := []pair{}
+	combined := []Range{}
 	current := ranges[0]
 	for i := 1; i < len(ranges); i++ {
-		if current[1] >= ranges[i][0] {
-			if current[1] >= ranges[i][1] {
+		this_range := ranges[i]
+		if current.end >= this_range.start {
+			if current.end >= this_range.end {
 				continue
 			} else {
-				current[1] = ranges[i][1]
+				current.end = this_range.end
 			}
 		} else {
 			combined = append(combined, current)
-			current = ranges[i]
+			current = this_range
 		}
 	}
 	combined = append(combined, current)
 
 	fresh := 0
 	for _, r := range combined {
-		fresh += r[1] - r[0] + 1
+		fresh += r.end - r.start + 1
 	}
 
 	return fresh
