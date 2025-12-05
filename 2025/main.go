@@ -5,6 +5,7 @@ import (
 	"days/day2"
 	"days/day3"
 	"days/day4"
+	"days/day5"
 	"fmt"
 	"os"
 	"strconv"
@@ -25,6 +26,8 @@ func main() {
 			day3.Run()
 		case 4:
 			day4.Run()
+		case 5:
+			day5.Run()
 		}
 	} else {
 		fmt.Println("Day 1")
@@ -35,5 +38,7 @@ func main() {
 		day3.Run()
 		fmt.Println("Day 4")
 		day4.Run()
+		fmt.Println("Day 5")
+		day5.Run()
 	}
 }
