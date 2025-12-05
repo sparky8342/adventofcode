@@ -10,16 +10,3 @@ go test days/day9 -v
 go test days/day10 -v 
 go test days/day11 -v 
 go test days/day12 -v 
-go test days/day13 -v 
-go test days/day14 -v 
-go test days/day15 -v 
-go test days/day16 -v 
-go test days/day17 -v 
-go test days/day18 -v 
-go test days/day19 -v 
-go test days/day20 -v 
-go test days/day21 -v 
-go test days/day22 -v 
-go test days/day23 -v 
-go test days/day24 -v 
-go test days/day25 -v 
