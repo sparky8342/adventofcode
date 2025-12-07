@@ -17,3 +17,5 @@ require days/day5 v1.0.0
 replace days/day5 v1.0.0 => ./days/day5
 require days/day6 v1.0.0
 replace days/day6 v1.0.0 => ./days/day6
+require days/day7 v1.0.0
+replace days/day7 v1.0.0 => ./days/day7
