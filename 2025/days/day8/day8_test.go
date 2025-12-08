@@ -28,8 +28,19 @@ var data = []string{
 func Test1(t *testing.T) {
 	boxes := parse_data(data)
 
-	got := connect_boxes(boxes, 10)
+	got, _ := connect_boxes(boxes, 10)
 	want := 40
+
+	if want != got {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
+
+func Test2(t *testing.T) {
+	boxes := parse_data(data)
+
+	_, got := connect_boxes(boxes, 10)
+	want := 25272
 
 	if want != got {
 		t.Errorf("got %d, wanted %d", got, want)

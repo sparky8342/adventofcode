@@ -80,7 +80,7 @@ func calc_distances(boxes []Box) [][]float64 {
 	return distances
 }
 
-func connect_boxes(boxes []Box, connections int) int {
+func connect_boxes(boxes []Box, connections int) (int, int) {
 	distances := calc_distances(boxes)
 
 	pair_dists := [][3]float64{}
@@ -101,12 +101,16 @@ func connect_boxes(boxes []Box, connections int) int {
 		sets[i] = s
 	}
 
-	for i := 0; i < connections; i++ {
+	var i int
+	for i = 0; i < connections; i++ {
 		box1, box2 := int(pair_dists[i][0]), int(pair_dists[i][1])
 		combine := []int{}
 		for j, set := range sets {
 			if set.contains(box1) || set.contains(box2) {
 				combine = append(combine, j)
+				if len(combine) == 2 {
+					break
+				}
 			}
 		}
 		if len(combine) == 2 {
@@ -122,14 +126,43 @@ func connect_boxes(boxes []Box, connections int) int {
 		return len(sets[i]) > len(sets[j])
 	})
 
-	return len(sets[0]) * len(sets[1]) * len(sets[2])
+	part1 := len(sets[0]) * len(sets[1]) * len(sets[2])
+	var part2 int
+
+	i--
+	for ; ; i++ {
+		box1, box2 := int(pair_dists[i][0]), int(pair_dists[i][1])
+		combine := []int{}
+		for j, set := range sets {
+			if set.contains(box1) || set.contains(box2) {
+				combine = append(combine, j)
+				if len(combine) == 2 {
+					break
+				}
+			}
+		}
+		if len(combine) == 2 {
+			first, second := combine[0], combine[1]
+			combined := union(sets[first], sets[second])
+			sets = append(sets[0:second], sets[second+1:]...)
+			sets = append(sets[0:first], sets[first+1:]...)
+			sets = append(sets, combined)
+
+			if len(sets) == 1 {
+				part2 = boxes[box1].x * boxes[box2].x
+				break
+			}
+		}
+	}
+
+	return part1, part2
 }
 
 func Run() {
 	loader.Day = 8
 	data := loader.GetStrings()
 	boxes := parse_data(data)
-	part1 := connect_boxes(boxes, 1000)
+	part1, part2 := connect_boxes(boxes, 1000)
 
-	fmt.Printf("%d %d\n", part1, 0)
+	fmt.Printf("%d %d\n", part1, part2)
 }
