@@ -63,30 +63,17 @@ func parse_data(data []string) []Box {
 	return boxes
 }
 
-func calc_distances(boxes []Box) [][]float64 {
-	distances := make([][]float64, len(boxes))
-	for i := range distances {
-		distances[i] = make([]float64, len(boxes))
-	}
-
-	for i := 0; i < len(boxes); i++ {
-		for j := i + 1; j < len(boxes); j++ {
-			box, box2 := boxes[i], boxes[j]
-			dist := math.Sqrt(float64(square(box.x-box2.x) + square(box.y-box2.y) + square(box.z-box2.z)))
-			distances[i][j] = dist
-			distances[j][i] = dist
-		}
-	}
-	return distances
-}
-
 func connect_boxes(boxes []Box, connections int) (int, int) {
-	distances := calc_distances(boxes)
-
 	pair_dists := [][3]float64{}
 	for i := 0; i < len(boxes); i++ {
 		for j := i + 1; j < len(boxes); j++ {
-			pair_dists = append(pair_dists, [3]float64{float64(i), float64(j), distances[i][j]})
+			pair_dists = append(pair_dists,
+				[3]float64{
+					float64(i),
+					float64(j),
+					math.Sqrt(float64(square(boxes[i].x-boxes[j].x) + square(boxes[i].y-boxes[j].y) + square(boxes[i].z-boxes[j].z))),
+				},
+			)
 		}
 	}
 
@@ -129,7 +116,6 @@ func connect_boxes(boxes []Box, connections int) (int, int) {
 	part1 := len(sets[0]) * len(sets[1]) * len(sets[2])
 	var part2 int
 
-	i--
 	for ; ; i++ {
 		box1, box2 := int(pair_dists[i][0]), int(pair_dists[i][1])
 		combine := []int{}
