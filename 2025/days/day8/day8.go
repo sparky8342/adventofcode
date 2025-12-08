@@ -62,6 +62,26 @@ func parse_data(data []string) []Box {
 	return boxes
 }
 
+func combine_boxes(sets []intset, box1 int, box2 int) []intset {
+	combine := []int{}
+	for j, set := range sets {
+		if set.contains(box1) || set.contains(box2) {
+			combine = append(combine, j)
+			if len(combine) == 2 {
+				break
+			}
+		}
+	}
+	if len(combine) == 2 {
+		first, second := combine[0], combine[1]
+		combined := union(sets[first], sets[second])
+		sets = append(sets[0:second], sets[second+1:]...)
+		sets = append(sets[0:first], sets[first+1:]...)
+		sets = append(sets, combined)
+	}
+	return sets
+}
+
 func connect_boxes(boxes []Box, connections int) (int, int) {
 	pair_dists := [][3]int{}
 	for i := 0; i < len(boxes); i++ {
@@ -90,22 +110,7 @@ func connect_boxes(boxes []Box, connections int) (int, int) {
 	var i int
 	for i = 0; i < connections; i++ {
 		box1, box2 := pair_dists[i][0], pair_dists[i][1]
-		combine := []int{}
-		for j, set := range sets {
-			if set.contains(box1) || set.contains(box2) {
-				combine = append(combine, j)
-				if len(combine) == 2 {
-					break
-				}
-			}
-		}
-		if len(combine) == 2 {
-			first, second := combine[0], combine[1]
-			combined := union(sets[first], sets[second])
-			sets = append(sets[0:second], sets[second+1:]...)
-			sets = append(sets[0:first], sets[first+1:]...)
-			sets = append(sets, combined)
-		}
+		sets = combine_boxes(sets, box1, box2)
 	}
 
 	sort.Slice(sets, func(i, j int) bool {
@@ -117,26 +122,10 @@ func connect_boxes(boxes []Box, connections int) (int, int) {
 
 	for ; ; i++ {
 		box1, box2 := int(pair_dists[i][0]), int(pair_dists[i][1])
-		combine := []int{}
-		for j, set := range sets {
-			if set.contains(box1) || set.contains(box2) {
-				combine = append(combine, j)
-				if len(combine) == 2 {
-					break
-				}
-			}
-		}
-		if len(combine) == 2 {
-			first, second := combine[0], combine[1]
-			combined := union(sets[first], sets[second])
-			sets = append(sets[0:second], sets[second+1:]...)
-			sets = append(sets[0:first], sets[first+1:]...)
-			sets = append(sets, combined)
-
-			if len(sets) == 1 {
-				part2 = boxes[box1].x * boxes[box2].x
-				break
-			}
+		sets = combine_boxes(sets, box1, box2)
+		if len(sets) == 1 {
+			part2 = boxes[box1].x * boxes[box2].x
+			break
 		}
 	}
 
