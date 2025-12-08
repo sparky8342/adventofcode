@@ -3,7 +3,6 @@ package day8
 import (
 	"fmt"
 	"loader"
-	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -64,14 +63,14 @@ func parse_data(data []string) []Box {
 }
 
 func connect_boxes(boxes []Box, connections int) (int, int) {
-	pair_dists := [][3]float64{}
+	pair_dists := [][3]int{}
 	for i := 0; i < len(boxes); i++ {
 		for j := i + 1; j < len(boxes); j++ {
 			pair_dists = append(pair_dists,
-				[3]float64{
-					float64(i),
-					float64(j),
-					math.Sqrt(float64(square(boxes[i].x-boxes[j].x) + square(boxes[i].y-boxes[j].y) + square(boxes[i].z-boxes[j].z))),
+				[3]int{
+					i,
+					j,
+					square(boxes[i].x-boxes[j].x) + square(boxes[i].y-boxes[j].y) + square(boxes[i].z-boxes[j].z),
 				},
 			)
 		}
@@ -90,7 +89,7 @@ func connect_boxes(boxes []Box, connections int) (int, int) {
 
 	var i int
 	for i = 0; i < connections; i++ {
-		box1, box2 := int(pair_dists[i][0]), int(pair_dists[i][1])
+		box1, box2 := pair_dists[i][0], pair_dists[i][1]
 		combine := []int{}
 		for j, set := range sets {
 			if set.contains(box1) || set.contains(box2) {
