@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"utils"
 )
 
 type Box struct {
@@ -18,32 +19,6 @@ type Pair struct {
 	from int
 	to   int
 	dist int
-}
-
-type intset map[int]struct{}
-
-func (s intset) add(value int) {
-	s[value] = struct{}{}
-}
-
-func (s intset) contains(value int) bool {
-	_, ok := s[value]
-	return ok
-}
-
-func union(a intset, b intset) intset {
-	combined := intset{}
-	for id := range a {
-		combined.add(id)
-	}
-	for id := range b {
-		combined.add(id)
-	}
-	return combined
-}
-
-func square(n int) int {
-	return n * n
 }
 
 func parse_data(data []string) []Box {
@@ -68,10 +43,10 @@ func parse_data(data []string) []Box {
 	return boxes
 }
 
-func combine_boxes(sets []intset, box1 int, box2 int) []intset {
+func combine_boxes(sets []utils.Intset, box1 int, box2 int) []utils.Intset {
 	combine := []int{}
 	for j, set := range sets {
-		if set.contains(box1) || set.contains(box2) {
+		if set.Contains(box1) || set.Contains(box2) {
 			combine = append(combine, j)
 			if len(combine) == 2 {
 				break
@@ -80,7 +55,7 @@ func combine_boxes(sets []intset, box1 int, box2 int) []intset {
 	}
 	if len(combine) == 2 {
 		first, second := combine[0], combine[1]
-		combined := union(sets[first], sets[second])
+		combined := sets[first].Union(sets[second])
 		sets = append(sets[0:second], sets[second+1:]...)
 		sets = append(sets[0:first], sets[first+1:]...)
 		sets = append(sets, combined)
@@ -95,7 +70,7 @@ func connect_boxes(boxes []Box, connections int) (int, int) {
 			pairs = append(pairs, Pair{
 				from: i,
 				to:   j,
-				dist: square(boxes[i].x-boxes[j].x) + square(boxes[i].y-boxes[j].y) + square(boxes[i].z-boxes[j].z),
+				dist: utils.Square(boxes[i].x-boxes[j].x) + utils.Square(boxes[i].y-boxes[j].y) + utils.Square(boxes[i].z-boxes[j].z),
 			})
 		}
 	}
@@ -104,10 +79,10 @@ func connect_boxes(boxes []Box, connections int) (int, int) {
 		return pairs[i].dist < pairs[j].dist
 	})
 
-	sets := make([]intset, len(boxes))
+	sets := make([]utils.Intset, len(boxes))
 	for i := range boxes {
-		s := intset{}
-		s.add(i)
+		s := utils.Intset{}
+		s.Add(i)
 		sets[i] = s
 	}
 
