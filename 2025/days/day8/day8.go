@@ -14,6 +14,12 @@ type Box struct {
 	z int
 }
 
+type Pair struct {
+	from int
+	to   int
+	dist int
+}
+
 type intset map[int]struct{}
 
 func (s intset) add(value int) {
@@ -83,21 +89,19 @@ func combine_boxes(sets []intset, box1 int, box2 int) []intset {
 }
 
 func connect_boxes(boxes []Box, connections int) (int, int) {
-	pair_dists := [][3]int{}
+	pairs := []Pair{}
 	for i := 0; i < len(boxes); i++ {
 		for j := i + 1; j < len(boxes); j++ {
-			pair_dists = append(pair_dists,
-				[3]int{
-					i,
-					j,
-					square(boxes[i].x-boxes[j].x) + square(boxes[i].y-boxes[j].y) + square(boxes[i].z-boxes[j].z),
-				},
-			)
+			pairs = append(pairs, Pair{
+				from: i,
+				to:   j,
+				dist: square(boxes[i].x-boxes[j].x) + square(boxes[i].y-boxes[j].y) + square(boxes[i].z-boxes[j].z),
+			})
 		}
 	}
 
-	sort.Slice(pair_dists, func(i, j int) bool {
-		return pair_dists[i][2] < pair_dists[j][2]
+	sort.Slice(pairs, func(i, j int) bool {
+		return pairs[i].dist < pairs[j].dist
 	})
 
 	sets := make([]intset, len(boxes))
@@ -109,7 +113,7 @@ func connect_boxes(boxes []Box, connections int) (int, int) {
 
 	var i int
 	for i = 0; i < connections; i++ {
-		box1, box2 := pair_dists[i][0], pair_dists[i][1]
+		box1, box2 := pairs[i].from, pairs[i].to
 		sets = combine_boxes(sets, box1, box2)
 	}
 
@@ -121,7 +125,7 @@ func connect_boxes(boxes []Box, connections int) (int, int) {
 	var part2 int
 
 	for ; ; i++ {
-		box1, box2 := int(pair_dists[i][0]), int(pair_dists[i][1])
+		box1, box2 := pairs[i].from, pairs[i].to
 		sets = combine_boxes(sets, box1, box2)
 		if len(sets) == 1 {
 			part2 = boxes[box1].x * boxes[box2].x
