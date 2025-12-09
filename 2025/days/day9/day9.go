@@ -15,13 +15,21 @@ type Pos struct {
 }
 
 type Wall struct {
-	tile1 Pos
-	tile2 Pos
+	x1, y1 int
+	x2, y2 int
 }
 
 type Floor struct {
 	tiles []Pos
 	walls []Wall
+}
+
+func order_pair(a, b int) (int, int) {
+	if a > b {
+		return b, a
+	} else {
+		return a, b
+	}
 }
 
 func parse_data(data []string) Floor {
@@ -40,10 +48,17 @@ func parse_data(data []string) Floor {
 	}
 
 	walls := []Wall{}
-	for i := 0; i < len(tiles)-1; i++ {
-		walls = append(walls, Wall{tile1: tiles[i], tile2: tiles[i+1]})
+	for i := 0; i < len(tiles); i++ {
+		wall := Wall{
+			x1: tiles[i].x,
+			y1: tiles[i].y,
+			x2: tiles[(i+1)%len(tiles)].x,
+			y2: tiles[(i+1)%len(tiles)].y,
+		}
+		wall.x1, wall.x2 = order_pair(wall.x1, wall.x2)
+		wall.y1, wall.y2 = order_pair(wall.y1, wall.y2)
+		walls = append(walls, wall)
 	}
-	walls = append(walls, Wall{tile1: tiles[len(tiles)-1], tile2: tiles[0]})
 
 	return Floor{
 		tiles: tiles,
@@ -84,25 +99,12 @@ outer:
 		tile2 := floor.tiles[rectangle[2]]
 
 		from_x, to_x, from_y, to_y := tile1.x, tile2.x, tile1.y, tile2.y
-		if from_x > to_x {
-			from_x, to_x = to_x, from_x
-		}
-		if from_y > to_y {
-			from_y, to_y = to_y, from_y
-		}
+		from_x, to_x = order_pair(from_x, to_x)
+		from_y, to_y = order_pair(from_y, to_y)
 
 		for _, wall := range floor.walls {
-			x_start, x_end := wall.tile1.x, wall.tile2.x
-			if x_start > x_end {
-				x_start, x_end = x_end, x_start
-			}
-			y_start, y_end := wall.tile1.y, wall.tile2.y
-			if y_start > y_end {
-				y_start, y_end = y_end, y_start
-			}
-
-			for y := y_start; y <= y_end; y++ {
-				for x := x_start; x <= x_end; x++ {
+			for y := wall.y1; y <= wall.y2; y++ {
+				for x := wall.x1; x <= wall.x2; x++ {
 					if x > from_x && x < to_x && y > from_y && y < to_y {
 						continue outer
 					}
