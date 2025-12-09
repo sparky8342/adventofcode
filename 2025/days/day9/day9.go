@@ -3,7 +3,7 @@ package day9
 import (
 	"fmt"
 	"loader"
-	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"utils"
@@ -14,63 +14,48 @@ type Pos struct {
 	y int
 }
 
-func parse_data(data []string) []Pos {
+type Wall struct {
+	tile1 Pos
+	tile2 Pos
+}
+
+type Floor struct {
+	tiles []Pos
+	walls []Wall
+}
+
+func parse_data(data []string) Floor {
 	tiles := make([]Pos, len(data))
 	for i, line := range data {
 		parts := strings.Split(line, ",")
-		n1, err := strconv.Atoi(parts[0])
+		x, err := strconv.Atoi(parts[0])
 		if err != nil {
 			panic(err)
 		}
-		n2, err := strconv.Atoi(parts[1])
+		y, err := strconv.Atoi(parts[1])
 		if err != nil {
 			panic(err)
 		}
-		tiles[i] = Pos{x: n1, y: n2}
-	}
-	return tiles
-}
-
-func largest_rectangle_attempt1(tiles []Pos) int {
-	tl := Pos{x: math.MaxInt64, y: math.MaxInt64}
-	tr := Pos{x: math.MinInt64, y: math.MaxInt64}
-	bl := Pos{x: math.MaxInt64, y: math.MinInt64}
-	br := Pos{x: math.MinInt64, y: math.MinInt64}
-
-	for _, tile := range tiles {
-		if tile.x <= tl.x && tile.y <= tl.y {
-			tl = tile
-		}
-		if tile.x >= tr.x && tile.y <= tr.y {
-			tr = tile
-		}
-		if tile.x <= bl.x && tile.y >= bl.y {
-			bl = tile
-		}
-		if tile.x >= br.x && tile.y >= br.y {
-			br = tile
-		}
+		tiles[i] = Pos{x: x, y: y}
 	}
 
-	fmt.Println(tl, tr, bl, br)
+	walls := []Wall{}
+	for i := 0; i < len(tiles)-1; i++ {
+		walls = append(walls, Wall{tile1: tiles[i], tile2: tiles[i+1]})
+	}
+	walls = append(walls, Wall{tile1: tiles[len(tiles)-1], tile2: tiles[0]})
 
-	rect1 := (br.x - tl.x + 1) * (br.y - tl.y + 1)
-	rect2 := (tr.x - bl.x + 1) * (bl.y - tr.y + 1)
-
-	fmt.Println(rect1, rect2)
-
-	if rect1 > rect2 {
-		return rect1
-	} else {
-		return rect2
+	return Floor{
+		tiles: tiles,
+		walls: walls,
 	}
 }
 
-func largest_rectangle(tiles []Pos) int {
+func largest_rectangle(floor Floor) int {
 	max := 0
-	for i := 0; i < len(tiles); i++ {
-		for j := i + 1; j < len(tiles); j++ {
-			size := (utils.Abs(tiles[i].x-tiles[j].x) + 1) * (utils.Abs(tiles[i].y-tiles[j].y) + 1)
+	for i := 0; i < len(floor.tiles); i++ {
+		for j := i + 1; j < len(floor.tiles); j++ {
+			size := (utils.Abs(floor.tiles[i].x-floor.tiles[j].x) + 1) * (utils.Abs(floor.tiles[i].y-floor.tiles[j].y) + 1)
 			if size > max {
 				max = size
 			}
@@ -79,11 +64,64 @@ func largest_rectangle(tiles []Pos) int {
 	return max
 }
 
+func largest_rectangle_inside(floor Floor) int {
+	rectangles := [][]int{}
+
+	for i := 0; i < len(floor.tiles); i++ {
+		for j := i + 1; j < len(floor.tiles); j++ {
+			size := (utils.Abs(floor.tiles[i].x-floor.tiles[j].x) + 1) * (utils.Abs(floor.tiles[i].y-floor.tiles[j].y) + 1)
+			rectangles = append(rectangles, []int{size, i, j})
+		}
+	}
+
+	sort.Slice(rectangles, func(i, j int) bool {
+		return rectangles[i][0] > rectangles[j][0]
+	})
+
+outer:
+	for _, rectangle := range rectangles {
+		tile1 := floor.tiles[rectangle[1]]
+		tile2 := floor.tiles[rectangle[2]]
+
+		from_x, to_x, from_y, to_y := tile1.x, tile2.x, tile1.y, tile2.y
+		if from_x > to_x {
+			from_x, to_x = to_x, from_x
+		}
+		if from_y > to_y {
+			from_y, to_y = to_y, from_y
+		}
+
+		for _, wall := range floor.walls {
+			x_start, x_end := wall.tile1.x, wall.tile2.x
+			if x_start > x_end {
+				x_start, x_end = x_end, x_start
+			}
+			y_start, y_end := wall.tile1.y, wall.tile2.y
+			if y_start > y_end {
+				y_start, y_end = y_end, y_start
+			}
+
+			for y := y_start; y <= y_end; y++ {
+				for x := x_start; x <= x_end; x++ {
+					if x > from_x && x < to_x && y > from_y && y < to_y {
+						continue outer
+					}
+				}
+			}
+		}
+
+		return rectangle[0]
+	}
+
+	return -1
+}
+
 func Run() {
 	loader.Day = 9
 	data := loader.GetStrings()
-	tiles := parse_data(data)
-	part1 := largest_rectangle(tiles)
+	floor := parse_data(data)
+	part1 := largest_rectangle(floor)
+	part2 := largest_rectangle_inside(floor)
 
-	fmt.Printf("%d %d\n", part1, 0)
+	fmt.Printf("%d %d\n", part1, part2)
 }
