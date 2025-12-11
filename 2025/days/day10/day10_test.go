@@ -18,3 +18,14 @@ func Test1(t *testing.T) {
 		t.Errorf("got %d, wanted %d", got, want)
 	}
 }
+
+func Test2(t *testing.T) {
+	machines := parse_data(data)
+
+	got := joltage_presses_needed(machines)
+	want := 33
+
+	if want != got {
+		t.Errorf("got %d, wanted %d", got, want)
+	}
+}
