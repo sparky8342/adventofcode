@@ -11,21 +11,19 @@ type Device struct {
 	links []*Device
 }
 
-type ThroughCacheEntry struct {
+type CacheEntry struct {
 	name string
 	dac  bool
 	fft  bool
 }
 
-var cache map[string]int
-var throughcache map[ThroughCacheEntry]int
+var cache map[CacheEntry]int
 
 func init() {
-	cache = map[string]int{}
-	throughcache = map[ThroughCacheEntry]int{}
+	cache = map[CacheEntry]int{}
 }
 
-func parse_data(data []string, return_device string) *Device {
+func parse_data(data []string) (*Device, *Device) {
 	devices := map[string]*Device{}
 
 	for _, line := range data {
@@ -41,69 +39,58 @@ func parse_data(data []string, return_device string) *Device {
 		}
 	}
 
-	return devices[return_device]
+	return devices["you"], devices["svr"]
 }
 
-func count_paths(node *Device) int {
-	if val, ok := cache[node.name]; ok {
-		return val
-	}
-
-	if node.name == "out" {
-		return 1
-	}
-
-	paths := 0
-	for _, link := range node.links {
-		paths += count_paths(link)
-	}
-
-	cache[node.name] = paths
-	return paths
-}
-
-func count_paths_through(node *Device, dac bool, fft bool) int {
-	key := ThroughCacheEntry{
-		name: node.name,
+func dfs(device *Device, dac bool, fft bool, mode int) int {
+	key := CacheEntry{
+		name: device.name,
 		dac:  dac,
 		fft:  fft,
 	}
-
-	if val, ok := throughcache[key]; ok {
+	if val, ok := cache[key]; ok {
 		return val
 	}
 
-	if node.name == "out" {
-		if dac && fft {
+	if device.name == "out" {
+		if mode == 1 || dac && fft {
 			return 1
 		} else {
 			return 0
 		}
 	}
 
-	if node.name == "dac" {
+	if device.name == "dac" {
 		dac = true
-	} else if node.name == "fft" {
+	} else if device.name == "fft" {
 		fft = true
 	}
 
 	paths := 0
-	for _, link := range node.links {
-		paths += count_paths_through(link, dac, fft)
+	for _, link := range device.links {
+		paths += dfs(link, dac, fft, mode)
 	}
 
-	throughcache[key] = paths
+	cache[key] = paths
 	return paths
+}
+
+func count_paths(device *Device) int {
+	cache = map[CacheEntry]int{}
+	return dfs(device, false, false, 1)
+}
+
+func count_paths_through(device *Device) int {
+	cache = map[CacheEntry]int{}
+	return dfs(device, false, false, 2)
 }
 
 func Run() {
 	loader.Day = 11
 	data := loader.GetStrings()
-	you := parse_data(data, "you")
+	you, svr := parse_data(data)
 	part1 := count_paths(you)
-
-	svr := parse_data(data, "svr")
-	part2 := count_paths_through(svr, false, false)
+	part2 := count_paths_through(svr)
 
 	fmt.Printf("%d %d\n", part1, part2)
 }

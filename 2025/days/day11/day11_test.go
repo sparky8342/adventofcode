@@ -16,7 +16,7 @@ func Test1(t *testing.T) {
 		"iii: out",
 	}
 
-	you := parse_data(data, "you")
+	you, _ := parse_data(data)
 
 	got := count_paths(you)
 	want := 5
@@ -43,9 +43,9 @@ func Test2(t *testing.T) {
 		"hhh: out",
 	}
 
-	svr := parse_data(data, "svr")
+	_, svr := parse_data(data)
 
-	got := count_paths_through(svr, false, false)
+	got := count_paths_through(svr)
 	want := 2
 
 	if want != got {
