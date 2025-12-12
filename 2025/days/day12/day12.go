@@ -9,7 +9,7 @@ import (
 
 type Shape struct {
 	id         int
-	variations [][]string
+	variations [][][]byte
 	squares    int
 }
 
@@ -24,11 +24,11 @@ func parse_data(data []string) ([]Shape, []Region) {
 	regions := []Region{}
 
 	var shape_id int
-	var shape []string
+	var shape [][]byte
 
 	for _, line := range data {
 		if line == "" {
-			variations := [][]string{shape}
+			variations := [][][]byte{shape}
 			for i := 0; i < 3; i++ {
 				shape = rotate_right(shape)
 				variations = append(variations, shape)
@@ -55,11 +55,11 @@ func parse_data(data []string) ([]Shape, []Region) {
 				variations: variations,
 				squares:    squares,
 			})
-			shape = []string{}
+			shape = [][]byte{}
 		} else if line[1] == ':' {
 			shape_id = int(line[0] - '0')
 		} else if len(line) == 3 {
-			shape = append(shape, line)
+			shape = append(shape, []byte(line))
 		} else {
 			line = strings.Replace(line, ":", "", 1)
 			parts := strings.Split(line, " ")
@@ -91,47 +91,31 @@ func parse_data(data []string) ([]Shape, []Region) {
 	return shapes, regions
 }
 
-func rotate_right(shape []string) []string {
+func rotate_right(shape [][]byte) [][]byte {
 	r := make([][]byte, 3)
-	for i := range r {
-		r[i] = make([]byte, 3)
-	}
-
 	for y := 0; y < 3; y++ {
+		r[y] = make([]byte, 3)
 		for x := 0; x < 3; x++ {
 			r[y][x] = shape[3-(x+1)][y]
 		}
 	}
-
-	new_shape := make([]string, 3)
-	for i := range r {
-		new_shape[i] = string(r[i])
-	}
-
-	return new_shape
+	return r
 }
 
-func flip(shape []string) []string {
+func flip(shape [][]byte) [][]byte {
 	f := make([][]byte, 3)
-	for i := range f {
-		f[i] = make([]byte, 3)
+	for y := 0; y < 3; y++ {
+		f[y] = make([]byte, 3)
 	}
-
 	for y := 0; y < 3; y++ {
 		for x := 0; x < 3; x++ {
 			f[2-y][x] = shape[y][x]
 		}
 	}
-
-	new_shape := make([]string, 3)
-	for i := range f {
-		new_shape[i] = string(f[i])
-	}
-
-	return new_shape
+	return f
 }
 
-func shape_fits(grid [][]byte, shape []string, x int, y int) bool {
+func shape_fits(grid [][]byte, shape [][]byte, x int, y int) bool {
 	height := len(grid)
 	width := len(grid[0])
 	if height-y < 3 || width-x < 3 {
@@ -150,7 +134,7 @@ func shape_fits(grid [][]byte, shape []string, x int, y int) bool {
 	return true
 }
 
-func place_shape(grid [][]byte, shape []string, x int, y int) [][]byte {
+func place_shape(grid [][]byte, shape [][]byte, x int, y int) [][]byte {
 	for shape_y := 0; shape_y < 3; shape_y++ {
 		for shape_x := 0; shape_x < 3; shape_x++ {
 			if shape[shape_y][shape_x] == '#' {
@@ -161,7 +145,7 @@ func place_shape(grid [][]byte, shape []string, x int, y int) [][]byte {
 	return grid
 }
 
-func remove_shape(grid [][]byte, shape []string, x int, y int) [][]byte {
+func remove_shape(grid [][]byte, shape [][]byte, x int, y int) [][]byte {
 	for shape_y := 0; shape_y < 3; shape_y++ {
 		for shape_x := 0; shape_x < 3; shape_x++ {
 			if shape[shape_y][shape_x] == '#' {
