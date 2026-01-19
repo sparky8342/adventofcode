@@ -13,8 +13,20 @@ type Step struct {
 	x1, x2, y1, y2, z1, z2 int
 }
 
-type Cube struct {
-	x, y, z int
+func min(a, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
 }
 
 func get_data() []Step {
@@ -41,33 +53,66 @@ func get_data() []Step {
 	return steps
 }
 
-func main() {
-	steps := get_data()
-
-	cubes := map[Cube]struct{}{}
-
-	for _, step := range steps {
-		if step.x1 > 50 || step.x2 < -50 || step.y1 > 50 || step.y2 < -50 || step.z1 > 50 || step.z2 < -50 {
-			continue
-		}
-
-		for x := step.x1; x <= step.x2; x++ {
-			for y := step.y1; y <= step.y2; y++ {
-				for z := step.z1; z <= step.z2; z++ {
-					if x >= -50 && x <= 50 && y >= -50 && y <= 50 && z >= -50 && z <= 50 {
-						cube := Cube{x: x, y: y, z: z}
-						if step.on {
-							cubes[cube] = struct{}{}
-						} else {
-							if _, found := cubes[cube]; found {
-								delete(cubes, cube)
-							}
-						}
-					}
+func intersect(a Step, b Step) (bool, Step) {
+	if (b.x1 >= a.x1 && b.x1 <= a.x2) || (b.x2 >= a.x1 && b.x2 <= a.x2) || (a.x1 >= b.x1 && a.x1 <= b.x2) || (a.x2 >= b.x1 && a.x2 <= b.x2) {
+		if (b.y1 >= a.y1 && b.y1 <= a.y2) || (b.y2 >= a.y1 && b.y2 <= a.y2) || (a.y1 >= b.y1 && a.y1 <= b.y2) || (a.y2 >= b.y1 && a.y2 <= b.y2) {
+			if (b.z1 >= a.z1 && b.z1 <= a.z2) || (b.z2 >= a.z1 && b.z2 <= a.z2) || (a.z1 >= b.z1 && a.z1 <= b.z2) || (a.z2 >= b.z1 && a.z2 <= b.z2) {
+				intersection := Step{
+					x1: max(a.x1, b.x1),
+					x2: min(a.x2, b.x2),
+					y1: max(a.y1, b.y1),
+					y2: min(a.y2, b.y2),
+					z1: max(a.z1, b.z1),
+					z2: min(a.z2, b.z2),
+					on: !b.on,
 				}
+				return true, intersection
 			}
 		}
 	}
+	return false, Step{}
+}
 
-	fmt.Println(len(cubes))
+func count_on(steps []Step) int {
+	cores := []Step{}
+
+	for _, step := range steps {
+		to_add := []Step{}
+		if step.on {
+			to_add = []Step{step}
+		}
+		for _, core := range cores {
+			ok, intersection := intersect(step, core)
+			if ok {
+				to_add = append(to_add, intersection)
+			}
+		}
+		cores = append(cores, to_add...)
+	}
+
+	switched_on := 0
+	for _, core := range cores {
+		amount := (core.x2 - core.x1 + 1) * (core.y2 - core.y1 + 1) * (core.z2 - core.z1 + 1)
+		if core.on {
+			switched_on += amount
+		} else {
+			switched_on -= amount
+		}
+	}
+
+	return switched_on
+}
+
+func main() {
+	steps := get_data()
+
+	small_steps := []Step{}
+	for _, step := range steps {
+		if step.x1 <= 50 && step.x2 >= -50 && step.y1 <= 50 && step.y2 >= -50 && step.z1 <= 50 && step.z2 >= -50 {
+			small_steps = append(small_steps, step)
+		}
+	}
+
+	fmt.Println(count_on(small_steps))
+	fmt.Println(count_on(steps))
 }
