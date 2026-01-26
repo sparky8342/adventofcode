@@ -108,8 +108,77 @@ func intersection(a Point, b Point, c Point, d Point, min float64, max float64) 
 	return x, y
 }
 
+func find_relative_hailstones(hailstones []Hailstone) []Hailstone {
+	// find 3 with same vy
+	seen := map[float64][]Hailstone{}
+	for _, hailstone := range hailstones {
+		seen[hailstone.vy] = append(seen[hailstone.vy], hailstone)
+	}
+	for _, hailstones := range seen {
+		if len(hailstones) >= 3 {
+			return hailstones[0:3]
+		}
+	}
+	return []Hailstone{}
+}
+
+func find_rock(hailstones []Hailstone) int {
+	hail := find_relative_hailstones(hailstones)
+
+	// calculate relative velocities of hail 1 and 2 to hail 0
+	// the y component is zero due to selection of hail
+	vxr1 := hail[1].vx - hail[0].vx
+	vzr1 := hail[1].vz - hail[0].vz
+	vxr2 := hail[2].vx - hail[0].vx
+	vzr2 := hail[2].vz - hail[0].vz
+
+	// relative initial position of hail 1
+	xr1 := hail[1].x - hail[0].x
+	yr1 := hail[1].y - hail[0].y
+	zr1 := hail[1].z - hail[0].z
+
+	// relative initial position of hail 2
+	xr2 := hail[2].x - hail[0].x
+	yr2 := hail[2].y - hail[0].y
+	zr2 := hail[2].z - hail[0].z
+
+	// Solve set of two linear equations x=x and z=z
+	num := (yr2 * xr1 * vzr1) - (vxr1 * yr2 * zr1) + (yr1 * zr2 * vxr1) - (yr1 * xr2 * vzr1)
+	den := yr1 * ((vzr1 * vxr2) - (vxr1 * vzr2))
+	t2 := num / den
+
+	// Substitute t2 into a t1 equation
+	num = (yr1 * xr2) + (yr1 * vxr2 * t2) - (yr2 * xr1)
+	den = yr2 * vxr1
+	t1 := num / den
+
+	// calculate collision position at t1 and t2 of hail 1 and 2 in normal frame of reference
+	cx1 := hail[1].x + (t1 * hail[1].vx)
+	cy1 := hail[1].y + (t1 * hail[1].vy)
+	cz1 := hail[1].z + (t1 * hail[1].vz)
+
+	cx2 := hail[2].x + (t2 * hail[2].vx)
+	cy2 := hail[2].y + (t2 * hail[2].vy)
+	cz2 := hail[2].z + (t2 * hail[2].vz)
+
+	// calculate the vector the rock travelled between those two collisions
+	xm := (cx2 - cx1) / (t2 - t1)
+	ym := (cy2 - cy1) / (t2 - t1)
+	zm := (cz2 - cz1) / (t2 - t1)
+
+	// calculate the initial position of the rock based on its vector
+	xc := cx1 - (xm * t1)
+	yc := cy1 - (ym * t1)
+	zc := cz1 - (zm * t1)
+
+	// answer is sometimes wrong, probably because of floating point errors
+	// TODO use big.Float variables instead
+	return int(xc + yc + zc)
+}
+
 func main() {
 	data := load_data("input.txt")
 	hailstones := parse_data(data)
 	fmt.Println(find_intersections(hailstones, 200000000000000, 400000000000000))
+	fmt.Println(find_rock(hailstones))
 }
